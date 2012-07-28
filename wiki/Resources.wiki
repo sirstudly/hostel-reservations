@@ -6,6 +6,8 @@ Items are arranged in a tree structure with groups at the top level, followed by
 
 = Details =
 
+https://code.google.com/p/hostel-reservations/source/browse/wiki/images/resources_sample.png
+
 Admin users will see a Resources tab on the left sidebar. Clicking on it will bring up this screen. Resources can be added to the right. Rooms should be grouped into distinct categories that will be used when allocating a booking. For example, a group name could be called "HostelWorld 10-bed dorms". Then this group can be selected when creating a new booking to automatically assign a guest to an available bed within this group.
 
 Define high-level groups first, followed by rooms and finally beds. When defining room type (for dorm rooms), you can select "Male only", "Female only", "Mixed", or "None". A room defined as "Male only" will only allow booking for guests who specifically request a "Male only" room. Likewise for "Female only" and "Mixed". A dorm room with a room type of "None" will take on the attribute of a Male, Female or Mixed room depending on which guest(s) are currently assigned to it on a particular day. (A Male only room one day could just as easily be a Female only room the next).
