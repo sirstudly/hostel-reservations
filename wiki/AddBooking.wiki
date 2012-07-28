@@ -1,0 +1,16 @@
+#summary Add a new booking
+
+= Introduction =
+
+Add a new booking/allocation. 
+
+
+= Details =
+
+Admin users (reception staff) clicks "Add Booking" under the left sidebar to enter a new booking. 
+
+First Name, Last Name: self-explanatory. this is the name the booking will be under. Only a first name is required.
+
+Booked by: How the booking was originally made. e.g. HostelWorld, HostelBookers, Telephone, Walk-in, etc..
+
+Audit Log/Comments: User comments can be entered here. e.g. Amount payable on arrival can be manually entered here. Future functionality may include a separate field to sum payment amounts for each booking/day.
