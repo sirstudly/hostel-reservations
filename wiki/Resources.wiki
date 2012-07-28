@@ -6,7 +6,7 @@ Items are arranged in a tree structure with groups at the top level, followed by
 
 = Details =
 
-https://code.google.com/p/hostel-reservations/source/browse/wiki/images/resources_sample.png
+http://hostel-reservations.googlecode.com/svn/wiki/images/resources_sample.png
 
 Admin users will see a Resources tab on the left sidebar. Clicking on it will bring up this screen. Resources can be added to the right. Rooms should be grouped into distinct categories that will be used when allocating a booking. For example, a group name could be called "HostelWorld 10-bed dorms". Then this group can be selected when creating a new booking to automatically assign a guest to an available bed within this group.
 
