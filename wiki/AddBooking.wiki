@@ -17,7 +17,7 @@ Booked by: How the booking was originally made. e.g. HostelWorld, HostelBookers,
 
 Audit Log/Comments: User comments can be entered here. e.g. Amount payable on arrival can be manually entered here. Future functionality may include a separate field to sum payment amounts for each booking/day. This also holds a log of all changes made to the booking since it was created including changes to the allocations, change in status (from reserved to paid for example) along with the date/time and user who made the change.
 
-Under Allocations:
+= Allocations =
 
 This is where we define all the guest(s) for this booking and their room/bed allocations. Select the dates for the booking using the calendar widget.
 
