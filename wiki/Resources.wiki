@@ -27,3 +27,5 @@ You are also able to define properties for a "shared room". Properties are anoth
 http://hostel-reservations.googlecode.com/svn/wiki/images/resource_properties_sample.png
 
 For example, a room can be set to have a property called "ocean view". During allocation, you can select this as a required property when allocating the guests so only beds in these rooms will allocated if availability exists. See [AddBooking] for details on allocations.
+
+The different property values can be defined under the Settings admin menu.
