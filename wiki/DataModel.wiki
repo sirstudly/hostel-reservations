@@ -1,0 +1,5 @@
+#summary Internal data-model.
+
+= Introduction =
+
+Supplementary tables to be created on top of the wordpress database.
