@@ -13,9 +13,10 @@ Enter the from and to dates and click apply to perform the search. Dates are alw
 
 Allocations will be displayed ordered by group and resource (order as shown on the [Resources] page).
 
-Clicking on any of the allocations will bring up the edit booking form for that particular booking.  
+Clicking on any of the allocations will bring up the [AddBooking Edit Booking] form for that particular booking.  
 
 Print: renders a printer-friendly version of this page (not implemented).
+
 Export: exports the current contents of the page to CSV/Excel (not implemented).
 
 Clicking on the 'Bookings' tab will bring you to the [Bookings] page.
