@@ -20,4 +20,10 @@ Clicking "Delete" will delete the selected group/room/bed and all elements under
 
 At the moment, you are not able to moved a group/room to another group once it has been created. (This can be done directly on the db for now).
 
-You are also able to define properties for a "shared room". Properties are another way to group rooms into specific categories to be used when allocating guests. For example, a room can be set to have a property called "ocean view". During allocation, you can select this as a required property when allocating the guests so only beds in these rooms will allocated if availability exists. See "Add Booking" for details on allocations.
+=== Resource Properties ===
+
+You are also able to define properties for a "shared room". Properties are another way to group rooms into specific categories to be used when allocating guests. Click on the notepad icon [http://hostel-reservations.googlecode.com/svn/trunk/wordpress/wp-content/plugins/booking/img/notes_rd.png] to view the Edit Properties screen.
+
+http://hostel-reservations.googlecode.com/svn/wiki/images/resource_properties_sample.png
+
+For example, a room can be set to have a property called "ocean view". During allocation, you can select this as a required property when allocating the guests so only beds in these rooms will allocated if availability exists. See [AddBooking] for details on allocations.
