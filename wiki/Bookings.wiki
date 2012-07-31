@@ -20,24 +20,24 @@ Match Dates By:
 
 Search by Booking ID: enter the unique booking id to search for an exact booking
 
-Search by Name: Show those bookings where either the first/last name for the booking or the guest name for an allocation matches. Search is _NOT_ case sensitive. (*) can be used as a wildcard for any number of characters. 
+Search by Name: Show those bookings where either the first/last name for the booking or the guest name for an allocation matches. Search is _NOT_ case sensitive. (`*`) can be used as a wildcard for any number of characters. 
 
-Example 1: "sara*" will match "sara" or "sarah" or "sarandon".
+Example 1: `sara*` will match "sara" or "sarah" or "sarandon".
 
-Example 2: "rebe*a" will match "Rebecca" or "Rebeka".
+Example 2: `rebe*a` will match "Rebecca" or "Rebeka".
 
-Print: displays a printer-friendly table of the current results along with a print dialog (not implemented).
+Print: displays a printer-friendly table of the current results along with a print dialog (not yet implemented).
 
-Export: exports the current results to a CSV/Excel file (not implemented).
+Export: exports the current results to a CSV/Excel file (not yet implemented).
 
 == Search Results ==
 
 ID: ID of the booking as well as the creation date and user who created the booking.
 
-Tags: Shows the properties for the booking. This includes: the room(s) allocated, the active statuses and the manner in which the booking was made (e.g. telephone, HostelWorld, etc...)
+Tags: Shows the properties for the booking. This includes: the room(s) allocated, the active statuses and the manner in which the booking was made (e.g. telephone, !HostelWorld, etc...)
 
 Booking Details: Names/Guests and user-created comments.
 
 Booking Dates: Dates across all allocations. 
 
-Actions: Clicking on the pencil icon will redirect to the [AddBooking Edit Booking] screen. TODO: Clicking on the Exit icon will change all allocations ending today to "checked-out".
+Actions: Clicking on the pencil icon will redirect to the [AddBooking Edit Booking] screen. Clicking on the Exit icon will change all allocations ending today to "checked-out" (not yet implemented).
