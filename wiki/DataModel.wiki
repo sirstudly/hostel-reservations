@@ -2,4 +2,6 @@
 
 = Introduction =
 
-Supplementary tables to be created on top of the wordpress database.
+Supplementary tables that will be created on top of the wordpress database.
+
+http://hostel-reservations.googlecode.com/svn/wiki/images/data_model.png
