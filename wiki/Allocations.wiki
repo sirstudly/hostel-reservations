@@ -1,0 +1,13 @@
+#summary Displays an allocation table containing all groups/rooms/beds for a particular date range.
+
+= Introduction =
+
+This view allows a user to see at a glance which rooms are full/empty on a particular day or set of days.
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
