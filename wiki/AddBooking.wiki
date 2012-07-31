@@ -1,15 +1,15 @@
-#summary Add a new booking
+#summary Add/Edit a booking
 
 = Introduction =
 
-Add a new booking/allocation. 
+Add a new booking/allocation or edit an existing booking. 
 
 
 = Details =
 
 http://hostel-reservations.googlecode.com/svn/wiki/images/add_booking_sample.png
 
-Admin users (reception staff) clicks "Add Booking" under the left sidebar to enter a new booking. 
+Admin users (reception staff) clicks "Add Booking" under the left sidebar to enter a new booking. To edit an existing booking, click on the link/icon of the booking/allocation to edit in the [Allocations Allocation] or [Bookings Booking] view.
 
 First Name, Last Name: self-explanatory. this is the name the booking will be under. Only a first name is required.
 
@@ -17,7 +17,7 @@ Booked by: How the booking was originally made. e.g. HostelWorld, HostelBookers,
 
 Audit Log/Comments: User comments can be entered here. e.g. Amount payable on arrival can be manually entered here. Future functionality may include a separate field to sum payment amounts for each booking/day. This also holds a log of all changes made to the booking since it was created including changes to the allocations, change in status (from reserved to paid for example) along with the date/time and user who made the change.
 
-= Allocations =
+== Allocations ==
 
 This is where we define all the guest(s) for this booking and their room/bed allocations. Select the dates for the booking using the calendar widget.
 
