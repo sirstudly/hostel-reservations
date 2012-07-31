@@ -4,10 +4,9 @@
 
 This view allows a user to see at a glance which rooms are full/empty on a particular day or set of days.
 
-
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+
+http://hostel-reservations.googlecode.com/svn/wiki/images/allocations_sample.png
+
+Enter the from and to dates and click apply to perform the search. Dates are always inclusive. A pull-tab will show/hide the legend showing the colours corresponding to current state of the allocation for that date (e.g. paid, reserved, etc..)
