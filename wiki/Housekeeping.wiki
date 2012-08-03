@@ -8,4 +8,6 @@ Groups/rooms are shown in the same order as in the [Resources] page. Empty beds 
 
 A rule may be updated in the Settings tab which indicate the maximum number of days that a bed can remain as / (unchanged). (e.g. force a change of sheets even if the same guest is in the bed every X number of days)
 
+No changes can be made on this screen.
+
 This page has not yet been implemented.
