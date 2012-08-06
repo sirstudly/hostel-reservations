@@ -1,0 +1,10 @@
+#summary Guest requests larger/smaller room or just shuffling guests around prior to checkin in order to keep groups together.
+
+== Process ==
+
+  # Click Bookings.
+  # Enter name/reservation number and set date to start date of booking. Click Search.
+  # Find reservation. Click Edit.
+  # For the allocation to move, click Edit.
+  # Change the room assigned to either a specific room number or a particular group. Click ok. (If a group was assigned, a new bed will be assigned within the group or message will be displayed if no availability)
+  # Click save (error message will be displayed if no availability for the given rooms/dates).
