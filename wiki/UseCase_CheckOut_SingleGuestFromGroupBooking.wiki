@@ -1,0 +1,12 @@
+#summary Checking out a single guest from a group booking.
+
+== Process ==
+
+  # Click Bookings
+  # For Date (from) and Date (to) select today's date.
+  # Under "Match Dates By", select Check-Out Date.
+  # Keep name blank (for all) or enter the name of the person checking out.
+  # Click Search.
+  # Click on the "Edit" icon of the matching booking to checkout.
+  # Under the correct _allocation_ click the 'Exit' icon next to today's date. 
+  # Click save.
