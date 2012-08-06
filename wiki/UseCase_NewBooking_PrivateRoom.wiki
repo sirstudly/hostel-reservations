@@ -4,5 +4,6 @@
 
   # Click Add Booking
   # Enter booking name, referrer, (deposit, balance to pay on arrival).
+  # Select the dates for the booking.
   # Select 1 or 2 M/F and allocate to private rooms. Click Add.
   # Click save.
