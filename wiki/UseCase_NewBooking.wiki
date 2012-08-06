@@ -1,4 +1,4 @@
-#summary Adding a new booking for a Shared Dorm.
+#summary Adding a new booking for a shared dorm.
 
 == Synopsis ==
 
