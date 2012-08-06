@@ -1,0 +1,12 @@
+#summary Mark a room as "inactive" for a particular period.
+
+== Process ==
+
+Effectively, we add a booking with 0 payment amount to the dates to deactivate covering all the beds in the room.
+
+  # Click Add Booking.
+  # Set name to "Inactive".
+  # Select the dates that the room should be inactive for. (Obviously, there can't be any bookings for the dates selected).
+  # For number of guests, enter the total number of beds in the room. 
+  # Click Add. 
+  # Click Save.
