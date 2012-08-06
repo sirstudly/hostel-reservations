@@ -1,0 +1,11 @@
+#summary Checking out all guests from a booking with multiple guests.
+
+== Process ==
+
+  # Click Bookings
+  # For Date (from) and Date (to) select today's date.
+  # Under "Match Dates By", select Check-Out Date.
+  # Keep name blank (for all) or enter the name of the person checking out.
+  # Click Search.
+  # Click on the "Exit" icon of the matching booking to checkout.
+  # Click OK on the confirmation dialog.
