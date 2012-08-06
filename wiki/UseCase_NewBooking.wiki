@@ -1,0 +1,17 @@
+#summary Adding a new booking.
+
+== Synopsis ==
+
+Booking received by telephone/walkin for future date. e.g. 3 guests 1M, 2F in separate dorm rooms for 3 nights. 10+ beds. Take deposit for 1st night.
+
+
+== Process ==
+
+  # Click [AddBooking Add Booking]
+  # Enter booking name, referrer, (deposit, balance to pay on arrival).
+  # Select the dates for the booking.
+  # 1M allocate to 10 bed resource (tick male only). Click Add.
+  # 2F to 10 bed resource (tick female only). Click Add. 
+  # Click Save.
+
+If the group/room does not have availability for the specified dates, an error message will be displayed.
