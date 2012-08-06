@@ -1,0 +1,13 @@
+#summary If there is little availability across all rooms, it may be difficult to swap allocations between rooms. Allocations can be moved to the special "overflow" group before reassigning to different rooms.
+
+== Process ==
+
+  # Click [Bookings].
+  # Enter name/reservation number and set date to start of booking. Click Search.
+  # Find reservation. Click edit.
+  # For the allocation to move, click Edit.
+  # Change the room assigned to the "Overflow" group.
+  # Click save. This will release the previously assigned room to be used elsewhere. At this point, you can lookup another booking and reassign it to this newly released room. 
+  # Lookup the booking that was assigned to "Overflow" (through [Allocations] or through searching for booking by id/name in [Bookings])
+  # Assign the allocation from "Overflow" to another group/room. Click OK.
+  # Click save.
