@@ -1,4 +1,4 @@
-#summary Report used by cleaners showing which beds which require their linen changed.
+#summary Report used by cleaners showing which beds require linen changing.
 
 = Details =
 
