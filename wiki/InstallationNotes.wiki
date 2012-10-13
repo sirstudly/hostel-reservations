@@ -1,0 +1,10 @@
+#summary Installation Notes
+
+= Details =
+
+* Enable logging on PHP if desired (edit php.ini)
+log_errors = On
+error_log = php_errors.log
+display_errors = On  (for development only)
+
+* Once wordpress has been installed and configured, copy the contents of the plugin into wp-content/plugins
