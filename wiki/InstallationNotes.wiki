@@ -10,3 +10,5 @@ display_errors = On  (for development only)
 }}}
 
   * Once wordpress has been installed and configured, copy the contents of the plugin into wp-content/plugins
+
+  * login as wordpress admin user, under plugins menu, activate hostel backoffice plugin
