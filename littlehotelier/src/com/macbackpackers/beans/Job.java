@@ -1,13 +1,12 @@
 package com.macbackpackers.beans;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 public class Job {
 
     private int id;
     private String name;
-    private String status;
+    private JobStatus status;
     private Timestamp createdDate;
     private Timestamp lastUpdatedDate;
 
@@ -27,11 +26,11 @@ public class Job {
         this.name = name;
     }
 
-    public String getStatus() {
+    public JobStatus getStatus() {
         return status;
     }
 
-    public void setStatus( String status ) {
+    public void setStatus( JobStatus status ) {
         this.status = status;
     }
 

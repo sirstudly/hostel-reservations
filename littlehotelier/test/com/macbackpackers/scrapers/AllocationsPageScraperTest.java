@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.macbackpackers.beans.Job;
+import com.macbackpackers.beans.JobStatus;
 import com.macbackpackers.dao.WordPressDAO;
 import com.macbackpackers.dao.WordPressDAOTest;
 
@@ -53,7 +54,7 @@ public class AllocationsPageScraperTest {
     public void testInsertAndRunHousekeepingJob() throws Exception {
         Job j = new Job();
         j.setName( "bedsheets" );
-        j.setStatus( "submitted" );
+        j.setStatus( JobStatus.submitted );
         dao.insertJob( j );
         
         // this should be the one we just added
@@ -70,14 +71,14 @@ public class AllocationsPageScraperTest {
         scraper.dumpPageForJob( j, calendarPage );
         
         // we've done all the hard work
-        dao.updateJobStatus( j.getId(), "completed" );
+        dao.updateJobStatus( j.getId(), JobStatus.completed, JobStatus.processing );
     }
 
     @Test
 	public void testDumpCalendarPage() throws Exception {
         Job job = dao.getNextJobToProcess();
 		scraper.dumpPageForJob( job, null ); // use serialised file
-        dao.updateJobStatus( job.getId(), "completed" );
+        dao.updateJobStatus( job.getId(), JobStatus.completed, JobStatus.processing );
 	}
 
 	@Test

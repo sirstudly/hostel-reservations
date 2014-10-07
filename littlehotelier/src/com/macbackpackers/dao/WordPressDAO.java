@@ -17,8 +17,10 @@ import org.apache.logging.log4j.Logger;
 import com.macbackpackers.beans.Allocation;
 import com.macbackpackers.beans.BedSheetEntry;
 import com.macbackpackers.beans.Job;
+import com.macbackpackers.beans.JobStatus;
 import com.macbackpackers.dao.mappers.BedSheetRowHandler;
 import com.macbackpackers.dao.mappers.JobRowHandler;
+import com.macbackpackers.exceptions.IncorrectNumberOfRecordsUpdatedException;
 
 public class WordPressDAO {
 
@@ -144,7 +146,8 @@ public class WordPressDAO {
 
     public int insertJob( Job job ) throws SQLException {
         QueryRunner runner = new QueryRunner( getDataSource() );
-        runner.update( "INSERT INTO wp_lh_jobs ( name, status )" + " VALUES ( ?, ? )", job.getName(), job.getStatus() );
+        runner.update( "INSERT INTO wp_lh_jobs ( name, status )" + " VALUES ( ?, ? )", job.getName(), job.getStatus()
+                .name() );
 
         // just assume that it increments consecutively for now
         int jobId = runner.query( "SELECT MAX(job_id) AS job_id FROM wp_lh_jobs " + " WHERE name = ? AND status = ?",
@@ -158,7 +161,7 @@ public class WordPressDAO {
                         throw new IllegalStateException( "job_id was inserted a moment ago.. :S" );
                     }
 
-                }, job.getName(), job.getStatus() );
+                }, job.getName(), job.getStatus().name() );
         return jobId;
     }
 
@@ -167,14 +170,19 @@ public class WordPressDAO {
         runner.update( "DELETE FROM wp_lh_jobs" );
     }
 
-    public void updateJobStatus( int jobId, String status, String prevStatus ) throws SQLException {
+    public void updateJobStatus( int jobId, JobStatus status, JobStatus prevStatus ) throws SQLException {
         QueryRunner runner = new QueryRunner( getDataSource() );
-        runner.update( "UPDATE wp_lh_jobs SET status = ?, last_updated_date = NOW() WHERE job_id = ? and status = ?", status, jobId, prevStatus );
+        int rowsUpdated = runner.update( "UPDATE wp_lh_jobs SET status = ?, last_updated_date = NOW() "
+                + " WHERE job_id = ? and status = ?", status.name(), jobId, prevStatus.name() );
+        if ( rowsUpdated == 0 ) {
+            throw new IncorrectNumberOfRecordsUpdatedException(
+                    "Unable to update status of job " + jobId + " to " + status );
+        }
     }
 
     public Job getNextJobToProcess() throws SQLException {
         QueryRunner runner = new QueryRunner( getDataSource() );
-        Integer jobId = runner.query( "SELECT MIN(job_id) AS job_id FROM wp_lh_jobs WHERE status = 'submitted'",
+        Integer jobId = runner.query( "SELECT MIN(job_id) AS job_id FROM wp_lh_jobs WHERE status = ?",
                 new ResultSetHandler<Integer>() {
 
                     @Override
@@ -185,7 +193,7 @@ public class WordPressDAO {
                         return null;
                     }
 
-                } );
+                }, JobStatus.submitted.name() );
         return jobId == null ? null : getJobById( jobId );
     }
 

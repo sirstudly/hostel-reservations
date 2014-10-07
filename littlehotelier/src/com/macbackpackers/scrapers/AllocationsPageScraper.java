@@ -3,7 +3,6 @@ package com.macbackpackers.scrapers;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +29,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.macbackpackers.beans.Allocation;
 import com.macbackpackers.beans.Job;
 import com.macbackpackers.dao.WordPressDAO;
-import com.macbackpackers.exceptions.UnrecoverableFault;
+import com.macbackpackers.services.Config;
 
 /**
  * Scrapes the allocations page for the specified dates.
@@ -50,9 +48,8 @@ import com.macbackpackers.exceptions.UnrecoverableFault;
  * <li>updates job to 'completed'</li>
  * </ul>
  * 
- * Each job id will have an associated table
- * job_id, calendar_date_loaded (date)
- * which will hold which job updated the calendar for a particular date
+ * Each job id will have an associated table job_id, calendar_date_loaded (date) which will hold which job updated the
+ * calendar for a particular date
  */
 public class AllocationsPageScraper {
 
@@ -64,23 +61,6 @@ public class AllocationsPageScraper {
     private WebClient webClient;
 
     private WordPressDAO dao;
-    
-    private Properties config;
-    
-    public AllocationsPageScraper() {
-        config = new Properties();
-        FileReader fr = null;
-        try {
-            fr = new FileReader( "config.properties" );
-            config.load( fr );
-        } catch ( FileNotFoundException e ) {
-            throw new UnrecoverableFault( e );
-        } catch ( IOException e ) {
-            throw new UnrecoverableFault( e );
-        } finally {
-            try { fr.close(); } catch ( IOException e ) { /* can't do much else */ }
-        }
-    }
 
     public WordPressDAO getWordPressDAO() {
         return dao;
@@ -93,7 +73,7 @@ public class AllocationsPageScraper {
     public void doLogin() throws Exception {
 
         webClient = new WebClient();
-        HtmlPage loginPage = webClient.getPage( config.getProperty( "lilhotelier.url.login" ) );
+        HtmlPage loginPage = webClient.getPage( Config.getProperty( "lilhotelier.url.login" ) );
 
         // The form doesn't have a name so just take the only one on the page
         List<HtmlForm> forms = loginPage.getForms();
@@ -104,8 +84,8 @@ public class AllocationsPageScraper {
         HtmlPasswordInput passwordField = form.getInputByName( "user_session[password]" );
 
         // Change the value of the text field
-        usernameField.setValueAttribute( config.getProperty( "lilhotelier.username" ) );
-        passwordField.setValueAttribute( config.getProperty( "lilhotelier.password" ) );
+        usernameField.setValueAttribute( Config.getProperty( "lilhotelier.username" ) );
+        passwordField.setValueAttribute( Config.getProperty( "lilhotelier.password" ) );
 
         HtmlPage nextPage = button.click();
         logger.info( "Finished logging in" );
@@ -115,14 +95,14 @@ public class AllocationsPageScraper {
     public HtmlPage goToCalendarPage( Date date ) throws Exception {
         String dateAsString = DATE_FORMAT_YYYY_MM_DD.format( date );
         HtmlPage nextPage = webClient
-                .getPage( config.getProperty( "lilhotelier.url.calendar" ) + "?start_date=" + dateAsString );
+                .getPage( Config.getProperty( "lilhotelier.url.calendar" ) + "?start_date=" + dateAsString );
         logger.info( "Calendar page" );
 
         serialiseToDisk( nextPage, getCalendarPageSerialisedObjectFilename( date ) );
         logger.info( nextPage.asXml() );
         return nextPage;
     }
-    
+
     private static String getCalendarPageSerialisedObjectFilename( Date date ) {
         String dateAsString = DATE_FORMAT_YYYY_MM_DD.format( date );
         return "calendar_page_" + dateAsString + ".ser";
@@ -131,8 +111,8 @@ public class AllocationsPageScraper {
     public void dumpPageForJob( Job job, HtmlPage calendarPage ) throws Exception {
 
         // read in the file if page not specified
-        if( calendarPage == null ) {
-            ObjectInputStream ois = new ObjectInputStream( new FileInputStream( 
+        if ( calendarPage == null ) {
+            ObjectInputStream ois = new ObjectInputStream( new FileInputStream(
                     getCalendarPageSerialisedObjectFilename( job.getCreatedDate() ) ) );
             calendarPage = (HtmlPage) ois.readObject();
             ois.close();
@@ -144,8 +124,8 @@ public class AllocationsPageScraper {
         for( DomElement div : calendarPage.getElementsByTagName( "div" ) ) {
             try {
                 String dataDate = div.getAttribute( "data-date" );
-                
-                if( StringUtils.isNotBlank( div.getAttribute( "data-room_id" ) )) {
+
+                if ( StringUtils.isNotBlank( div.getAttribute( "data-room_id" ) ) ) {
                     dataRoomId = div.getAttribute( "data-room_id" );
                 }
 
@@ -170,14 +150,14 @@ public class AllocationsPageScraper {
                     // first entry after the data-date div is not always correct
                     // it could be one day off screen
                     for( DomElement elem : div.getChildElements() ) {
-                        if( "span".equals( elem.getTagName() )) {
-                            insertAllocationFromSpan( job, Integer.parseInt( dataRoomId ), 
+                        if ( "span".equals( elem.getTagName() ) ) {
+                            insertAllocationFromSpan( job, Integer.parseInt( dataRoomId ),
                                     currentBedName, dataDate, elem );
                         }
                     }
                     if ( div.hasChildNodes() == false ) {
                         logger.info( "no records for " + dataDate );
-                    } 
+                    }
                 }
             } catch ( Exception ex ) {
                 logger.error( "Exception handled.", ex );
@@ -188,15 +168,23 @@ public class AllocationsPageScraper {
     /**
      * Builds an allocation object from the given span element and inserts it into the db.
      * 
-     * @param job job we are currently running
-     * @param dataRoomId room id
-     * @param currentBedName the bed name for the allocation (required)
-     * @param dataDate the data date for the record we are currently processing
-     * @param span the span element containing the allocation details
-     * @throws ParseException if date could not be parsed
-     * @throws SQLException on data creation error
+     * @param job
+     *            job we are currently running
+     * @param dataRoomId
+     *            room id
+     * @param currentBedName
+     *            the bed name for the allocation (required)
+     * @param dataDate
+     *            the data date for the record we are currently processing
+     * @param span
+     *            the span element containing the allocation details
+     * @throws ParseException
+     *             if date could not be parsed
+     * @throws SQLException
+     *             on data creation error
      */
-    private void insertAllocationFromSpan( Job job, int dataRoomId, String currentBedName, String dataDate, DomElement span )
+    private void insertAllocationFromSpan( Job job, int dataRoomId, String currentBedName, String dataDate,
+            DomElement span )
             throws ParseException, SQLException {
 
         // should have 3 spans
@@ -383,7 +371,7 @@ public class AllocationsPageScraper {
 
     public String getPageAsXml() throws Exception {
         final WebClient webClient = new WebClient();
-        final HtmlPage page = webClient.getPage( config.getProperty( "lilhotelier.url.login" ) );
+        final HtmlPage page = webClient.getPage( Config.getProperty( "lilhotelier.url.login" ) );
         final String pageAsXml = page.asXml();
         webClient.closeAllWindows();
         return pageAsXml;
@@ -391,7 +379,7 @@ public class AllocationsPageScraper {
 
     public String getPageAsText() throws Exception {
         final WebClient webClient = new WebClient();
-        final HtmlPage page = webClient.getPage( config.getProperty( "lilhotelier.url.login" ) );
+        final HtmlPage page = webClient.getPage( Config.getProperty( "lilhotelier.url.login" ) );
         final String pageAsText = page.asText();
         webClient.closeAllWindows();
         return pageAsText;

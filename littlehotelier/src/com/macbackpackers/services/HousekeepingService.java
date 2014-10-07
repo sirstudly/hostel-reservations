@@ -3,6 +3,7 @@ package com.macbackpackers.services;
 import java.sql.SQLException;
 
 import com.macbackpackers.beans.Job;
+import com.macbackpackers.beans.JobStatus;
 import com.macbackpackers.dao.WordPressDAO;
 
 public class HousekeepingService {
@@ -21,8 +22,6 @@ public class HousekeepingService {
         WordPressDAO dao = new WordPressDAO("jdbc:mysql://", "localhost", "3306", "wordpress701");
         dao.connect(username, password);
 
-        dao.updateJobStatus( job.getId(), "processing" );
-        
-        
+        dao.updateJobStatus( job.getId(), JobStatus.processing, JobStatus.submitted );
     }
 }
