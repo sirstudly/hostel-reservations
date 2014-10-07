@@ -3,6 +3,7 @@ package com.macbackpackers.scrapers;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,9 +11,9 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Currency;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.macbackpackers.beans.Allocation;
 import com.macbackpackers.beans.Job;
 import com.macbackpackers.dao.WordPressDAO;
+import com.macbackpackers.exceptions.UnrecoverableFault;
 
 /**
  * Scrapes the allocations page for the specified dates.
@@ -62,6 +64,23 @@ public class AllocationsPageScraper {
     private WebClient webClient;
 
     private WordPressDAO dao;
+    
+    private Properties config;
+    
+    public AllocationsPageScraper() {
+        config = new Properties();
+        FileReader fr = null;
+        try {
+            fr = new FileReader( "config.properties" );
+            config.load( fr );
+        } catch ( FileNotFoundException e ) {
+            throw new UnrecoverableFault( e );
+        } catch ( IOException e ) {
+            throw new UnrecoverableFault( e );
+        } finally {
+            try { fr.close(); } catch ( IOException e ) { /* can't do much else */ }
+        }
+    }
 
     public WordPressDAO getWordPressDAO() {
         return dao;
@@ -74,7 +93,7 @@ public class AllocationsPageScraper {
     public void doLogin() throws Exception {
 
         webClient = new WebClient();
-        HtmlPage loginPage = webClient.getPage( "https://emea.littlehotelier.com/login" );
+        HtmlPage loginPage = webClient.getPage( config.getProperty( "lilhotelier.url.login" ) );
 
         // The form doesn't have a name so just take the only one on the page
         List<HtmlForm> forms = loginPage.getForms();
@@ -85,8 +104,8 @@ public class AllocationsPageScraper {
         HtmlPasswordInput passwordField = form.getInputByName( "user_session[password]" );
 
         // Change the value of the text field
-        usernameField.setValueAttribute( "CastleRock" );
-        passwordField.setValueAttribute( "plantbiology46" );
+        usernameField.setValueAttribute( config.getProperty( "lilhotelier.username" ) );
+        passwordField.setValueAttribute( config.getProperty( "lilhotelier.password" ) );
 
         HtmlPage nextPage = button.click();
         logger.info( "Finished logging in" );
@@ -96,7 +115,7 @@ public class AllocationsPageScraper {
     public HtmlPage goToCalendarPage( Date date ) throws Exception {
         String dateAsString = DATE_FORMAT_YYYY_MM_DD.format( date );
         HtmlPage nextPage = webClient
-                .getPage( "https://emea.littlehotelier.com/extranet/properties/533/calendar?start_date=" + dateAsString );
+                .getPage( config.getProperty( "lilhotelier.url.calendar" ) + "?start_date=" + dateAsString );
         logger.info( "Calendar page" );
 
         serialiseToDisk( nextPage, getCalendarPageSerialisedObjectFilename( date ) );
@@ -364,7 +383,7 @@ public class AllocationsPageScraper {
 
     public String getPageAsXml() throws Exception {
         final WebClient webClient = new WebClient();
-        final HtmlPage page = webClient.getPage( "https://emea.littlehotelier.com/login" );
+        final HtmlPage page = webClient.getPage( config.getProperty( "lilhotelier.url.login" ) );
         final String pageAsXml = page.asXml();
         webClient.closeAllWindows();
         return pageAsXml;
@@ -372,7 +391,7 @@ public class AllocationsPageScraper {
 
     public String getPageAsText() throws Exception {
         final WebClient webClient = new WebClient();
-        final HtmlPage page = webClient.getPage( "https://emea.littlehotelier.com/login" );
+        final HtmlPage page = webClient.getPage( config.getProperty( "lilhotelier.url.login" ) );
         final String pageAsText = page.asText();
         webClient.closeAllWindows();
         return pageAsText;
