@@ -14,12 +14,11 @@
         <h3 id="selected_date_label"><xsl:comment/></h3>
     </div>
 
-    <div class="wpdevbk">
+    <div class="wpdevbk wrap">
         <div class="booking-submenu-tab-container">
             <div class="nav-tabs booking-submenu-tab-insidecontainer">
                 <form id="housekeeping_form" class="form-inline" method="post" action="" name="housekeeping_form">
-                    <a class="btn btn-primary" style="float: left; margin-right: 15px;" onclick="javascript:housekeeping_form.submit();">Apply <span class="icon-refresh icon-white"></span></a>
-
+                    <a class="btn btn-primary" style="float: left; margin-right: 15px;" onclick="javascript:housekeeping_form.submit();">Filter <span class="icon-refresh icon-white"></span></a>
                     <div class="control-group" style="float: left;">
                         <div class="inline controls">
                             <div class="btn-group">
@@ -29,10 +28,36 @@
                             <p class="help-block" style="float:left;padding-left:5px;">Date</p>
                         </div>
                     </div>
+                    <!-- show the last /completed/ job -->
+                    <!-- also, if one is currently pending/submitted - disable the refresh button -->
+                    <div class="control-group" style="float: right;">
+                        <div class="inline controls">
+                            <div class="btn-group">
+                                <xsl:choose>
+                                    <xsl:when test="job_in_progress">
+                                        <a class="btn btn-primary disabled" style="float: right; margin-right: 15px;">Update in Progress <span class="icon-refresh icon-white"></span></a>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <input type="hidden" name="refresh_job" id="refresh_job" value="" />
+                                        <a class="btn btn-primary" style="float: right; margin-right: 15px;" onclick="javascript:document.getElementById('refresh_job').value = 'true';housekeeping_form.submit();">Refresh Now <span class="icon-refresh icon-white"></span></a>
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </div>
+                            <p class="help-block" style="float:left;padding-left:5px;padding-right:15px;font-style:italic;">
+                            <xsl:choose>
+                                <xsl:when test="job">
+                                    This report was last updated on: <xsl:value-of select="job/created_date"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    This report has never been updated for this date.
+                                </xsl:otherwise>
+                            </xsl:choose>
+                            </p>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
-    </div>
 
 <script type="text/javascript">
 
@@ -45,36 +70,36 @@ jQuery(document).ready(function() {
 });
 
 </script>
-    
 
+        Home URL: <xsl:value-of select="home_url"/><br/>
 
-    Home URL: <xsl:value-of select="home_url"/><br/>
+        <!-- show the last /completed/ job -->
+        <!-- also, if one is currently pending/submitted - disable the refresh button -->
+        <xsl:choose>
+            <xsl:when test="job">
+                ID: <xsl:value-of select="job/id"/><br/>
+                Name: <xsl:value-of select="job/name"/><br/>
+                Status: <xsl:value-of select="job/status"/><br/>
+                Created Date: <xsl:value-of select="job/created_date"/><br/>
+                Last Updated Date: <xsl:value-of select="job/last_updated_date"/><br/>
+            </xsl:when>
+            <xsl:otherwise>
+                No job defined.
+            </xsl:otherwise>
+        </xsl:choose>
+        Refresh Job: <xsl:value-of select="job_in_progress" /> <br/>
 
-    <!-- show the last /completed/ job -->
-    <!-- also, if one is currently pending/submitted - disable the refresh button -->
-    <xsl:choose>
-        <xsl:when test="job">
-            ID: <xsl:value-of select="job/id"/><br/>
-            Name: <xsl:value-of select="job/name"/><br/>
-            Status: <xsl:value-of select="job/status"/><br/>
-            Created Date: <xsl:value-of select="job/created_date"/><br/>
-            Last Updated Date: <xsl:value-of select="job/last_updated_date"/><br/>
-        </xsl:when>
-        <xsl:otherwise>
-            No job defined.
-        </xsl:otherwise>
-    </xsl:choose>
-
-    <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <th width="50">Room</th>
-            <th width="100">Bed</th>
-            <th>Bedsheets</th>
-        </thead>
-        <tbody>
-            <xsl:apply-templates select="bed" mode="bedsheet_row"/>
-        </tbody>
-    </table>
+        <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
+            <thead>
+                <th width="50">Room</th>
+                <th width="100">Bed</th>
+                <th>Bedsheets</th>
+            </thead>
+            <tbody>
+                <xsl:apply-templates select="bed" mode="bedsheet_row"/>
+            </tbody>
+        </table>
+    </div>
 
     <xsl:call-template name="write_inline_js"/>
 
@@ -103,7 +128,26 @@ jQuery(document).ready(function() {
     checkout_date: <xsl:value-of select="checkout_date"/><br/>
     data href:  <xsl:value-of select="data_href"/><br/>
     Created: <xsl:value-of select="created_date"/><br/>
-    Bed Sheet: <xsl:value-of select="bedsheet"/><br/>
+    Bed Sheet:<br/>
+        <span>
+            <xsl:attribute name="class">
+                label 
+                <xsl:if test="bedsheet = 'CHANGE'">
+                    label-change
+                </xsl:if>
+                <xsl:if test="bedsheet = '3 DAY CHANGE'">
+                    label-3daychange
+                </xsl:if>
+                <xsl:if test="bedsheet = 'NO CHANGE'">
+                    label-nochange
+                </xsl:if>
+                <xsl:if test="bedsheet = 'EMPTY'">
+                    label-empty
+                </xsl:if>
+            </xsl:attribute>
+            <xsl:value-of select="bedsheet"/>
+        </span>
+    <br/>
     <xsl:if test="/view/ignore_rooms/room = room">IGNORE THIS ROOM!</xsl:if>
         </td>
     </tr>

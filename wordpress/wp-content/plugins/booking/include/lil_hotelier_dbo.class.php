@@ -5,6 +5,10 @@
  */
 class LilHotelierDBO {
 
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_SUBMITTED = 'submitted';
+    const STATUS_PROCESSING = 'processing';
+
     /**
      * Returns all bedsheet data for the given date.
      * $selectedDate : DateTime object
@@ -57,8 +61,8 @@ error_log( "QUERY: " . $wpdb->last_query );
               WHERE GREATEST(created_date, last_updated_date) IN (
 	                SELECT MAX(GREATEST(created_date, last_updated_date)) 
                       FROM ".$wpdb->prefix."lh_jobs t
-	                 WHERE t.name = %s
-                       AND t.status = 'completed')", $jobName));
+	                 WHERE t.classname = %s
+                       AND t.status = %s)", $jobName, self::STATUS_COMPLETED));
         
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
@@ -82,6 +86,50 @@ error_log( "QUERY: " . $wpdb->last_query );
         }
 
         return array_shift($resultset);
+    }
+
+    /**
+     * Inserts a new job with the given name at the status of 'submitted'.
+     */
+    static function insertJobOfType( $jobName ) {
+        global $wpdb;
+        if (false === $wpdb->insert($wpdb->prefix ."lh_jobs", 
+                array( 'name' => $jobName, 'status' => self::STATUS_SUBMITTED ), array( '%s', '%s' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+    }
+
+    /**
+     * Returns true iff a job exists with the given name in a submitted or processing state.
+     */
+    static function isExistsIncompleteJobOfType( $jobName ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT job_id
+               FROM ".$wpdb->prefix."lh_jobs
+              WHERE name = %s 
+                AND status IN ( %s, %s )", $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
+
+        return ! empty( $resultset );        
+    }
+    
+    /**
+     * Returns report where a reservation is split between rooms of the same type.
+     */
+    static function getSplitRoomReservationsReport() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, notes, created_date
+               FROM ".$wpdb->prefix."lh_rpt_split_rooms
+              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_split_rooms)
+              ORDER BY checkin_date");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
     }
     
 }

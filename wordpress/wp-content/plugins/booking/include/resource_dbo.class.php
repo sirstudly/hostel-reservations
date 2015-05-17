@@ -315,20 +315,22 @@ error_log("updateResourceProperties $resourceId , ".var_export($propertyArray, t
      * $bookingId : valid booking id
      * Returns array() of String indexed by resourceId
      */
-    function fetchResourcesForBookingId($bookingId) {
+    static function fetchResourcesForBookingId($bookingId) {
         // find all "parent" resources (rooms) for this booking
         global $wpdb;
 
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT DISTINCT p.resource_id, p.name
+            "SELECT DISTINCT COALESCE(p.resource_id, r.resource_id) AS resource_id, 
+                             COALESCE(p.name, r.name) AS name
                FROM ".$wpdb->prefix."booking b
                JOIN ".$wpdb->prefix."allocation a ON b.booking_id = a.booking_id
                JOIN ".$wpdb->prefix."bookingresources r ON a.resource_id = r.resource_id
-               JOIN ".$wpdb->prefix."bookingresources p ON r.parent_resource_id = p.resource_id
-              WHERE p.resource_type = 'room'
+               LEFT OUTER JOIN ".$wpdb->prefix."bookingresources p ON r.parent_resource_id = p.resource_id
+              WHERE ( p.resource_type IN ('room', 'private') OR r.resource_id = 1 ) -- unallocated
                 AND b.booking_id = %d
               ORDER BY p.resource_id", $bookingId));
         
+error_log("fetchResourcesForBookingId sql: ".$wpdb->last_query);
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
         }

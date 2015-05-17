@@ -617,6 +617,26 @@
 	background-color: #3a87ad
 }
 
+.wpdevbk .label-change {
+	font-size: 12px;
+    background-color: #3A87AD;
+}
+
+.wpdevbk .label-3daychange {
+	font-size: 12px;
+    background-color: #C87F5B;
+}
+
+.wpdevbk .label-nochange {
+	font-size: 12px;
+    background-color: #7A7A7A;
+}
+
+.wpdevbk .label-empty {
+	font-size: 12px;
+    background-color: #B8B8B8;
+}
+
 .center {
 	display:table; 
 	margin:auto;

@@ -7,14 +7,32 @@ class HouseKeeping extends XslTransform {
 
     var $selectionDate;  // DateTime of selected date
 
-    var $bedsheetView;
-    var $jobInfo;
+    var $bedsheetView;  // the view of the current bedsheet counts on $selectionDate
+    var $jobInfo; // latest COMPLETED job we will show the report on
+    var $isRefreshJobInProgress = false;
+
+    const JOB_TYPE = "bedsheets";
     
     /**
      * Default constructor.
-     * $selectionDate : date to display housekeeping for (DateTime)
      */
     function HouseKeeping() {
+        $this->selectionDate = new DateTime();
+    }
+
+    /**
+     * Updates the selection date when performing a view
+     * $selectionDate : date to display housekeeping for (DateTime)
+     */
+    function setSelectionDate( $selectionDate ) {
+        $this->selectionDate = $selectionDate;
+    }
+
+    /**
+     * Updates the view using the current selection date.
+     */
+    function doView() {
+        $this->doViewForDate($this->selectionDate);
     }
     
     /**
@@ -27,7 +45,7 @@ class HouseKeeping extends XslTransform {
         $startDate = clone $selectionDate;
 //        $startDate->sub(new DateInterval('P3D'));   FIXME
 
-        $this->jobInfo = LilHotelierDBO::getLatestJobOfType( "bedsheets" );
+        $this->jobInfo = LilHotelierDBO::getLatestJobOfType( self::JOB_TYPE );
 error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
 
         if( $this->jobInfo ) {
@@ -37,6 +55,15 @@ error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
             $selectionDate,
             $this->jobInfo->job_id);
         }
+
+        $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
+    }
+
+    /** 
+     * Submits a new bedsheets job to run.
+     */
+    function submitRefreshJob() {
+        LilHotelierDBO::insertJobOfType( self::JOB_TYPE );
     }
     
     /**
@@ -68,6 +95,10 @@ error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
             $jobRoot->appendChild($domtree->createElement('status', $this->jobInfo->status));
             $jobRoot->appendChild($domtree->createElement('created_date', $this->jobInfo->created_date));
             $jobRoot->appendChild($domtree->createElement('last_updated_date', $this->jobInfo->last_updated_date));
+        }
+
+        if( $this->isRefreshJobInProgress ) {
+            $parentElement->appendChild($domtree->createElement('job_in_progress', 'true' ));
         }
 
         if ( $this->bedsheetView ) {

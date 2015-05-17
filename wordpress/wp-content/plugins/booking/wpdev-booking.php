@@ -180,6 +180,9 @@ A c t u a l   T O D O   List:
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/housekeeping.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/housekeeping.class.php' ); }
 
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_reports.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_reports.class.php' ); }
+
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lil_hotelier_dbo.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lil_hotelier_dbo.class.php' ); }
 

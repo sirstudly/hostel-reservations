@@ -54,6 +54,19 @@
                                         <th scope="row"><label for="resources_url">Resources Page</label></th>
                                         <td><input id="resources_url"  name="hbo_resources_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{resourcesurl}" /></td>
                                     </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="housekeeping_url">Housekeeping Page</label></th>
+                                        <td><input id="housekeeping_url"  name="hbo_housekeeping_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{housekeepingurl}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="hbo_housekeeping_ignore_rooms">Ignore these rooms on housekeeping page:</label></th>
+                                        <td><input id="housekeeping_ignore_rooms"  name="hbo_housekeeping_ignore_rooms" class="regular-text code" type="text" style="width:200px;" size="145" value="{housekeepingignorerooms}" />
+                                        <span class="description">Comma-delimited rooms. e.g. 10,22,23</span></td>
+                                    </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="reports_url">Reports Page</label></th>
+                                        <td><input id="reports_url"  name="hbo_reports_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{reportsurl}" /></td>
+                                    </tr>  
                                     <tr valign="top"><td colspan="2"><div style="border-bottom:1px solid #cccccc;"><xsl:comment/></div></td></tr>
                                     <tr valign="top"> 
                                         <td colspan="2">
