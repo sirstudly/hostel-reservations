@@ -341,6 +341,11 @@ error_log(var_export($_POST, TRUE));
      */
     function content_of_reports_page() {
         $rep = new LHReports();
+
+        if (isset($_POST['allocation_scraper_job'])) {
+            $rep->submitAllocationScraperJob();
+        } 
+
         $rep->doView(); // update the view
         echo $rep->toHtml();
     }

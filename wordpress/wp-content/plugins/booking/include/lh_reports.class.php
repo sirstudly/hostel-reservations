@@ -6,6 +6,7 @@
 class LHReports extends XslTransform {
 
     var $splitRoomReport;  // the view of the latest split room report
+    var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
 
     /**
      * Default constructor.
@@ -19,6 +20,14 @@ class LHReports extends XslTransform {
      */
     function doView() {
         $this->splitRoomReport = LilHotelierDBO::getSplitRoomReservationsReport();
+        $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
+    }
+
+    /**
+     * Inserts an allocation scraper job into the jobs table.
+     */
+    function submitAllocationScraperJob() {
+        LilHotelierDBO::insertAllocationScraperJob();
     }
     
     /**
@@ -28,6 +37,12 @@ class LHReports extends XslTransform {
      * $parentElement : DOM element where this object will be added
      */
     function addSelfToDocument($domtree, $parentElement) {
+
+        if( $this->lastSubmittedAllocScraperJob ) {
+            $recordRoot = $parentElement->appendChild($domtree->createElement('last_submitted_job', 
+                DateTime::createFromFormat('Y-m-d H:i:s', $this->lastSubmittedAllocScraperJob)->format('D, d M Y H:i:s')));
+        }
+
         if ( $this->splitRoomReport ) {
             foreach( $this->splitRoomReport as $record ) {
                 $recordRoot = $parentElement->appendChild($domtree->createElement('record'));
@@ -36,6 +51,14 @@ class LHReports extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
+                $recordRoot->appendChild($domtree->createElement('status', $record->lh_status));
+                $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
+                $recordRoot->appendChild($domtree->createElement('booking_source', $record->booking_source));
+                if( $record->booked_date ) {
+                    $recordRoot->appendChild($domtree->createElement('booked_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
+                }
+                $recordRoot->appendChild($domtree->createElement('eta', $record->eta));
+                $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
                 $recordRoot->appendChild($domtree->createElement('notes', $record->notes));
                 $recordRoot->appendChild($domtree->createElement('created_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->created_date)->format('D, d M Y H:i:s')));
             }
@@ -45,6 +68,7 @@ class LHReports extends XslTransform {
     /** 
       Generates the following xml:
         <view>
+            <last_submitted_job>2015-05-24 13:22:58</last_submitted_job>
             <record>
                 <reservation_id>123456</reservation_id>
                 <guest_name>Joe Bloggs</guest_name>

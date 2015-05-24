@@ -120,7 +120,9 @@ error_log( "QUERY: " . $wpdb->last_query );
     static function getSplitRoomReservationsReport() {
         global $wpdb;
         $resultset = $wpdb->get_results(
-            "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, notes, created_date
+            "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, lh_status, 
+                    booking_reference, booking_source, booked_date, eta, viewed_yn, notes, 
+                    DATE_ADD( created_date, INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
                FROM ".$wpdb->prefix."lh_rpt_split_rooms
               WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_split_rooms)
               ORDER BY checkin_date");
@@ -131,7 +133,112 @@ error_log( "QUERY: " . $wpdb->last_query );
 
         return $resultset;
     }
+
+    /**
+     * Inserts a new AllocationScraperJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertAllocationScraperJob() {
+        $dblink = new DbTransaction();
+        try{
+            $jobId = self::doInsertAllocationScraperJob($dblink->mysqli);
+            $dblink->mysqli->commit();
+            $dblink->mysqli->close();
+            return $jobId;
+
+        } catch(Exception $e) {
+            $dblink->mysqli->rollback();
+            $dblink->mysqli->close();
+            throw $e;
+        }
+    }
+
+    /**
+     * Inserts a new AllocationScraperJob.
+     * $mysqli : manual db connection (for transaction handling)
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function doInsertAllocationScraperJob($mysqli) {
     
+        global $wpdb;
+        $stmt = $mysqli->prepare(
+            "INSERT INTO ".$wpdb->prefix."lh_jobs(classname, `status`, created_date, last_updated_date)
+             VALUES('com.macbackpackers.jobs.AllocationScraperJob', 'submitted', NOW(), NOW())");
+        
+        if(false === $stmt->execute()) {
+            throw new DatabaseException("Error during INSERT: " . $mysqli->error);
+        }
+        $stmt->close();
+
+        // insert the start end - end dates as parameters
+        $jobId = $mysqli->insert_id;
+
+        $startDate = new DateTime();
+        $endDate = new DateTime();
+        $endDate->add(new DateInterval('P4M'));  // get data for the next 4 months
+
+        self::insertJobParameter($mysqli, $jobId, 'start_date', $startDate->format('Y-m-d'));
+        self::insertJobParameter($mysqli, $jobId, 'end_date', $endDate->format('Y-m-d'));
+
+        return $jobId;
+    }
+    
+    /**
+     * Inserts a new AllocationScraperJob parameter.
+     * $mysqli : manual db connection (for transaction handling)
+     * $jobId : id of job
+     * $paramName : name of parameter
+     * $paramValue : value of parameter
+     * Returns id of inserted job param id
+     * Throws DatabaseException on insert error
+     */
+    static function insertJobParameter($mysqli, $jobId, $paramName, $paramValue) {
+    
+        global $wpdb;
+        $stmt = $mysqli->prepare(
+            "INSERT INTO ".$wpdb->prefix."lh_job_param(job_id, name, value)
+             VALUES(?, ?, ?)");
+        $stmt->bind_param('iss', 
+            $jobId,
+            $paramName, 
+            $paramValue);
+        
+        if(false === $stmt->execute()) {
+            throw new DatabaseException("Error during INSERT: " . $mysqli->error);
+        }
+        $stmt->close();
+
+        return $mysqli->insert_id;
+    }
+    
+    /**
+     * Returns the date of the last allocation scraper job that
+     * hasn't been run/completed yet or null if none exists.
+     */
+    static function getOutstandingAllocationScraperJob() {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT DATE_ADD( MAX(created_date), INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
+                  FROM ".$wpdb->prefix."lh_jobs 
+                 WHERE classname = 'com.macbackpackers.jobs.AllocationScraperJob' 
+                   AND status IN ( %s, %s )",  
+                self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // guaranteed null or int
+        $rec = array_shift($resultset);
+
+        // if null, then no job exists
+        if( $rec->created_date == null) {
+            return null;
+        }
+        return $rec->created_date;
+    }
 }
 
 ?>
