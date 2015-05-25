@@ -42,7 +42,8 @@ class WP_HostelBackoffice {
         add_option('hbo_resources_url', 'admin/resources');
         add_option('hbo_editbooking_url', 'edit-booking');
         add_option('hbo_housekeeping_url', 'housekeeping');
-        add_option('hbo_reports_url', 'reports');
+        add_option('hbo_reports_url', 'reports/reservations-split-across-rooms');
+        add_option('hbo_unpaid_deposit_report_url', 'reports/unpaid-deposit-report');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -59,6 +60,8 @@ class WP_HostelBackoffice {
         delete_option('hbo_editbooking_url');
         delete_option('hbo_housekeeping_url');
         delete_option('hbo_reports_url');
+        delete_option('hbo_unpaid_deposit_report_url');
+
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
         delete_option('hbo_delete_db_on_deactivate');
@@ -94,6 +97,10 @@ class WP_HostelBackoffice {
         ///////////////// REPORTS /////////////////////////////////////////////
         $pagehook10 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('Reports', 'wpdev-booking'), __('Reports', 'wpdev-booking'), 'administrator',
                 WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_reports_page')  );
+        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
+            
+        $pagehook11 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('UnpaidDepositReport', 'wpdev-booking'), __('UnpaidDepositReport', 'wpdev-booking'), 'administrator',
+                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_unpaid_deposit_report_page')  );
         add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
             
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,6 +358,20 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
+     * Write the contents of the Unpaid Deposits Report page.
+     */
+    function content_of_unpaid_deposit_report_page() {
+        $rep = new LHUnpaidDepositReport();
+
+        if (isset($_POST['allocation_scraper_job'])) {
+            $rep->submitAllocationScraperJob();
+        } 
+
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+    }
+
+    /**
      * Display a top-level menu dropdown on the admin menu (when logged in as admin).
      */
     function add_admin_bar_bookings_menu(){
@@ -393,6 +414,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_resources_url'), 'resources.php');
         $this->do_redirect_for_page(get_option('hbo_housekeeping_url'), 'housekeeping.php');
         $this->do_redirect_for_page(get_option('hbo_reports_url'), 'reports.php');
+        $this->do_redirect_for_page(get_option('hbo_unpaid_deposit_report_url'), 'unpaid-deposit-report.php');
     }
 
     /**

@@ -135,6 +135,26 @@ error_log( "QUERY: " . $wpdb->last_query );
     }
 
     /**
+     * Returns report of bookings which have unpaid deposits.
+     */
+    static function getUnpaidDepositReport() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT guest_name, checkin_date, checkout_date, payment_total, data_href, booking_reference, 
+                    booking_source, booked_date, notes, viewed_yn,
+                    DATE_ADD( created_date, INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
+               FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit
+              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit)
+              ORDER BY checkin_date");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
+    /**
      * Inserts a new AllocationScraperJob.
      * Returns id of inserted job id
      * Throws DatabaseException on insert error
@@ -220,9 +240,13 @@ error_log( "QUERY: " . $wpdb->last_query );
     static function getOutstandingAllocationScraperJob() {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
-               "SELECT DATE_ADD( MAX(created_date), INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
+               "SELECT DATE_ADD( MIN(created_date), INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
                   FROM ".$wpdb->prefix."lh_jobs 
-                 WHERE classname = 'com.macbackpackers.jobs.AllocationScraperJob' 
+                 WHERE classname IN (
+                           'com.macbackpackers.jobs.AllocationScraperJob', 
+                           'com.macbackpackers.jobs.BookingScraperJob', 
+                           'com.macbackpackers.jobs.SplitRoomReservationReportJob',
+                           'com.macbackpackers.jobs.UnpaidDepositReportJob' )
                    AND status IN ( %s, %s )",  
                 self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
 
