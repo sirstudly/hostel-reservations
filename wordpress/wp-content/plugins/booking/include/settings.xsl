@@ -65,7 +65,7 @@
                                     </tr>  
                                     <tr valign="top">
                                         <th scope="row"><label for="reports_url">Split Room Reservation Report</label></th>
-                                        <td><input id="reports_url"  name="hbo_reports_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{reportsurl}" /></td>
+                                        <td><input id="hbo_split_room_report_url"  name="hbo_split_room_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{split_room_report_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
                                         <th scope="row"><label for="unpaid_deposit_report_url">Unpaid Deposit Report</label></th>

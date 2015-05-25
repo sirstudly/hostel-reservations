@@ -42,7 +42,7 @@ class WP_HostelBackoffice {
         add_option('hbo_resources_url', 'admin/resources');
         add_option('hbo_editbooking_url', 'edit-booking');
         add_option('hbo_housekeeping_url', 'housekeeping');
-        add_option('hbo_reports_url', 'reports/reservations-split-across-rooms');
+        add_option('hbo_split_room_report_url', 'reports/reservations-split-across-rooms');
         add_option('hbo_unpaid_deposit_report_url', 'reports/unpaid-deposit-report');
         self::build_db_schema();
         self::insert_site_pages();
@@ -59,7 +59,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_resources_url');
         delete_option('hbo_editbooking_url');
         delete_option('hbo_housekeeping_url');
-        delete_option('hbo_reports_url');
+        delete_option('hbo_split_room_report_url');
         delete_option('hbo_unpaid_deposit_report_url');
 
         self::delete_site_pages();
@@ -95,8 +95,8 @@ class WP_HostelBackoffice {
         add_action("admin_print_scripts-" . $pagehook9 , array( &$this, 'add_js_css_files'));
             
         ///////////////// REPORTS /////////////////////////////////////////////
-        $pagehook10 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('Reports', 'wpdev-booking'), __('Reports', 'wpdev-booking'), 'administrator',
-                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_reports_page')  );
+        $pagehook10 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('SplitRoomReport', 'wpdev-booking'), __('SplitRoomReport', 'wpdev-booking'), 'administrator',
+                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_split_room_report_page')  );
         add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
             
         $pagehook11 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('UnpaidDepositReport', 'wpdev-booking'), __('UnpaidDepositReport', 'wpdev-booking'), 'administrator',
@@ -346,8 +346,8 @@ error_log(var_export($_POST, TRUE));
     /**
      * Write the contents of the Reports page.
      */
-    function content_of_reports_page() {
-        $rep = new LHReports();
+    function content_of_split_room_report_page() {
+        $rep = new LHSplitRoomReport();
 
         if (isset($_POST['allocation_scraper_job'])) {
             $rep->submitAllocationScraperJob();
@@ -413,7 +413,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_editbooking_url'), 'edit-booking.php');
         $this->do_redirect_for_page(get_option('hbo_resources_url'), 'resources.php');
         $this->do_redirect_for_page(get_option('hbo_housekeeping_url'), 'housekeeping.php');
-        $this->do_redirect_for_page(get_option('hbo_reports_url'), 'reports.php');
+        $this->do_redirect_for_page(get_option('hbo_split_room_report_url'), 'reservations-split-across-rooms.php');
         $this->do_redirect_for_page(get_option('hbo_unpaid_deposit_report_url'), 'unpaid-deposit-report.php');
     }
 
