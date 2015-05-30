@@ -7,6 +7,7 @@ class LHSplitRoomReport extends XslTransform {
 
     var $splitRoomReport;  // the view of the latest split room report
     var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
+    var $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job
 
     /**
      * Default constructor.
@@ -21,6 +22,7 @@ class LHSplitRoomReport extends XslTransform {
     function doView() {
         $this->splitRoomReport = LilHotelierDBO::getSplitRoomReservationsReport();
         $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
+        $this->lastCompletedAllocScraperJob = LilHotelierDBO::getLastCompletedAllocationScraperJob();
     }
 
     /**
@@ -41,6 +43,11 @@ class LHSplitRoomReport extends XslTransform {
         if( $this->lastSubmittedAllocScraperJob ) {
             $recordRoot = $parentElement->appendChild($domtree->createElement('last_submitted_job', 
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastSubmittedAllocScraperJob)->format('D, d M Y H:i:s')));
+        }
+
+        if( $this->lastCompletedAllocScraperJob ) {
+            $parentElement->appendChild($domtree->createElement('last_completed_job', 
+                DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedAllocScraperJob)->format('D, d M Y H:i:s')));
         }
 
         if ( $this->splitRoomReport ) {

@@ -263,6 +263,37 @@ error_log( "QUERY: " . $wpdb->last_query );
         }
         return $rec->created_date;
     }
+
+    /**
+     * Returns the date of the last allocation scraper job that
+     * ran succesfully.
+     */
+    static function getLastCompletedAllocationScraperJob() {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT DATE_ADD( MAX(end_date), INTERVAL 7 HOUR ) `end_date` -- easiest way to sync to correct for timezone
+                  FROM ".$wpdb->prefix."lh_jobs 
+                 WHERE classname IN (
+                           'com.macbackpackers.jobs.AllocationScraperJob', 
+                           'com.macbackpackers.jobs.BookingScraperJob', 
+                           'com.macbackpackers.jobs.SplitRoomReservationReportJob',
+                           'com.macbackpackers.jobs.UnpaidDepositReportJob' )
+                   AND status IN ( %s )",  
+                self::STATUS_COMPLETED ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // guaranteed null or int
+        $rec = array_shift($resultset);
+
+        // if null, then no job exists
+        if( $rec->end_date == null) {
+            return null;
+        }
+        return $rec->end_date;
+    }
 }
 
 ?>

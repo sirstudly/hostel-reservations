@@ -54,8 +54,8 @@
     </div>
 
     <br/>
-    <p><span class="aside">This report was last run on <xsl:value-of select="record[1]/created_date"/>.</span><br/>
-       <span class="aside">It is automatically re-run daily at 12:30am.</span></p>
+    <p><span class="aside">This report was last run on <xsl:value-of select="last_completed_job"/>.</span><br/>
+       <span class="aside">It is automatically re-run daily at 10:00pm.</span></p>
 
     <xsl:choose>
         <xsl:when test="last_submitted_job">

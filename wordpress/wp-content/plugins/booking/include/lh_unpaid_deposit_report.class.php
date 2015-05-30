@@ -7,6 +7,7 @@ class LHUnpaidDepositReport extends XslTransform {
 
     var $unpaidDepositReport;  // the view of the latest unpaid deposit report
     var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
+    var $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job
 
     /**
      * Default constructor.
@@ -21,6 +22,7 @@ class LHUnpaidDepositReport extends XslTransform {
     function doView() {
         $this->unpaidDepositReport = LilHotelierDBO::getUnpaidDepositReport();
         $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
+        $this->lastCompletedAllocScraperJob = LilHotelierDBO::getLastCompletedAllocationScraperJob();
     }
 
     /**
@@ -41,6 +43,11 @@ class LHUnpaidDepositReport extends XslTransform {
         if( $this->lastSubmittedAllocScraperJob ) {
             $recordRoot = $parentElement->appendChild($domtree->createElement('last_submitted_job', 
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastSubmittedAllocScraperJob)->format('D, d M Y H:i:s')));
+        }
+
+        if( $this->lastCompletedAllocScraperJob ) {
+            $parentElement->appendChild($domtree->createElement('last_completed_job', 
+                DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedAllocScraperJob)->format('D, d M Y H:i:s')));
         }
 
         if ( $this->unpaidDepositReport ) {
@@ -66,6 +73,7 @@ class LHUnpaidDepositReport extends XslTransform {
       Generates the following xml:
         <view>
             <last_submitted_job>2015-05-24 13:22:58</last_submitted_job>
+            <last_completed_job>2015-05-23 12:15:21</last_completed_job>
             <record>
                 <guest_name>Joe Bloggs</guest_name>
                 <checkin_date>Mon, 18 May 2015</checkin_date>
