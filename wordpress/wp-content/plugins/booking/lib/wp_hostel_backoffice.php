@@ -44,6 +44,7 @@ class WP_HostelBackoffice {
         add_option('hbo_housekeeping_url', 'housekeeping');
         add_option('hbo_split_room_report_url', 'reports/reservations-split-across-rooms');
         add_option('hbo_unpaid_deposit_report_url', 'reports/unpaid-deposit-report');
+        add_option('hbo_group_bookings_report_url', 'reports/group-bookings');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -61,6 +62,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_housekeeping_url');
         delete_option('hbo_split_room_report_url');
         delete_option('hbo_unpaid_deposit_report_url');
+        delete_option('group_bookings_report_url');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
@@ -101,6 +103,10 @@ class WP_HostelBackoffice {
             
         $pagehook11 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('UnpaidDepositReport', 'wpdev-booking'), __('UnpaidDepositReport', 'wpdev-booking'), 'administrator',
                 WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_unpaid_deposit_report_page')  );
+        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
+            
+        $pagehook12 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('GroupBookingsReport', 'wpdev-booking'), __('GroupBookingsReport', 'wpdev-booking'), 'administrator',
+                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_group_bookings_page')  );
         add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
             
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,6 +378,20 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
+     * Write the contents of the group bookings report.
+     */
+    function content_of_group_bookings_page() {
+        $rep = new LHGroupBookingsReport();
+
+        if (isset($_POST['allocation_scraper_job'])) {
+            $rep->submitAllocationScraperJob();
+        } 
+
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+    }
+
+    /**
      * Display a top-level menu dropdown on the admin menu (when logged in as admin).
      */
     function add_admin_bar_bookings_menu(){
@@ -415,6 +435,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_housekeeping_url'), 'housekeeping.php');
         $this->do_redirect_for_page(get_option('hbo_split_room_report_url'), 'reservations-split-across-rooms.php');
         $this->do_redirect_for_page(get_option('hbo_unpaid_deposit_report_url'), 'unpaid-deposit-report.php');
+        $this->do_redirect_for_page(get_option('hbo_group_bookings_report_url'), 'group-bookings.php');
     }
 
     /**

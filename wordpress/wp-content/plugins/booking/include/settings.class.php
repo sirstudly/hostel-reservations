@@ -29,6 +29,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('housekeepingignorerooms', get_option('hbo_housekeeping_ignore_rooms')));
         $xmlRoot->appendChild($domtree->createElement('split_room_report_url', get_option('hbo_split_room_report_url')));
         $xmlRoot->appendChild($domtree->createElement('unpaid_deposit_report_url', get_option('hbo_unpaid_deposit_report_url')));
+        $xmlRoot->appendChild($domtree->createElement('group_bookings_report_url', get_option('hbo_group_bookings_report_url')));
         $xmlRoot->appendChild($domtree->createElement('delete_on_deactivate', get_option('hbo_delete_db_on_deactivate')));
     }
 
@@ -46,6 +47,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_housekeeping_ignore_rooms');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_split_room_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_unpaid_deposit_report_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_group_bookings_report_url');
 
         update_option('hbo_delete_db_on_deactivate', isset($optionsArray['hbo_delete_db_on_deactivate']) ? 'On' : 'Off');
     }

@@ -135,6 +135,25 @@ error_log( "QUERY: " . $wpdb->last_query );
     }
 
     /**
+     * Returns report for all group bookings.
+     */
+    static function getGroupBookingsReport() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT reservation_id, guest_name, booking_reference, booking_source, checkin_date, checkout_date, 
+                    booked_date, payment_outstanding, num_guests, data_href, notes, viewed_yn 
+               FROM ".$wpdb->prefix."lh_group_bookings
+              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_group_bookings)
+              ORDER BY checkin_date");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
+    /**
      * Returns report of bookings which have unpaid deposits.
      */
     static function getUnpaidDepositReport() {
