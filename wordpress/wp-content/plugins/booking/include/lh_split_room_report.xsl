@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
+<xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"/>
+
 <!--
 //*****************************************************************************
 // Distributed under the GNU General Public Licence
@@ -95,7 +97,7 @@
         <td><a target="_blank"><xsl:attribute name="href">
                    https://emea.littlehotelier.com<xsl:value-of select="data_href"/>
                </xsl:attribute>
-               <xsl:value-of select="guest_name"/>
+               <xsl:value-of select="guest_name" />
             </a>
         </td>
         <td><xsl:value-of select="booking_reference"/></td>

@@ -54,7 +54,7 @@ class LHSplitRoomReport extends XslTransform {
             foreach( $this->splitRoomReport as $record ) {
                 $recordRoot = $parentElement->appendChild($domtree->createElement('record'));
                 $recordRoot->appendChild($domtree->createElement('reservation_id', $record->reservation_id));
-                $recordRoot->appendChild($domtree->createElement('guest_name', $record->guest_name));
+                $recordRoot->appendChild($domtree->createElement('guest_name', html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" )));
                 $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
