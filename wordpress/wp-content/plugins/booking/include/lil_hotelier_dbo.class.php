@@ -46,23 +46,31 @@ error_log( "QUERY: " . $wpdb->last_query );
     }
 
     /**
-     * Returns the latest job with the given type.
-     * $jobName name of job, e.g. bedsheets, bedcount
+     * Returns the latest successful job with the given type.
+     * $jobName classname of job
+     * $selectedDate date for which this job applies against the
+     *               'start_date' (inclusive) and 'end_date' (exclusive) job parameters
      * Returns matching job recordset or null if no jobs of type found
      */
-    static function getLatestJobOfType($jobName) {
+    static function getLatestJobOfTypeForDate($jobName, $selectedDate) {
 
         global $wpdb;
 
         // first find the job id for the most recent job of the given type
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT MAX(job_id) AS job_id
-               FROM ".$wpdb->prefix."lh_jobs
-              WHERE GREATEST(created_date, last_updated_date) IN (
-	                SELECT MAX(GREATEST(created_date, last_updated_date)) 
-                      FROM ".$wpdb->prefix."lh_jobs t
-	                 WHERE t.classname = %s
-                       AND t.status = %s)", $jobName, self::STATUS_COMPLETED));
+            "SELECT MAX(j.job_id) AS job_id
+               FROM (SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) d
+               JOIN ".$wpdb->prefix."lh_jobs j ON 1 = 1
+               JOIN ".$wpdb->prefix."lh_job_param jpa ON j.job_id = jpa.job_id AND jpa.name = 'start_date'
+               JOIN ".$wpdb->prefix."lh_job_param jpb ON j.job_id = jpb.job_id AND jpb.name = 'end_date'
+              WHERE j.end_date IN (
+                     SELECT MAX( t.end_date ) 
+                       FROM ".$wpdb->prefix."lh_jobs t
+                      WHERE t.classname = %s
+                        AND t.status = %s )
+                AND d.selected_date >= STR_TO_DATE( jpa.value, '%%Y-%%m-%%d %%H:%%i:%%s' )
+                AND d.selected_date < STR_TO_DATE( jpb.value, '%%Y-%%m-%%d %%H:%%i:%%s' )",
+            $selectedDate->format('Y-m-d'), $jobName, self::STATUS_COMPLETED));
         
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
@@ -77,7 +85,7 @@ error_log( "QUERY: " . $wpdb->last_query );
 
         // otherwise, retrieve the job details
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT job_id, name, status, created_date, last_updated_date
+            "SELECT job_id, classname, status, start_date, end_date
                FROM ".$wpdb->prefix."lh_jobs
               WHERE job_id = %d", $rec->job_id));
         
