@@ -11,7 +11,7 @@ class HouseKeeping extends XslTransform {
     var $jobInfo; // latest COMPLETED job we will show the report on
     var $isRefreshJobInProgress = false;
 
-    const JOB_TYPE = "bedsheets";
+    const JOB_TYPE = "com.macbackpackers.jobs.HousekeepingJob";
     
     /**
      * Default constructor.
@@ -41,12 +41,11 @@ class HouseKeeping extends XslTransform {
     function doViewForDate($selectionDate) {
         $this->selectionDate = $selectionDate;
 
-        // show view from 3 days ago
+        // show view for this date
         $startDate = clone $selectionDate;
-//        $startDate->sub(new DateInterval('P3D'));   FIXME
 
+        // find the last completed job
         $this->jobInfo = LilHotelierDBO::getLatestJobOfType( self::JOB_TYPE );
-error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
 
         if( $this->jobInfo ) {
             //$this->bedsheetView = LilHotelierDBO::fetchBedSheetsFrom($startDate, $this->jobInfo->job_id);
@@ -63,7 +62,8 @@ error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
      * Submits a new bedsheets job to run.
      */
     function submitRefreshJob() {
-        LilHotelierDBO::insertJobOfType( self::JOB_TYPE );
+        LilHotelierDBO::insertJobOfType( self::JOB_TYPE,
+            array( "selected_date" => $this->selectionDate->format('Y-m-d H:i:s') ) );
     }
     
     /**
@@ -74,27 +74,16 @@ error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
      */
     function addSelfToDocument($domtree, $parentElement) {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
-        $parentElement->appendChild($domtree->createElement('selectiondate', $this->selectionDate->format('Y-m-d')));
-
-        // ignore these rooms
-        if( ! $this->isNullOrEmptyString( get_option('hbo_housekeeping_ignore_rooms') ) ) {
-            $ignoredRooms = explode(",", get_option('hbo_housekeeping_ignore_rooms'));
-            $ignoreRoot = $parentElement->appendChild($domtree->createElement('ignore_rooms'));
-            foreach( $ignoredRooms as $room ) {
-                $ignoreRoot->appendChild( $domtree->createElement('room', trim($room) ));
-            }
-        }
+        $parentElement->appendChild($domtree->createElement('selectiondate', $this->selectionDate->format('l jS F Y')));
 
         if( $this->jobInfo ) {
             // job_id, name, status, created_date, last_updated_date
             $jobRoot = $parentElement->appendChild($domtree->createElement('job'));
-//error_log( 'bedhseetView' . var_export( $this->bedsheetView, TRUE ) );
-//error_log( 'job' . var_export( $this->row, TRUE ) );
             $jobRoot->appendChild($domtree->createElement('id', $this->jobInfo->job_id));
-            $jobRoot->appendChild($domtree->createElement('name', $this->jobInfo->name));
+            $jobRoot->appendChild($domtree->createElement('name', $this->jobInfo->classname));
             $jobRoot->appendChild($domtree->createElement('status', $this->jobInfo->status));
-            $jobRoot->appendChild($domtree->createElement('created_date', $this->jobInfo->created_date));
-            $jobRoot->appendChild($domtree->createElement('last_updated_date', $this->jobInfo->last_updated_date));
+            $jobRoot->appendChild($domtree->createElement('start_date', $this->jobInfo->start_date));
+            $jobRoot->appendChild($domtree->createElement('end_date', $this->jobInfo->end_date));
         }
 
         if( $this->isRefreshJobInProgress ) {
@@ -103,30 +92,23 @@ error_log( 'job resultset: ' . var_export( $this->jobInfo, TRUE ) );
 
         if ( $this->bedsheetView ) {
             foreach( $this->bedsheetView as $bed ) {
-error_log( "BED : " . var_export( $bed, TRUE ));
                 $bedRoot = $parentElement->appendChild($domtree->createElement('bed'));
                 $bedRoot->appendChild($domtree->createElement('room', $bed->room));
                 $bedRoot->appendChild($domtree->createElement('bed_name', htmlspecialchars($bed->bed_name)));
-                $bedRoot->appendChild($domtree->createElement('guest_name', $bed->guest_name));
+                $bedRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($bed->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date));
                 $bedRoot->appendChild($domtree->createElement('checkout_date', $bed->checkout_date));
                 $bedRoot->appendChild($domtree->createElement('data_href', $bed->data_href));
-                $bedRoot->appendChild($domtree->createElement('created_date', $bed->created_date));
                 $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet));
             }
         }
     }
     
-    // Function for basic field validation (present and neither empty nor only white space
-    function isNullOrEmptyString($value){
-        return ! isset($value) || trim($value)==='';
-    }
-
     /** 
       Generates the following xml:
         <view>
             <homeurl>/yourwebapp/</homeurl>
-            <selectiondate>2012-05-21</selectiondate>
+            <selectiondate>Tuesday 9th June 2015</selectiondate>
             <job>
               <id>5</id>
               <name>calendar</name>
@@ -134,6 +116,19 @@ error_log( "BED : " . var_export( $bed, TRUE ));
               <created_date>15.03.2014</created_date>
               <last_updated_date>22.03.2014</last_updated_date>
             </job>
+            <job_in_progress>true</job_in_progress>
+            <bed>
+                <room>12</room>
+                <bed_name>01 Pukie</bed_name>
+                <guest_name>Evans, Richard</guest_name>
+                <checkin_date>2015-05-20 00:00:00</checkin_date>
+                <checkout_date>2015-05-24 00:00:00</checkout_date>
+                <data_href>/extranet/properties/533/room_closures/165212/edit</data_href>
+                <bedsheet>NO CHANGE<bedsheet>
+            </bed>
+            <bed>
+              ...
+            </bed>
         </view>
      */
     function toXml() {
@@ -142,7 +137,6 @@ error_log( "BED : " . var_export( $bed, TRUE ));
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
         $this->addSelfToDocument($domtree, $xmlRoot);
         $xml = $domtree->saveXML();
-error_log( $xml );
         return $xml;
     }
     

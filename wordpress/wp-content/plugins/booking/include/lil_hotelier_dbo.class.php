@@ -18,26 +18,34 @@ class LilHotelierDBO {
         global $wpdb;
 
         // query all our resources (in order)
-        $resultset = $wpdb->get_results(
-            "SELECT r.room, r.bed_name, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, c.created_date,
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT r.room, r.bed_name, c.job_id, c.guest_name, c.checkin_date, 
+                    IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
-                    CASE WHEN c.checkout_date = dr.a_date THEN 'CHANGE'
-                         WHEN MOD(DATEDIFF(dr.a_date, c.checkin_date), 3) = 0 THEN '3 DAY CHANGE'
-                         WHEN c.checkout_date > dr.a_date THEN 'NO CHANGE'
+                    CASE WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
+                         WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0 THEN '3 DAY CHANGE'
+                         WHEN IFNULL( c2.checkout_date, c.checkout_date ) > constants.selected_date THEN 'NO CHANGE'
                          ELSE 'EMPTY' END AS bedsheet
-               FROM ".$wpdb->prefix."daterange dr 
+               FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
                JOIN ".$wpdb->prefix."lh_rooms r ON 1 = 1
                LEFT OUTER JOIN ".$wpdb->prefix."lh_calendar c
-	             ON r.id = c.room_id 
-                AND c.checkout_date >= dr.a_date
-                AND c.checkin_date < dr.a_date
-              WHERE dr.a_date = '" . $selectedDate->format('Y-m-d') . "'
-	            AND (c.job_id = $jobId OR c.job_id IS NULL)
-              GROUP BY r.room, r.bed_name, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, 
-                    c.created_date, dr.a_date
-              ORDER BY r.room, r.bed_name");
+                 ON r.id = c.room_id
+                AND c.checkout_date >= constants.selected_date
+                AND c.checkin_date < constants.selected_date
+                AND c.job_id = %d
+                    -- check if the following reservation is also the same guest
+               LEFT OUTER JOIN ".$wpdb->prefix."lh_calendar c2
+                 ON c2.room_id = c.room_id
+                AND c2.checkin_date = c.checkout_date
+                AND c2.job_id = c.job_id
+                AND c2.guest_name = c.guest_name
+              WHERE r.room_type NOT IN ('LT_MALE', 'LT_FEMALE', 'OVERFLOW')
+                AND r.active_yn = 'Y'
+              GROUP BY r.room, r.bed_name, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, constants.selected_date,
+                       c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
+              ORDER BY r.room, r.bed_name",
+              $selectedDate->format('Y-m-d'), $jobId));
 
-error_log( "QUERY: " . $wpdb->last_query );
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
         }
@@ -46,31 +54,23 @@ error_log( "QUERY: " . $wpdb->last_query );
     }
 
     /**
-     * Returns the latest successful job with the given type.
-     * $jobName classname of job
-     * $selectedDate date for which this job applies against the
-     *               'start_date' (inclusive) and 'end_date' (exclusive) job parameters
+     * Returns the latest job with the given type.
+     * $jobName name of job, e.g. bedsheets, bedcount
      * Returns matching job recordset or null if no jobs of type found
      */
-    static function getLatestJobOfTypeForDate($jobName, $selectedDate) {
+    static function getLatestJobOfType($jobName) {
 
         global $wpdb;
 
         // first find the job id for the most recent job of the given type
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT MAX(j.job_id) AS job_id
-               FROM (SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) d
-               JOIN ".$wpdb->prefix."lh_jobs j ON 1 = 1
-               JOIN ".$wpdb->prefix."lh_job_param jpa ON j.job_id = jpa.job_id AND jpa.name = 'start_date'
-               JOIN ".$wpdb->prefix."lh_job_param jpb ON j.job_id = jpb.job_id AND jpb.name = 'end_date'
-              WHERE j.end_date IN (
-                     SELECT MAX( t.end_date ) 
-                       FROM ".$wpdb->prefix."lh_jobs t
-                      WHERE t.classname = %s
-                        AND t.status = %s )
-                AND d.selected_date >= STR_TO_DATE( jpa.value, '%%Y-%%m-%%d %%H:%%i:%%s' )
-                AND d.selected_date < STR_TO_DATE( jpb.value, '%%Y-%%m-%%d %%H:%%i:%%s' )",
-            $selectedDate->format('Y-m-d'), $jobName, self::STATUS_COMPLETED));
+            "SELECT MAX(job_id) AS job_id
+               FROM ".$wpdb->prefix."lh_jobs
+              WHERE end_date IN (
+                    SELECT MAX(end_date) 
+                      FROM ".$wpdb->prefix."lh_jobs t
+                     WHERE t.classname = %s
+                       AND t.status = %s)", $jobName, self::STATUS_COMPLETED));
         
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
@@ -85,7 +85,9 @@ error_log( "QUERY: " . $wpdb->last_query );
 
         // otherwise, retrieve the job details
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT job_id, classname, status, start_date, end_date
+            "SELECT job_id, classname, status,
+                    DATE_ADD( start_date, INTERVAL 7 HOUR ) AS start_date,
+                    DATE_ADD( end_date, INTERVAL 7 HOUR ) AS end_date
                FROM ".$wpdb->prefix."lh_jobs
               WHERE job_id = %d", $rec->job_id));
         
@@ -98,13 +100,28 @@ error_log( "QUERY: " . $wpdb->last_query );
 
     /**
      * Inserts a new job with the given name at the status of 'submitted'.
+     * $jobName : classname of Job to create
+     * $jobParams : associative array of param name => param value for Job
      */
-    static function insertJobOfType( $jobName ) {
+    static function insertJobOfType( $jobName, $jobParams ) {
         global $wpdb;
         if (false === $wpdb->insert($wpdb->prefix ."lh_jobs", 
-                array( 'name' => $jobName, 'status' => self::STATUS_SUBMITTED ), array( '%s', '%s' ))) {
+                array( 'classname' => $jobName, 
+                       'status' => self::STATUS_SUBMITTED, 
+                       'last_updated_date' => current_time('mysql') ), 
+                array( '%s', '%s', '%s' ))) {
             error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
             throw new DatabaseException( $wpdb->last_error );
+        }
+
+        $jobId = $wpdb->insert_id;
+        foreach( $jobParams as $jobParamKey => $jobParamValue ) {
+            if (false === $wpdb->insert($wpdb->prefix ."lh_job_param", 
+                    array( 'job_id' => $jobId, 'name' => $jobParamKey, 'value' => $jobParamValue ), 
+                    array( '%d', '%s', '%s' ))) {
+                error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+                throw new DatabaseException( $wpdb->last_error );
+            }
         }
     }
 
@@ -116,7 +133,7 @@ error_log( "QUERY: " . $wpdb->last_query );
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT job_id
                FROM ".$wpdb->prefix."lh_jobs
-              WHERE name = %s 
+              WHERE classname = %s 
                 AND status IN ( %s, %s )", $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
 
         return ! empty( $resultset );        

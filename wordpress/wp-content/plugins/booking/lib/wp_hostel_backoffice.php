@@ -337,13 +337,9 @@ error_log(var_export($_POST, TRUE));
     function content_of_housekeeping_page() {
         $hk = new HouseKeeping();
 
-        if (isset($_POST['refresh_job'])) {
+        if (isset($_POST['housekeeping_job'])) {
             $hk->submitRefreshJob();
         } 
-
-        if (isset($_POST['housekeeping_date']) && trim($_POST['housekeeping_date']) != '') {
-            $hk->setSelectionDate(DateTime::createFromFormat('!Y-m-d', trim($_POST['housekeeping_date']), new DateTimeZone('UTC')));
-        }
 
         $hk->doView(); // update the view
         echo $hk->toHtml();

@@ -59,11 +59,6 @@
                                         <td><input id="housekeeping_url"  name="hbo_housekeeping_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{housekeepingurl}" /></td>
                                     </tr>  
                                     <tr valign="top">
-                                        <th scope="row"><label for="hbo_housekeeping_ignore_rooms">Ignore these rooms on housekeeping page:</label></th>
-                                        <td><input id="housekeeping_ignore_rooms"  name="hbo_housekeeping_ignore_rooms" class="regular-text code" type="text" style="width:200px;" size="145" value="{housekeepingignorerooms}" />
-                                        <span class="description">Comma-delimited rooms. e.g. 10,22,23</span></td>
-                                    </tr>  
-                                    <tr valign="top">
                                         <th scope="row"><label for="reports_url">Split Room Reservation Report</label></th>
                                         <td><input id="hbo_split_room_report_url"  name="hbo_split_room_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{split_room_report_url}" /></td>
                                     </tr>  

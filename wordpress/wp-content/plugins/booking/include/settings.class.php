@@ -26,7 +26,6 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('editbookingurl', get_option('hbo_editbooking_url')));
         $xmlRoot->appendChild($domtree->createElement('resourcesurl', get_option('hbo_resources_url')));
         $xmlRoot->appendChild($domtree->createElement('housekeepingurl', get_option('hbo_housekeeping_url')));
-        $xmlRoot->appendChild($domtree->createElement('housekeepingignorerooms', get_option('hbo_housekeeping_ignore_rooms')));
         $xmlRoot->appendChild($domtree->createElement('split_room_report_url', get_option('hbo_split_room_report_url')));
         $xmlRoot->appendChild($domtree->createElement('unpaid_deposit_report_url', get_option('hbo_unpaid_deposit_report_url')));
         $xmlRoot->appendChild($domtree->createElement('group_bookings_report_url', get_option('hbo_group_bookings_report_url')));
@@ -44,7 +43,6 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_editbooking_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_resources_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_housekeeping_url');
-        $this->setOptionIfNotEmpty($optionsArray, 'hbo_housekeeping_ignore_rooms');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_split_room_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_unpaid_deposit_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_group_bookings_report_url');
