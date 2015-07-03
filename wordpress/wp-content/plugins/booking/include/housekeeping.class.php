@@ -65,6 +65,58 @@ class HouseKeeping extends XslTransform {
         LilHotelierDBO::insertJobOfType( self::JOB_TYPE,
             array( "selected_date" => $this->selectionDate->format('Y-m-d H:i:s') ) );
     }
+
+    /**
+     * Calculates the number of beds to be changed grouped by
+     * the following:
+     * 'level2' => 'X beds'
+     * 'level4' => 'Y beds'
+     * 'level5' => 'Z beds'
+     * 'level6_7' => 'A beds'
+     * 'upstairs' => 'Y+Z+A beds'
+     * 'total' => 'X+Y+Z+A beds'
+     */
+    function calculateBedChangeCountsByRooms() {
+        $bedcounts = array();
+        if($this->bedsheetView) {
+            foreach( $this->bedsheetView as $bed ) {
+                $this->update_bedsheets_to_change( $bedcounts, $bed, '/^2.*/', 'level2' );
+                $this->update_bedsheets_to_change( $bedcounts, $bed, '/^4.*/', 'level4' );
+                $this->update_bedsheets_to_change( $bedcounts, $bed, '/^5.*/', 'level5' );
+                $this->update_bedsheets_to_change( $bedcounts, $bed, '/^[67].*/', 'level6_7' );
+            }
+            $bedcounts['upstairs'] = 
+                ( isset( $bedcounts['level4'] ) ? + $bedcounts['level4'] : 0 ) +
+                ( isset( $bedcounts['level5'] ) ? + $bedcounts['level5'] : 0 ) +
+                ( isset( $bedcounts['level6_7'] ) ? + $bedcounts['level6_7'] : 0 );
+            $bedcounts['total'] = $bedcounts['upstairs'] +
+                ( isset( $bedcounts['level2'] ) ? $bedcounts['level2'] : 0 );
+        }
+        return $bedcounts;
+    }
+
+    /**
+     * Updates the given array with the bedsheets to change.
+     * &$bedcounts: the array to update
+     * $bed: the current bedsheet record [resultset] we're looking at
+     * $roomMatch: the regex matching string for the "room"
+     * $arrayKey: the array key to update if a CHANGE or 3 DAY CHANGE appears in $bed
+     */
+    function update_bedsheets_to_change( &$bedcounts, $bed, $roomMatch, $arrayKey ) {
+        if( preg_match( $roomMatch, $bed->room )) {
+            if( !isset( $bedcounts[$arrayKey] )) {
+                $bedcounts[$arrayKey] = 0;
+            }
+            if( $bed->bedsheet == 'CHANGE' || $bed->bedsheet == '3 DAY CHANGE' ) {
+                if( $bed->room_type == 'TWIN' || $bed->room_type == 'DBL'
+                        || $bed->room_type == 'TRIPLE' || $bed->room_type == 'QUAD' ) {
+                    $bedcounts[$arrayKey] += $bed->capacity; // increment by capacity of private room
+                } else {
+                    $bedcounts[$arrayKey]++; // otherwise, just count as dorm bed
+                }
+            }
+        }
+    }
     
     /**
      * Adds this object to the DOMDocument/XMLElement specified.
@@ -102,6 +154,14 @@ class HouseKeeping extends XslTransform {
                 $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet));
             }
         }
+        
+        $bedcounts = $this->calculateBedChangeCountsByRooms();
+        if( !empty( $bedcounts )) {
+            $totalsRoot = $parentElement->appendChild($domtree->createElement('totals'));
+            foreach( $bedcounts as $bedcountKey => $bedcountValue ) {
+                $totalsRoot->appendChild($domtree->createElement( $bedcountKey, $bedcountValue ));
+            }
+        }
     }
     
     /** 
@@ -129,6 +189,12 @@ class HouseKeeping extends XslTransform {
             <bed>
               ...
             </bed>
+            <totals>
+                <level2>48</level2>
+                ...
+                <upstairs>78</upstairs>
+                <total>128</total>
+            </totals>
         </view>
      */
     function toXml() {

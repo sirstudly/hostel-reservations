@@ -19,8 +19,8 @@ class LilHotelierDBO {
 
         // query all our resources (in order)
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT r.room, r.bed_name, c.job_id, c.guest_name, c.checkin_date, 
-                    IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
+            "SELECT r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, 
+	                IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
                     CASE WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
                          WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0 THEN '3 DAY CHANGE'
@@ -29,7 +29,7 @@ class LilHotelierDBO {
                FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
                JOIN ".$wpdb->prefix."lh_rooms r ON 1 = 1
                LEFT OUTER JOIN ".$wpdb->prefix."lh_calendar c
-                 ON r.id = c.room_id
+	             ON r.id = c.room_id
                 AND c.checkout_date >= constants.selected_date
                 AND c.checkin_date < constants.selected_date
                 AND c.job_id = %d
@@ -41,7 +41,7 @@ class LilHotelierDBO {
                 AND c2.guest_name = c.guest_name
               WHERE r.room_type NOT IN ('LT_MALE', 'LT_FEMALE', 'OVERFLOW')
                 AND r.active_yn = 'Y'
-              GROUP BY r.room, r.bed_name, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, constants.selected_date,
+              GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, constants.selected_date,
                        c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
               ORDER BY r.room, r.bed_name",
               $selectedDate->format('Y-m-d'), $jobId));
@@ -67,9 +67,9 @@ class LilHotelierDBO {
             "SELECT MAX(job_id) AS job_id
                FROM ".$wpdb->prefix."lh_jobs
               WHERE end_date IN (
-                    SELECT MAX(end_date) 
+	                SELECT MAX(end_date) 
                       FROM ".$wpdb->prefix."lh_jobs t
-                     WHERE t.classname = %s
+	                 WHERE t.classname = %s
                        AND t.status = %s)", $jobName, self::STATUS_COMPLETED));
         
         if($wpdb->last_error) {

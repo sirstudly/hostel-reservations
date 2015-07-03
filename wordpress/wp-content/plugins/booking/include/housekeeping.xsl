@@ -84,6 +84,23 @@ td.border_bottom {
 
         <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
             <thead>
+                <th>20s : <xsl:value-of select="totals/level2"/></th>
+                <th>40s : <xsl:value-of select="totals/level4"/></th>
+                <th>50s : <xsl:value-of select="totals/level5"/></th>
+                <th>60s / 70s : <xsl:value-of select="totals/level6_7"/></th>
+            </thead>
+        </table>
+        <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
+            <thead>
+                <th style="text-align: left; padding-left: 20%;">Upstairs : <xsl:value-of select="totals/upstairs"/></th>
+                <th style="text-align: left; padding-left: 20%;">Total : <xsl:value-of select="totals/total"/></th>
+            </thead>
+        </table>
+
+        <div style="padding: 10px 0; background-color: #e3e3e3;"><xsl:comment/></div>
+
+        <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
+            <thead>
                 <th width="50">Room</th>
                 <th width="150">Bed</th>
                 <th>Bedsheets</th>
