@@ -134,8 +134,10 @@ class HouseKeeping extends XslTransform {
             $jobRoot->appendChild($domtree->createElement('id', $this->jobInfo->job_id));
             $jobRoot->appendChild($domtree->createElement('name', $this->jobInfo->classname));
             $jobRoot->appendChild($domtree->createElement('status', $this->jobInfo->status));
-            $jobRoot->appendChild($domtree->createElement('start_date', $this->jobInfo->start_date));
-            $jobRoot->appendChild($domtree->createElement('end_date', $this->jobInfo->end_date));
+            $jobRoot->appendChild($domtree->createElement('start_date', 
+                DateTime::createFromFormat('Y-m-d H:i:s', $this->jobInfo->start_date)->format('D, d M Y H:i:s')));
+            $jobRoot->appendChild($domtree->createElement('end_date', 
+                DateTime::createFromFormat('Y-m-d H:i:s', $this->jobInfo->end_date)->format('D, d M Y H:i:s')));
         }
 
         if( $this->isRefreshJobInProgress ) {

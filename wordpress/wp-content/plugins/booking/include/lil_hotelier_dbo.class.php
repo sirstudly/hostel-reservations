@@ -85,9 +85,7 @@ class LilHotelierDBO {
 
         // otherwise, retrieve the job details
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT job_id, classname, status,
-                    DATE_ADD( start_date, INTERVAL 7 HOUR ) AS start_date,
-                    DATE_ADD( end_date, INTERVAL 7 HOUR ) AS end_date
+            "SELECT job_id, classname, status, start_date, end_date
                FROM ".$wpdb->prefix."lh_jobs
               WHERE job_id = %d", $rec->job_id));
         
@@ -240,11 +238,8 @@ class LilHotelierDBO {
         $jobId = $mysqli->insert_id;
 
         $startDate = new DateTime();
-        $endDate = new DateTime();
-        $endDate->add(new DateInterval('P4M'));  // get data for the next 4 months
-
         self::insertJobParameter($mysqli, $jobId, 'start_date', $startDate->format('Y-m-d'));
-        self::insertJobParameter($mysqli, $jobId, 'end_date', $endDate->format('Y-m-d'));
+        self::insertJobParameter($mysqli, $jobId, 'days_ahead', '140'); // get data for next 4-5 months
 
         return $jobId;
     }
@@ -315,7 +310,7 @@ class LilHotelierDBO {
     static function getLastCompletedAllocationScraperJob() {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
-               "SELECT DATE_ADD( MAX(end_date), INTERVAL 7 HOUR ) `end_date` -- easiest way to sync to correct for timezone
+               "SELECT MAX(end_date) `end_date`
                   FROM ".$wpdb->prefix."lh_jobs 
                  WHERE classname IN (
                            'com.macbackpackers.jobs.AllocationScraperJob', 
