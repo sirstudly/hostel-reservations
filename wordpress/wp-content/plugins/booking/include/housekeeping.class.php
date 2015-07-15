@@ -48,11 +48,7 @@ class HouseKeeping extends XslTransform {
         $this->jobInfo = LilHotelierDBO::getLatestJobOfType( self::JOB_TYPE );
 
         if( $this->jobInfo ) {
-            //$this->bedsheetView = LilHotelierDBO::fetchBedSheetsFrom($startDate, $this->jobInfo->job_id);
-            $this->bedsheetView = LilHotelierDBO::fetchBedSheetsFrom(
-            //DateTime::createFromFormat('!Y-m-d', '2014-08-10', new DateTimeZone('UTC')), 
-            $selectionDate,
-            $this->jobInfo->job_id);
+            $this->bedsheetView = LilHotelierDBO::fetchBedSheetsFrom( $selectionDate, $this->jobInfo->job_id);
         }
 
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );

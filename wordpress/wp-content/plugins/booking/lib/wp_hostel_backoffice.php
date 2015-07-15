@@ -29,6 +29,9 @@ class WP_HostelBackoffice {
         // Template fallback: this gets called when not on admin page
         // TODO: can we create a template file the user references when creating a new page?
         add_action("template_redirect", array(&$this, 'my_template_redirect'));
+
+        // this handles the "download" action as we need to set the headers before anything is sent
+        add_action( 'plugins_loaded', array(&$this, 'download_bedcounts_page_as_csv'));
     }
 
     /**
@@ -45,6 +48,7 @@ class WP_HostelBackoffice {
         add_option('hbo_split_room_report_url', 'reports/reservations-split-across-rooms');
         add_option('hbo_unpaid_deposit_report_url', 'reports/unpaid-deposit-report');
         add_option('hbo_group_bookings_report_url', 'reports/group-bookings');
+        add_option('hbo_bedcounts_url', 'reports/bedcounts');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -62,7 +66,8 @@ class WP_HostelBackoffice {
         delete_option('hbo_housekeeping_url');
         delete_option('hbo_split_room_report_url');
         delete_option('hbo_unpaid_deposit_report_url');
-        delete_option('group_bookings_report_url');
+        delete_option('hbo_group_bookings_report_url');
+        delete_option('hbo_bedcounts_url');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
@@ -107,6 +112,10 @@ class WP_HostelBackoffice {
             
         $pagehook12 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('GroupBookingsReport', 'wpdev-booking'), __('GroupBookingsReport', 'wpdev-booking'), 'administrator',
                 WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_group_bookings_page')  );
+        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
+            
+        $pagehook13 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('BedcountsReport', 'wpdev-booking'), __('BedcountsReport', 'wpdev-booking'), 'administrator',
+                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_bedcounts_page')  );
         add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
             
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -388,6 +397,54 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
+     * Write the contents of the bedcounts report.
+     */
+    function content_of_bedcounts_page() {
+
+        $selectionDate = new DateTime('now', new DateTimeZone('UTC'));
+        $selectionDate->sub(new DateInterval('P1D')); // default to 1 day in the past
+
+        // if date is defined, update the date
+        if (isset($_POST['selectiondate']) && trim($_POST['selectiondate']) != '') {
+            $selectionDate = DateTime::createFromFormat(
+                '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC'));
+        }
+
+        $bc = new BedCounts( $selectionDate );
+
+        if (isset($_POST['bedcount_job']) && trim($_POST['bedcount_job']) == 'true' ) {
+            $bc->submitRefreshJob();
+        } 
+
+        $bc->updateBedcounts();
+
+        echo $bc->toHtml();
+    }
+
+    /**
+     * Downloads the bedcounts page as a CSV file
+     */
+    function download_bedcounts_page_as_csv() {
+        if (isset($_POST['download_bedcounts']) && trim($_POST['download_bedcounts']) == 'true' ) {
+
+            // generate headers
+            $filename = "bedcounts_".$_POST['selectiondate'].".csv";
+            header('Content-Disposition: attachment; filename='.$filename);
+            header('Content-type: application/force-download');
+            header('Content-Transfer-Encoding: binary');
+            header('Pragma: public');
+
+            // generate the CSV file and terminate
+            $bc = new BedCountsCSV( DateTime::createFromFormat(
+                    '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC')));
+            $bc->updateBedcounts();
+            echo $bc->toCSV();
+
+            die();      
+        }
+    }
+
+    /**
      * Display a top-level menu dropdown on the admin menu (when logged in as admin).
      */
     function add_admin_bar_bookings_menu(){
@@ -432,6 +489,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_split_room_report_url'), 'reservations-split-across-rooms.php');
         $this->do_redirect_for_page(get_option('hbo_unpaid_deposit_report_url'), 'unpaid-deposit-report.php');
         $this->do_redirect_for_page(get_option('hbo_group_bookings_report_url'), 'group-bookings.php');
+        $this->do_redirect_for_page(get_option('hbo_bedcounts_url'), 'bedcounts.php');
     }
 
     /**

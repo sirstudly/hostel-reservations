@@ -20,7 +20,7 @@ class LilHotelierDBO {
         // query all our resources (in order)
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, 
-	                IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
+                    IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
                     CASE WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
                          WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0 THEN '3 DAY CHANGE'
@@ -29,7 +29,7 @@ class LilHotelierDBO {
                FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
                JOIN ".$wpdb->prefix."lh_rooms r ON 1 = 1
                LEFT OUTER JOIN ".$wpdb->prefix."lh_calendar c
-	             ON r.id = c.room_id
+                 ON r.id = c.room_id
                 AND c.checkout_date >= constants.selected_date
                 AND c.checkin_date < constants.selected_date
                 AND c.job_id = %d
@@ -67,9 +67,9 @@ class LilHotelierDBO {
             "SELECT MAX(job_id) AS job_id
                FROM ".$wpdb->prefix."lh_jobs
               WHERE end_date IN (
-	                SELECT MAX(end_date) 
+                    SELECT MAX(end_date) 
                       FROM ".$wpdb->prefix."lh_jobs t
-	                 WHERE t.classname = %s
+                     WHERE t.classname = %s
                        AND t.status = %s)", $jobName, self::STATUS_COMPLETED));
         
         if($wpdb->last_error) {
@@ -333,6 +333,93 @@ class LilHotelierDBO {
         }
         return $rec->end_date;
     }
+
+    /**
+     * Returns the date of the last allocation scraper job that
+     * ran succesfully before then given date or null if none found.
+     *
+     * $selectedDate : do not include jobs after this DateTime
+     * Returns recordset (job_id, end_date)
+     */
+    static function getLastCompletedBedCountJob( $selectedDate ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT j.job_id, j.end_date
+                  FROM ".$wpdb->prefix."lh_jobs j
+                  JOIN ".$wpdb->prefix."lh_job_param p ON j.job_id = p.job_id AND p.name = 'selected_date'
+                  JOIN (SELECT %s `selected_date`) const
+                 WHERE j.classname = 'com.macbackpackers.jobs.BedCountJob'
+                   AND j.status IN ( %s )
+                   -- 7 days is hard-coded in the BedCountJob (number of days to query data from)
+                   AND DATE_ADD(STR_TO_DATE(p.value, '%%Y-%%m-%%d'), INTERVAL -7 DAY ) <= const.selected_date
+                   AND STR_TO_DATE(p.value, '%%Y-%%m-%%d') >= const.selected_date
+                 ORDER BY j.end_date desc
+                 LIMIT 1",
+                $selectedDate->format('Y-m-d'), self::STATUS_COMPLETED ) );
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // if empty, then no job exists
+        if(empty($resultset)) {
+            return null;
+        }
+
+        // return single row
+        $rec = array_shift($resultset);
+        return $rec;
+    }
+
+    /**
+     * Returns bedcount report.
+     * $selectedDate : DateTime for selection date
+     * $allocJobId : completed AllocationScraperJobId to use for querying data
+     */
+    static function getBedcountReport( $selectedDate, $allocJobId ) {
+        global $wpdb;
+
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT room, capacity, room_type, 
+                    -- magnify private rooms based on size of room
+                    IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_empty * capacity, num_empty) `num_empty`, 
+                    IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_staff * capacity, num_staff) `num_staff`, 
+                    IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_paid * capacity, num_paid) `num_paid`, 
+                    IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_noshow * capacity, num_noshow) `num_noshow`
+              FROM (
+               -- room 30 is split into separate rooms for some reason; collapse them
+               SELECT IF(p.room_type = 'OVERFLOW', '30', p.room) `room`, IF(p.room_type = 'OVERFLOW', 7, p.capacity) `capacity`, p.room_type,
+                      SUM(IF(p.reservation_id IS NULL AND p.room_type != 'OVERFLOW', 1, 0)) `num_empty`,
+                      SUM(IF(p.reservation_id = 0, 1, 0)) `num_staff`, 
+                      SUM(IF(p.lh_status IN ('checked-in', 'checked-out') AND p.reservation_id > 0, 1, 0)) `num_paid`, 
+                      SUM(IF(IFNULL(p.lh_status, '') NOT IN ('checked-in', 'checked-out') AND p.reservation_id > 0, 1, 0)) `num_noshow`
+                 FROM (
+                   SELECT rm.room, rm.bed_name, rm.capacity, rm.room_type, c.reservation_id, c.payment_outstanding, c.guest_name, c.notes, c.lh_status
+                     FROM ".$wpdb->prefix."lh_rooms rm
+                     LEFT OUTER JOIN 
+                       ( SELECT cal.* FROM ".$wpdb->prefix."lh_calendar cal, (select %s AS selection_date) const
+                          WHERE cal.job_id = %d -- the job_id to use data for
+                            AND cal.checkin_date <= const.selection_date
+                            AND cal.checkout_date > const.selection_date
+                       ) c 
+                       -- if unallocated (room_id = null), then ignore this join field and match on room_type_id
+                       ON IFNULL(c.room_id, rm.id) = rm.id AND IFNULL(c.room, 'Unallocated') = rm.room AND c.room_type_id = rm.room_type_id
+              ) p
+             GROUP BY IF(p.room_type = 'OVERFLOW', '30', p.room), p.capacity, p.room_type
+          ) t
+          -- only include OVERFLOW or Unallocated if we have something to report
+         WHERE (room_type != 'OVERFLOW' AND room != 'Unallocated')
+            OR ((room_type = 'OVERFLOW' OR room = 'Unallocated') AND (num_staff > 0 OR num_paid > 0 OR num_noshow > 0))
+         ORDER BY room", 
+         $selectedDate->format('Y-m-d H:i:s'), $allocJobId ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
 }
 
 ?>

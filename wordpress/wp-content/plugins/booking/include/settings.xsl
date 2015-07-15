@@ -70,6 +70,10 @@
                                         <th scope="row"><label for="group_bookings_report_url">Group Bookings</label></th>
                                         <td><input id="group_bookings_report_url"  name="hbo_group_bookings_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{group_bookings_report_url}" /></td>
                                     </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="bedcounts_url">Bedcount Report</label></th>
+                                        <td><input id="bedcounts_url"  name="hbo_bedcounts_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{bedcounts_url}" /></td>
+                                    </tr>  
                                     <tr valign="top"><td colspan="2"><div style="border-bottom:1px solid #cccccc;"><xsl:comment/></div></td></tr>
                                     <tr valign="top"> 
                                         <td colspan="2">
