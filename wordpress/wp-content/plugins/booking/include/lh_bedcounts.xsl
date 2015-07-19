@@ -12,7 +12,7 @@
 
 <style media="screen" type="text/css">
 #bedcounts_rpt tbody tr:nth-child(odd) td,#bedcounts_rpt tbody tr:nth-child(odd) th {
-	background-color: #e3e3e3;
+    background-color: #e3e3e3;
 }
 
 #bedcounts_rpt tbody tr td {
@@ -22,6 +22,7 @@
 #bedcounts_rpt tfoot tr td {
     text-align: center;
     font-weight: bold;
+    background-color: #d7d7d7;
 }
 
 </style>
@@ -140,7 +141,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td><b>Totals</b></td>
+                <td><b>Total Beds</b></td>
                 <td><xsl:value-of select="sum(room/capacity)"/></td>
                 <td><!-- room type --></td>
                 <td><xsl:value-of select="sum(room/num_paid)"/></td>
@@ -151,10 +152,12 @@
             <tr>
                 <td>Total Paid</td>
                 <td><xsl:value-of select="sum(room/num_paid) + sum(room/num_noshow)"/></td>
+                <td colspan="5"></td>
             </tr>
             <tr>
                 <td>Total Occupied</td>
                 <td><xsl:value-of select="sum(room/num_paid) + sum(room/num_noshow) + sum(room/num_staff)"/></td>
+                <td colspan="5"></td>
             </tr>
         </tfoot>
     </table>
