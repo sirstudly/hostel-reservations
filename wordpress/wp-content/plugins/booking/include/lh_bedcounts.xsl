@@ -12,7 +12,7 @@
 
 <style media="screen" type="text/css">
 #bedcounts_rpt tbody tr:nth-child(odd) td,#bedcounts_rpt tbody tr:nth-child(odd) th {
-    background-color: #e3e3e3;
+	background-color: #e3e3e3;
 }
 
 #bedcounts_rpt tbody tr td {
@@ -22,7 +22,7 @@
 #bedcounts_rpt tfoot tr td {
     text-align: center;
     font-weight: bold;
-    background-color: #d7d7d7;
+	background-color: #d7d7d7;
 }
 
 </style>

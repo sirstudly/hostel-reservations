@@ -11,6 +11,9 @@ class WP_HostelBackoffice {
      * We will essentially need to call this on each request.
      */
     function __construct() {
+        // reset timezone on server
+        date_default_timezone_set('Europe/London');
+
         // Install / Uninstall
         register_activation_hook( WPDEV_BK_FILE, array(&$this,'activate'));
         register_deactivation_hook( WPDEV_BK_FILE, array(&$this,'deactivate'));
@@ -101,23 +104,6 @@ class WP_HostelBackoffice {
                 WPDEV_BK_FILE .'wpdev-booking-housekeeping', array(&$this, 'content_of_housekeeping_page')  );
         add_action("admin_print_scripts-" . $pagehook9 , array( &$this, 'add_js_css_files'));
             
-        ///////////////// REPORTS /////////////////////////////////////////////
-        $pagehook10 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('SplitRoomReport', 'wpdev-booking'), __('SplitRoomReport', 'wpdev-booking'), 'administrator',
-                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_split_room_report_page')  );
-        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
-            
-        $pagehook11 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('UnpaidDepositReport', 'wpdev-booking'), __('UnpaidDepositReport', 'wpdev-booking'), 'administrator',
-                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_unpaid_deposit_report_page')  );
-        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
-            
-        $pagehook12 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('GroupBookingsReport', 'wpdev-booking'), __('GroupBookingsReport', 'wpdev-booking'), 'administrator',
-                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_group_bookings_page')  );
-        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
-            
-        $pagehook13 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('BedcountsReport', 'wpdev-booking'), __('BedcountsReport', 'wpdev-booking'), 'administrator',
-                WPDEV_BK_FILE .'wpdev-booking-reports', array(&$this, 'content_of_bedcounts_page')  );
-        add_action("admin_print_scripts-" . $pagehook10 , array( &$this, 'add_js_css_files'));
-            
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // A D D     R E S E R V A T I O N
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,13 +140,11 @@ class WP_HostelBackoffice {
      * Safely enqueues any scripts/css to be run.
      */
     function enqueue_scripts() {
-error_log('enqueue scripts: jquery');
         wp_enqueue_script('jquery');
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
         if (strpos($_SERVER['REQUEST_URI'], 'wpdev-booking.phpwpdev-booking') !== false) {
             if (defined('WP_ADMIN') && WP_ADMIN === true) { 
-error_log("is this used? jquery-ui-dialog");
                 wp_enqueue_script('jquery-ui-dialog'); 
             }
         }
@@ -179,7 +163,6 @@ error_log("is this used? jquery-ui-dialog");
      */
     function print_js_css() {
 
-error_log('print scripts: jquery');
         wp_print_scripts('jquery');
         //wp_print_scripts('jquery-ui-core');
 
@@ -780,12 +763,54 @@ error_log(var_export($_POST, TRUE));
         if ( false == $this->does_table_exist('lh_jobs') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_jobs (
               `job_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-              `name` varchar(50) NOT NULL,
-              `status` varchar(20) NOT NULL, -- one of submitted, processing, completed, failed
-              `created_date` timestamp DEFAULT CURRENT_TIMESTAMP,
-              `last_updated_date` timestamp DEFAULT 0,
+              `classname` varchar(255) NOT NULL,
+              `status` varchar(20) NOT NULL,
+              `start_date` timestamp NULL DEFAULT NULL,
+              `end_date` timestamp NULL DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `last_updated_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
               PRIMARY KEY (`job_id`)
-            ) $charset_collate;";
+            ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('lh_job_param') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_job_param (
+              `job_param_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `job_id` bigint(20) unsigned NOT NULL,
+              `name` varchar(255) NOT NULL,
+              `value` varchar(255) NOT NULL,
+              PRIMARY KEY (`job_param_id`)
+            --  FOREIGN KEY (`job_id`) REFERENCES `wp_lh_jobs`(`job_id`)  -- removed cause of hibernate
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('lh_scheduled_jobs') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_scheduled_jobs (
+              `job_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `classname` varchar(255) NOT NULL,
+              `cron_schedule` varchar(255) NOT NULL,
+              `active_yn` char(1) DEFAULT 'Y',
+              `last_scheduled_date` timestamp NULL DEFAULT NULL,
+              `last_updated_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`job_id`)
+            ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('lh_scheduled_job_param') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_scheduled_job_param (
+              `job_param_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `job_id` bigint(20) unsigned NOT NULL,
+              `name` varchar(255) NOT NULL,
+              `value` varchar(255) NOT NULL,
+              PRIMARY KEY (`job_param_id`)
+            --  FOREIGN KEY (`job_id`) REFERENCES `wp_lh_scheduled_jobs`(`id`) -- removed cause of hibernate
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
@@ -793,34 +818,112 @@ error_log(var_export($_POST, TRUE));
         if ( false == $this->does_table_exist('lh_calendar') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_calendar (
               `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-              `job_id` bigint(2) unsigned,
-              `room_id` integer(10) unsigned,
+              `job_id` bigint(2) unsigned DEFAULT NULL,
+              `room_id` int(10) unsigned DEFAULT NULL,
+              `room_type_id` int(10) unsigned DEFAULT NULL,
               `room` varchar(50) NOT NULL,
               `bed_name` varchar(50) DEFAULT NULL,
-              `reservation_id` bigint(20) unsigned,
-              `guest_name` varchar(255),
+              `reservation_id` bigint(20) unsigned DEFAULT NULL,
+              `guest_name` varchar(255) DEFAULT NULL,
               `checkin_date` datetime NOT NULL,
               `checkout_date` datetime NOT NULL,
-              `payment_total` decimal(10,2),
-              `payment_outstanding` decimal(10,2),
+              `payment_total` decimal(10,2) DEFAULT NULL,
+              `payment_outstanding` decimal(10,2) DEFAULT NULL,
               `rate_plan_name` varchar(50) DEFAULT NULL,
               `payment_status` varchar(50) DEFAULT NULL,
-              `num_guests` int(10) unsigned,
+              `num_guests` int(10) unsigned DEFAULT NULL,
               `data_href` varchar(255) DEFAULT NULL,
-              `created_date` timestamp DEFAULT CURRENT_TIMESTAMP,
-              PRIMARY KEY (`id`)
-            ) $charset_collate;";
+              `lh_status` varchar(50) DEFAULT NULL,
+              `booking_reference` varchar(50) DEFAULT NULL,
+              `booking_source` varchar(50) DEFAULT NULL,
+              `booked_date` timestamp NULL DEFAULT NULL,
+              `eta` varchar(50) DEFAULT NULL,
+              `notes` text,
+              `viewed_yn` char(1) DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              KEY `lh_c_checkin` (`checkin_date`),
+              KEY `lh_c_checkout` (`checkout_date`),
+              KEY `lh_c_jobid` (`job_id`),
+              KEY `lh_c_roomid` (`room_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
-            
+
+        // bookings where no deposit had been paid yet
+        if ( false == $this->does_table_exist('lh_rpt_unpaid_deposit') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rpt_unpaid_deposit (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `job_id` bigint(20) unsigned NOT NULL,
+              `guest_name` varchar(255) DEFAULT NULL,
+              `checkin_date` datetime NOT NULL,
+              `checkout_date` datetime NOT NULL,
+              `payment_total` decimal(10,2) DEFAULT NULL,
+              `data_href` varchar(255) DEFAULT NULL,
+              `booking_reference` varchar(50) DEFAULT NULL,
+              `booking_source` varchar(50) DEFAULT NULL,
+              `booked_date` timestamp NULL DEFAULT NULL,
+              `notes` text,
+              `viewed_yn` char(1) DEFAULT NULL,
+              `created_date` timestamp NULL DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `job_id_idx` (`job_id`),
+              FOREIGN KEY (`job_id`) REFERENCES `wp_lh_jobs`(`job_id`)
+            ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('lh_group_bookings') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_group_bookings (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `job_id` bigint(20) unsigned NOT NULL,
+              `reservation_id` bigint(20) unsigned DEFAULT NULL,
+              `guest_name` varchar(255) DEFAULT NULL,
+              `booking_reference` varchar(50) DEFAULT NULL,
+              `booking_source` varchar(50) DEFAULT NULL,
+              `checkin_date` datetime NOT NULL,
+              `checkout_date` datetime NOT NULL,
+              `booked_date` timestamp NULL DEFAULT NULL,
+              `payment_outstanding` decimal(10,2) DEFAULT NULL,
+              `data_href` varchar(255) DEFAULT NULL,
+              `num_guests` int(10) unsigned NOT NULL DEFAULT '0',
+              `notes` text,
+              `viewed_yn` char(1) DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `job_id_idx` (`job_id`),
+              FOREIGN KEY (`job_id`) REFERENCES `wp_lh_jobs`(`job_id`)
+            ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('log4j_data') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."log4j_data (
+             `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+             `job_id` VARCHAR(255) DEFAULT NULL,
+             `date_logged` DATETIME NOT NULL,
+             `location` VARCHAR(255) NOT NULL,
+             `log_level` VARCHAR(10) NOT NULL,
+             `message` TEXT,
+             `throwable` TEXT,
+             `stacktrace` TEXT,
+              PRIMARY KEY (`id`),
+              KEY `job_id_idx` (`job_id`),
+              KEY `date_idx` (`date_logged`)
+            ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
         if ( false == $this->does_table_exist('lh_rooms') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rooms (
               `id` bigint(20) unsigned NOT NULL,
               `room` int(5) unsigned,
               `bed_name` varchar(50) DEFAULT NULL,
               PRIMARY KEY (`id`)
-            ) $charset_collate;";
+            ) ENGINE=InnoDB $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }

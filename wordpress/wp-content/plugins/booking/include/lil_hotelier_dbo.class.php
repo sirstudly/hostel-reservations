@@ -144,8 +144,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results(
             "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, lh_status, 
-                    booking_reference, booking_source, booked_date, eta, viewed_yn, notes, 
-                    DATE_ADD( created_date, INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
+                    booking_reference, booking_source, booked_date, eta, viewed_yn, notes, created_date
                FROM ".$wpdb->prefix."lh_rpt_split_rooms
               WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_split_rooms)
               ORDER BY checkin_date");
@@ -183,8 +182,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results(
             "SELECT guest_name, checkin_date, checkout_date, payment_total, data_href, booking_reference, 
-                    booking_source, booked_date, notes, viewed_yn,
-                    DATE_ADD( created_date, INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
+                    booking_source, booked_date, notes, viewed_yn, created_date
                FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit
               WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit)
               ORDER BY checkin_date");
@@ -279,7 +277,7 @@ class LilHotelierDBO {
     static function getOutstandingAllocationScraperJob() {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
-               "SELECT DATE_ADD( MIN(created_date), INTERVAL 7 HOUR ) `created_date` -- easiest way to sync to correct for timezone
+               "SELECT MIN(created_date) `created_date`
                   FROM ".$wpdb->prefix."lh_jobs 
                  WHERE classname IN (
                            'com.macbackpackers.jobs.AllocationScraperJob', 
