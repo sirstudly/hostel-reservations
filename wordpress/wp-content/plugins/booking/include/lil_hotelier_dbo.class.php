@@ -418,6 +418,97 @@ class LilHotelierDBO {
         return $resultset;
     }
 
+    /**
+     * Returns the date of the last booking diffs job that
+     * ran succesfully for the given date or null if none found.
+     *
+     * $selectedDate : do not include jobs after this DateTime
+     * Returns recordset (job_id, end_date)
+     */
+    static function getLastCompletedBookingDiffsJob( $selectedDate ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT j.job_id, j.end_date
+                  FROM ".$wpdb->prefix."lh_jobs j
+                  JOIN ".$wpdb->prefix."lh_job_param p ON j.job_id = p.job_id AND p.name = 'checkin_date'
+                  JOIN (SELECT %s `selected_date`) const
+                 WHERE j.classname = 'com.macbackpackers.jobs.DiffBookingEnginesJob'
+                   AND j.status IN ( %s )
+                   -- include a 7 day window from the start of each booking diff job
+                   -- this corresponds with the 'days-ahead' we look in the actual job when scraping data
+                   AND const.selected_date <= DATE_ADD(STR_TO_DATE(p.value, '%%Y-%%m-%%d'), INTERVAL 7 DAY )
+                   AND STR_TO_DATE(p.value, '%%Y-%%m-%%d') <= const.selected_date
+                 ORDER BY j.end_date desc
+                 LIMIT 1",
+                $selectedDate->format('Y-m-d'), self::STATUS_COMPLETED ) );
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // if empty, then no job exists
+        if(empty($resultset)) {
+            return null;
+        }
+
+        // return single row
+        $rec = array_shift($resultset);
+error_log('getLastCompletedBookingDiffsJob() returning job ' . $rec->job_id);
+        return $rec;
+    }
+
+    /**
+     * Returns booking engine diff report.
+     * $selectedDate : DateTime for selection date
+     * $jobId : completed jobId to use for querying data
+     */
+    static function getBookingDiffsReport( $selectedDate, $jobId ) {
+        global $wpdb;
+
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT y.guest_name, 
+                    IF( y.room_type IN ('DBL','TRIPLE','QUAD'), y.room_type, CONVERT(CONCAT(y.capacity, y.room_type) USING utf8)) `hw_room_type`,
+                    y.checkin_date `hw_checkin_date`, y.checkout_date `hw_checkout_date`, y.hw_persons, y.payment_outstanding `hw_payment_outstanding`, y.booked_date,
+                    y.booking_reference, 
+	                IF( z.room_type IN ('DBL','TRIPLE','QUAD'), z.room_type, CONVERT(CONCAT(z.capacity, z.room_type) USING utf8)) `lh_room_type`, z.lh_status,
+                    z.checkin_date `lh_checkin_date`, z.checkout_date `lh_checkout_date`, z.lh_persons, z.payment_outstanding `lh_payment_outstanding`, z.data_href, z.notes,
+                    IF( IFNULL(y.hw_person_count,0) = IFNULL(z.lh_persons,0), 'Y', 'N' ) `matched_persons`,
+	                IF( IFNULL(y.room_type_id,0) = IFNULL(z.room_type_id,0), 'Y', 'N' ) `matched_room_type`,
+                    IF( IFNULL(y.checkin_date,0) = IFNULL(z.checkin_date,0), 'Y', 'N') `matched_checkin_date`,
+                    IF( IFNULL(y.checkout_date,0) = IFNULL(z.checkout_date,0), 'Y', 'N') `matched_checkout_date`,
+                    IF( IFNULL(z.lh_status, 'null') IN ('checked-in', 'checked-out') OR IFNULL(y.payment_outstanding,'null') = IFNULL(z.payment_outstanding,'null') OR z.payment_outstanding = 0, 'Y', 'N') `matched_payment_outstanding`
+             FROM (
+               -- all unique HW records for the given job_id
+               SELECT b.booking_reference, b.guest_name, b.booked_date, b.persons `hw_persons`, b.payment_outstanding, d.persons `hw_person_count`, d.room_type_id, r.room_type, r.capacity,
+                      (SELECT COUNT(DISTINCT e.room_type_id) FROM ".$wpdb->prefix."hw_booking_dates e WHERE e.hw_booking_id = b.id ) `num_room_types`, -- keep track of bookings that contain more than one room type
+		              MIN(d.booked_date) `checkin_date`, DATE_ADD(MAX(d.booked_date), INTERVAL 1 DAY) `checkout_date`
+                 FROM ".$wpdb->prefix."hw_booking b
+                 JOIN ".$wpdb->prefix."hw_booking_dates d ON b.id = d.hw_booking_id
+                 JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = d.room_type_id
+                GROUP BY b.booking_reference, b.guest_name, b.booked_date, b.persons, b.payment_outstanding, d.persons, d.room_type_id, r.room_type, r.capacity
+               HAVING MIN(d.booked_date) = %s -- checkin date
+             ) y
+             LEFT OUTER JOIN (
+               -- all unique LH records for the given job_id
+               SELECT c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity,
+                      SUM(IFNULL((SELECT MAX(r.capacity) FROM ".$wpdb->prefix."lh_rooms r WHERE r.room_type IN ('DBL', 'TWIN', 'TRIPLE', 'QUAD') AND r.room_type_id = c.room_type_id), 1 )) `lh_persons`
+                 FROM ".$wpdb->prefix."lh_calendar c 
+                 JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = c.room_type_id
+                WHERE c.job_id = %d
+                  AND c.booking_source = 'Hostelworld'
+                GROUP BY c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity
+             ) z ON CONCAT('HWL-551-', y.booking_reference) = z.booking_reference 
+                -- if there is only 1 room type, then match by booking ref only
+                AND y.room_type_id = IF(y.num_room_types > 1, z.room_type_id, y.room_type_id)", 
+         $selectedDate->format('Y-m-d'), $jobId ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
 }
 
 ?>

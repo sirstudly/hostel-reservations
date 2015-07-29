@@ -51,7 +51,9 @@ class WP_HostelBackoffice {
         add_option('hbo_split_room_report_url', 'reports/reservations-split-across-rooms');
         add_option('hbo_unpaid_deposit_report_url', 'reports/unpaid-deposit-report');
         add_option('hbo_group_bookings_report_url', 'reports/group-bookings');
+        add_option('hbo_booking_diffs_report_url', 'reports/booking-diffs');
         add_option('hbo_bedcounts_url', 'reports/bedcounts');
+        add_option('hbo_redirect_to_url', 'redirect-to');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -70,7 +72,9 @@ class WP_HostelBackoffice {
         delete_option('hbo_split_room_report_url');
         delete_option('hbo_unpaid_deposit_report_url');
         delete_option('hbo_group_bookings_report_url');
+        delete_option('hbo_booking_diffs_report_url');
         delete_option('hbo_bedcounts_url');
+        delete_option('hbo_redirect_to_url');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
@@ -380,6 +384,29 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
+     * Write the contents of the booking diffs report.
+     */
+    function content_of_booking_diffs_report_page() {
+
+        $selectionDate = new DateTime('now', new DateTimeZone('UTC'));
+
+        // if date is defined, update the date
+        if (isset($_POST['selectiondate']) && trim($_POST['selectiondate']) != '') {
+            $selectionDate = DateTime::createFromFormat(
+                '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC'));
+        }
+
+        $rep = new LHBookingsDiffsReport( $selectionDate );
+
+        if (isset($_POST['reload_data']) && trim($_POST['reload_data']) == 'true') {
+            $rep->submitBookingDiffsJob();
+        } 
+
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+    }
+
+    /**
      * Write the contents of the bedcounts report.
      */
     function content_of_bedcounts_page() {
@@ -472,7 +499,9 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_split_room_report_url'), 'reservations-split-across-rooms.php');
         $this->do_redirect_for_page(get_option('hbo_unpaid_deposit_report_url'), 'unpaid-deposit-report.php');
         $this->do_redirect_for_page(get_option('hbo_group_bookings_report_url'), 'group-bookings.php');
+        $this->do_redirect_for_page(get_option('hbo_booking_diffs_report_url'), 'booking-diffs.php');
         $this->do_redirect_for_page(get_option('hbo_bedcounts_url'), 'bedcounts.php');
+        $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
     }
 
     /**
@@ -482,16 +511,51 @@ error_log(var_export($_POST, TRUE));
      */
     function do_redirect_for_page($url, $templatefile) {
         global $wp;
-        $plugindir = dirname( __FILE__ ) . '/..';
 
-        if (isset($wp->query_vars["pagename"]) && $wp->query_vars["pagename"] == $url) {
-            if (file_exists(TEMPLATEPATH . '/' . $templatefile)) {
-                $return_template = TEMPLATEPATH . '/' . $templatefile;
-            } else {
-                $return_template = $plugindir . '/templates/' . $templatefile;
+        // if we're redirecting using a permalink; e.g. /redirect-to/anotherpage/12345
+        $page_path = parse_url( $_SERVER['REQUEST_URI'] );
+        $page_path = $page_path['path'];
+        $home_path = parse_url( home_url() );
+
+        if( array_key_exists( 'path', $home_path )) {
+            $home_path = $home_path['path'];
+
+            // if the page path, e.g. /castlerock/redirect-to/...
+            // starts the same as the home path, e.g. /castlerock
+            // then remove the first bit
+            if( substr($page_path, 0, strlen($home_path)) === $home_path ) {
+                $page_path = substr( $page_path, strlen($home_path) );
             }
-            $this->do_redirect($return_template);
         }
+
+        // if the first character is a slash, remove it
+        if ( substr($page_path, 0, 1) === '/' ) {
+            $page_path = substr( $page_path, 1 );
+        }
+
+        if ( substr($page_path, 0, strlen($url)) === $url ) {
+            $_SESSION['url_path'] = $page_path; // save in session so we can use it later
+            $this->do_redirect($this->get_template_path($templatefile));
+        }
+
+        elseif ( isset($wp->query_vars["pagename"]) && $wp->query_vars["pagename"] == $url) {
+            $this->do_redirect($this->get_template_path($templatefile));
+        }
+    }
+
+    /**
+     * Returns the path to the given template file.
+     * $templatefile : name of template file to redirect to
+     */
+    function get_template_path($templatefile) {
+        $plugindir = dirname( __FILE__ ) . '/..';
+        
+        if (file_exists(TEMPLATEPATH . '/' . $templatefile)) {
+            $return_template = TEMPLATEPATH . '/' . $templatefile;
+        } else {
+            $return_template = $plugindir . '/templates/' . $templatefile;
+        }
+        return $return_template;
     }
 
     /**
@@ -500,12 +564,12 @@ error_log(var_export($_POST, TRUE));
      */
     function do_redirect($url) {
         global $post, $wp_query;
-        if (have_posts()) {
+//        if (have_posts()) {
             include($url);
             die();
-        } else {
-            $wp_query->is_404 = true;
-        }
+//        } else {
+//            $wp_query->is_404 = true;
+//        }
     }
 
     /**
