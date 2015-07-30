@@ -468,7 +468,7 @@ error_log('getLastCompletedBookingDiffsJob() returning job ' . $rec->job_id);
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT y.guest_name, 
                     IF( y.room_type IN ('DBL','TRIPLE','QUAD'), y.room_type, CONVERT(CONCAT(y.capacity, y.room_type) USING utf8)) `hw_room_type`,
-                    y.checkin_date `hw_checkin_date`, y.checkout_date `hw_checkout_date`, y.hw_persons, y.payment_outstanding `hw_payment_outstanding`, y.booked_date,
+                    y.checkin_date `hw_checkin_date`, y.checkout_date `hw_checkout_date`, y.hw_persons, y.payment_outstanding `hw_payment_outstanding`, y.booked_date, y.booking_source,
                     y.booking_reference, 
 	                IF( z.room_type IN ('DBL','TRIPLE','QUAD'), z.room_type, CONVERT(CONCAT(z.capacity, z.room_type) USING utf8)) `lh_room_type`, z.lh_status,
                     z.checkin_date `lh_checkin_date`, z.checkout_date `lh_checkout_date`, z.lh_persons, z.payment_outstanding `lh_payment_outstanding`, z.data_href, z.notes,
@@ -479,25 +479,25 @@ error_log('getLastCompletedBookingDiffsJob() returning job ' . $rec->job_id);
                     IF( IFNULL(z.lh_status, 'null') IN ('checked-in', 'checked-out') OR IFNULL(y.payment_outstanding,'null') = IFNULL(z.payment_outstanding,'null') OR z.payment_outstanding = 0, 'Y', 'N') `matched_payment_outstanding`
              FROM (
                -- all unique HW records for the given job_id
-               SELECT b.booking_reference, b.guest_name, b.booked_date, b.persons `hw_persons`, b.payment_outstanding, d.persons `hw_person_count`, d.room_type_id, r.room_type, r.capacity,
+               SELECT b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons `hw_persons`, b.payment_outstanding, d.persons `hw_person_count`, d.room_type_id, r.room_type, r.capacity,
                       (SELECT COUNT(DISTINCT e.room_type_id) FROM ".$wpdb->prefix."hw_booking_dates e WHERE e.hw_booking_id = b.id ) `num_room_types`, -- keep track of bookings that contain more than one room type
 		              MIN(d.booked_date) `checkin_date`, DATE_ADD(MAX(d.booked_date), INTERVAL 1 DAY) `checkout_date`
                  FROM ".$wpdb->prefix."hw_booking b
                  JOIN ".$wpdb->prefix."hw_booking_dates d ON b.id = d.hw_booking_id
                  JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = d.room_type_id
-                GROUP BY b.booking_reference, b.guest_name, b.booked_date, b.persons, b.payment_outstanding, d.persons, d.room_type_id, r.room_type, r.capacity
+                GROUP BY b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons, b.payment_outstanding, d.persons, d.room_type_id, r.room_type, r.capacity
                HAVING MIN(d.booked_date) = %s -- checkin date
              ) y
              LEFT OUTER JOIN (
                -- all unique LH records for the given job_id
                SELECT c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity,
-                      SUM(IFNULL((SELECT MAX(r.capacity) FROM ".$wpdb->prefix."lh_rooms r WHERE r.room_type IN ('DBL', 'TWIN', 'TRIPLE', 'QUAD') AND r.room_type_id = c.room_type_id), 1 )) `lh_persons`
+                      IF(c.lh_status = 'cancelled', c.num_guests, SUM(IFNULL((SELECT MAX(r.capacity) FROM ".$wpdb->prefix."lh_rooms r WHERE r.room_type IN ('DBL', 'TWIN', 'TRIPLE', 'QUAD') AND r.room_type_id = c.room_type_id), 1 ))) `lh_persons`
                  FROM ".$wpdb->prefix."lh_calendar c 
                  JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = c.room_type_id
                 WHERE c.job_id = %d
-                  AND c.booking_source = 'Hostelworld'
+                  AND c.booking_source IN ('Hostelworld', 'Hostelbookers')
                 GROUP BY c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity
-             ) z ON CONCAT('HWL-551-', y.booking_reference) = z.booking_reference 
+             ) z ON CONCAT(IF(y.booking_source = 'Hostelbookers', 'HBK-', 'HWL-551-'), y.booking_reference) = z.booking_reference 
                 -- if there is only 1 room type, then match by booking ref only
                 AND y.room_type_id = IF(y.num_room_types > 1, z.room_type_id, y.room_type_id)", 
          $selectedDate->format('Y-m-d'), $jobId ));

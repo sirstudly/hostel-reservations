@@ -13,7 +13,7 @@
 <xsl:template match="view">
 
 <style media="screen" type="text/css">
-#booking_diffs_rpt tbody tr:nth-child(odd) td {
+.booking_diffs_rpt tbody tr:nth-child(odd) td {
 	background-color: #e3e3e3
 }
 
@@ -27,24 +27,35 @@ td.cancelled a {
     color: red !important;
 }
 
-#booking_diffs_rpt tbody td.mismatched {
+.booking_diffs_rpt tbody td.mismatched {
     background-color: #f8c7c7 !important;
 }
 
-#booking_diffs_rpt tbody td.currency {
+.booking_diffs_rpt tbody td.currency {
     padding-right: 30px;
     text-align: right;
 }
 
-#booking_diffs_rpt tfoot tr td {
+.booking_diffs_rpt tfoot tr td {
     font-weight: bold;
 	background-color: #d7d7d7;
 }
 
+.booking_diffs_rpt .report_title_row {
+	background-color: #dfeef7;
+}
+
+.booking_diffs_rpt .report_title_cell {
+	font-size: 20px; 
+    font-family: 'Oswald',sans-serif; 
+    color: #222; 
+    text-align: left; 
+    padding-left: 10px;
+}
 </style>
 
     <div id="wpdev-booking-booking-diffs" class="wrap bookingpage">
-        <h2>Comparison Between HW and Little Hotelier - <xsl:value-of select="selection_date_long"/></h2>
+        <h2>Comparison Between HW/HB and Little Hotelier - <xsl:value-of select="selection_date_long"/></h2>
         <div class="wpdevbk">
     
             <div style="margin-top:10px;" class="booking-submenu-tab-container">
@@ -62,7 +73,9 @@ td.cancelled a {
             <div class="visibility_container" id="report_data_view">
                 <xsl:choose>
                     <xsl:when test="record">
-                        <xsl:call-template name="report_data"/>
+                        <xsl:call-template name="report_data_hw"/>
+                        <div style="height:1px;clear:both;margin-top:30px;"><xsl:comment/></div>
+                        <xsl:call-template name="report_data_hb"/>
                     </xsl:when>
                     <xsl:otherwise>
                         <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
@@ -138,9 +151,13 @@ td.cancelled a {
     <div style="clear:both;height:1px;"><xsl:comment/></div>
 </xsl:template>
 
-<xsl:template name="report_data">
-    <table id="booking_diffs_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
+<!-- the main report body for Hostelworld -->
+<xsl:template name="report_data_hw">
+    <table id="booking_diffs_rpt_hw" class="allocation_view booking_diffs_rpt" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
+            <tr class="report_title_row">
+                <th colspan="13" class="report_title_cell">Hostelworld</th>
+            </tr>
             <tr>
                 <th colspan="6"><a target="_blank"><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/redirect-to/HW_ListBookingsByArrivalDate/<xsl:value-of select="selection_date"/></xsl:attribute>
                     Hostelworld</a>
@@ -168,12 +185,57 @@ td.cancelled a {
         </thead>
         <tbody>
             <xsl:if test="record">
-                <xsl:apply-templates select="record"/>
+                <xsl:apply-templates select="record[booking_source != 'Hostelbookers']"/>
             </xsl:if>
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="13">TOTAL: <xsl:value-of select="count(record)"/> records</td>
+                <td colspan="13">TOTAL: <xsl:value-of select="count(record[booking_source != 'Hostelbookers'])"/> records</td>
+            </tr>
+        </tfoot>
+    </table>
+</xsl:template>
+
+<!-- the main report body for Hostelbookers -->
+<xsl:template name="report_data_hb">
+    <table id="booking_diffs_rpt_hb" class="allocation_view booking_diffs_rpt" width="100%" cellspacing="0" cellpadding="3" border="0">
+        <thead>
+            <tr class="report_title_row">
+                <th colspan="13" class="report_title_cell">Hostelbookers</th>
+            </tr>
+            <tr>
+                <th colspan="6"><a target="_blank"><xsl:attribute name="href">https://admin.hostelbookers.com/backoffice/booking/index.cfm?fuseaction=search&amp;sub=query&amp;page=1&amp;searchType=Arrival&amp;strArrivalDateStart=<xsl:value-of select="selection_date_hb"/>&amp;strArrivalDateEnd=<xsl:value-of select="selection_date_hb"/>&amp;intArrivalStatusID=0&amp;intArrivalSourceID=0&amp;btnSubmit=Search</xsl:attribute>
+                    Hostelbookers</a>
+                </th>
+                <th></th>
+                <th colspan="6"><a target="_blank"><xsl:attribute name="href">https://emea.littlehotelier.com/extranet/properties/533/reservations?utf8=%E2%9C%93&amp;reservation_filter[guest_last_name]=&amp;reservation_filter[booking_reference_id]=HBK&amp;reservation_filter[date_type]=CheckIn&amp;reservation_filter[date_from_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_from]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[date_to_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_to]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[status]=&amp;commit=Search</xsl:attribute>
+                    Little Hotelier</a>
+                </th>
+            </tr>
+            <tr>
+            <th>Guest Name(s)</th>
+            <th>Room Type</th>
+            <th>Checkin Date</th>
+            <th>Checkout Date</th>
+            <th>Number of<br/>Guests</th>
+            <th>Payment Outstanding</th>
+            <th>HB Booking<br/>Reference</th>
+            <th>Room Type</th>
+            <th>Checkin Date</th>
+            <th>Checkout Date</th>
+            <th>Number of<br/>Guests</th>
+            <th>Payment Outstanding</th>
+            <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <xsl:if test="record">
+                <xsl:apply-templates select="record[booking_source = 'Hostelbookers']"/>
+            </xsl:if>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="13">TOTAL: <xsl:value-of select="count(record[booking_source = 'Hostelbookers'])"/> records</td>
             </tr>
         </tfoot>
     </table>
@@ -181,8 +243,20 @@ td.cancelled a {
 
 <xsl:template match="record">
     <tr>
-        <td><a target="_blank"><xsl:attribute name="href"><xsl:value-of select="../homeurl"/>/redirect-to/HW_CustID/<xsl:value-of select="booking_reference"/></xsl:attribute>
-               <xsl:value-of select="guest_name"/>
+        <xsl:if test="matched_room_type = 'Y' and matched_checkin_date = 'Y' and matched_checkout_date = 'Y' and matched_persons = 'Y' and matched_payment_outstanding = 'Y' and lh_status != 'cancelled'"><xsl:attribute name="style">color: #888;</xsl:attribute></xsl:if>
+        <td>
+            <a target="_blank">
+                <xsl:attribute name="href">
+                    <xsl:choose>
+                        <xsl:when test="booking_source = 'Hostelbookers'">
+                            <xsl:text>https://admin.hostelbookers.com/backoffice/booking/?fuseaction=detail&amp;i_id=</xsl:text><xsl:value-of select="substring(booking_reference, 6)"/><xsl:text>&amp;mode=search</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="../homeurl"/>/redirect-to/HW_CustID/<xsl:value-of select="booking_reference"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:attribute>
+                <xsl:value-of select="guest_name"/>
             </a>
         </td>
         <td><xsl:attribute name="class">centered <xsl:if test="matched_room_type = 'N'">mismatched</xsl:if></xsl:attribute><xsl:value-of select="hw_room_type"/></td>

@@ -62,6 +62,8 @@ class LHBookingsDiffsReport extends XslTransform {
             $this->selectionDate->format('d M Y')));
         $parentElement->appendChild($domtree->createElement('selection_date_uri', 
             $this->selectionDate->format('d+M+Y')));
+        $parentElement->appendChild($domtree->createElement('selection_date_hb', 
+            $this->selectionDate->format('d-F-Y')));
         $parentElement->appendChild($domtree->createElement('selection_date', 
             $this->selectionDate->format('Y-m-d')));
 
@@ -75,6 +77,7 @@ class LHBookingsDiffsReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('hw_persons', $record->hw_persons));
                 $recordRoot->appendChild($domtree->createElement('hw_payment_outstanding', $record->hw_payment_outstanding));
                 $recordRoot->appendChild($domtree->createElement('booked_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('d M Y H:i:s')));
+                $recordRoot->appendChild($domtree->createElement('booking_source', $record->booking_source));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
                 $recordRoot->appendChild($domtree->createElement('lh_room_type', $record->lh_room_type));
                 $recordRoot->appendChild($domtree->createElement('lh_status', $record->lh_status));
