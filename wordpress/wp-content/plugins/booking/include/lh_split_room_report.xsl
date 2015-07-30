@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
-<xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"/>
+<xsl:output method="html" omit-xml-declaration="yes" encoding="UTF-8"/>
 
 <!--
 //*****************************************************************************
@@ -13,67 +13,94 @@
 <xsl:template match="view">
 
 <style media="screen" type="text/css">
-#split_room_rpt tbody tr:nth-child(odd) td,#split_room_rpt tbody tr:nth-child(odd) th {
+
+#split_room_rpt tbody tr:nth-child(odd) td {
 	background-color: #e3e3e3
-}
-
-.aside {
-    padding-left: 20px;
-    font-style: italic;
-}
-
-.btn-primary {
-    background-color: #006DCC;
-    background-image: -moz-linear-gradient(center top , #08C, #04C);
-    background-repeat: repeat-x;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.25);
-    color: #FFF;
-    display: inline-block;
-    padding: 4px 10px;
-    font-size: 13px;
-    line-height: 18px;
-    text-align: center;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #CCC #CCC #BBB;
-    -moz-border-top-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    border-image: none;
-    border-radius: 4px;
-    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px rgba(0, 0, 0, 0.05);
-    cursor: pointer;
-    float: left; 
-    margin-right: 15px;
 }
 
 </style>
 
-    <div class="wpdevbk center">
-        <h3>Reservations Split Across Different Rooms</h3>
+    <div id="report-container" class="wrap bookingpage">
+        <h2>Reservations Split Across Different Rooms</h2>
+        <div class="wpdevbk">
+    
+            <div style="margin-top:10px;" class="booking-submenu-tab-container">
+                <div class="nav-tabs booking-submenu-tab-insidecontainer">
+
+                    <div id="filter" class="visibility_container active">
+                        <xsl:call-template name="report_header"/>
+                    </div>
+
+                </div>
+            </div>
+
+            <div style="height:1px;clear:both;margin-top:40px;"><xsl:comment/></div>
+    
+            <div class="visibility_container" id="report_data_view">
+                <xsl:choose>
+                    <xsl:when test="record">
+                        <xsl:call-template name="report_data"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </div>
+        </div>
+
+        <xsl:call-template name="write_inline_js"/>
+        <xsl:call-template name="write_inline_css"/>
     </div>
 
-    <br/>
-    <p><span class="aside">This report was last run on <xsl:value-of select="last_completed_job"/>.</span><br/>
-       <span class="aside">It is automatically re-run daily at 10:00pm.</span></p>
+</xsl:template>
 
-    <xsl:choose>
-        <xsl:when test="last_submitted_job">
-            <p><span class="aside">A request has been made to re-run this report on <xsl:value-of select="last_submitted_job"/>. This may take a while so maybe grab a cup of tea and check back later.</span></p>
-        </xsl:when>
-        <xsl:otherwise>
-            <form name="split_room_form" method="post" id="split_room_form" class="form-inline">
-                <input type="hidden" name="allocation_scraper_job" id="allocation_scraper_job" value="I can't wait. Run it now!"/>
-                <p style="margin-left:20px"><a class="btn-primary" onclick="javascript:split_room_form.submit();">I can't wait. Run it now!</a></p>
-                <br/><br/>
-            </form>
-        </xsl:otherwise>
-    </xsl:choose>
 
-    <xsl:call-template name="write_inline_js"/>
+<xsl:template name="report_header">
+    <div style="clear:both;height:1px;"><xsl:comment/></div>
+    <div class="wpdevbk-filters-section ">
 
+        <form  name="report_form" action="" method="post" id="report_form"  class="form-inline">
+
+            <div class="control-group" style="float:left;">
+                <p class="help-block" style="float:left;padding-left:5px;font-style: italic;">
+                    <xsl:if test="last_completed_job">
+                        This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
+                        It is automatically run daily at 10:50pm.
+                    </xsl:if>
+                </p>
+            </div>
+    
+            <div class="btn-group" style="float:right;">
+                <div class="inline controls">
+                    <div class="btn-group">
+                        <xsl:choose>
+                            <xsl:when test="last_submitted_job">
+                                <a class="btn btn-primary disabled" style="float: right; margin-right: 15px;">Update in Progress <span class="icon-refresh icon-white"></span></a>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <input type="hidden" name="reload_data" id="reload_data" value="true" />
+                                <a class="btn btn-primary" style="float: right; margin-right: 15px;" onclick="javascript:report_form.submit();">Reload Data <span class="icon-refresh icon-white"></span></a>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </div>
+                <p class="help-block" style="float:left;padding-left:5px;padding-right:15px;font-style:italic;">
+                    <xsl:if test="last_submitted_job">
+                        Come back to this page in a few minutes.
+                    </xsl:if>
+                </p>
+                </div>
+            </div>
+
+            <div class="clear"><xsl:comment/></div>
+        </form>
+
+    </div>
+    <div style="clear:both;height:1px;"><xsl:comment/></div>
+
+</xsl:template>
+
+
+<xsl:template name="report_data">
     <table id="split_room_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
             <th>Guest Name(s)</th>
@@ -88,9 +115,8 @@
             <xsl:apply-templates select="record"/>
         </tbody>
     </table>
-
-
 </xsl:template>
+
 
 <xsl:template match="record">
     <tr>

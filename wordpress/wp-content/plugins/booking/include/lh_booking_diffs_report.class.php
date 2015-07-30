@@ -37,6 +37,7 @@ class LHBookingsDiffsReport extends XslTransform {
     function submitBookingDiffsJob() {
         LilHotelierDBO::insertJobOfType( self::JOB_TYPE,
             array( "checkin_date" => $this->selectionDate->format('Y-m-d') ) );
+        LilHotelierDBO::runProcessor();
     }
     
     /**

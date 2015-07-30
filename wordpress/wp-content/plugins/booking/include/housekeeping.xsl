@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:output method="html" omit-xml-declaration="yes" encoding="UTF-8"/>
 
 <!--
 //*****************************************************************************
@@ -127,7 +128,7 @@ td.border_bottom {
     </xsl:choose>
     <tr>
         <xsl:attribute name="class">
-            alloc_resource_attrib
+            <xsl:text>alloc_resource_attrib</xsl:text>
             <xsl:choose>
                 <xsl:when test="position() mod 2">odd</xsl:when>
                 <xsl:otherwise>even</xsl:otherwise>
@@ -150,18 +151,18 @@ td.border_bottom {
             -->
         <span>
             <xsl:attribute name="class">
-                label 
+                <xsl:text>label </xsl:text>
                 <xsl:if test="bedsheet = 'CHANGE'">
-                    label-change
+                    <xsl:text>label-change </xsl:text>
                 </xsl:if>
                 <xsl:if test="bedsheet = '3 DAY CHANGE'">
-                    label-3daychange
+                    <xsl:text>label-3daychange </xsl:text>
                 </xsl:if>
                 <xsl:if test="bedsheet = 'NO CHANGE'">
-                    label-nochange
+                    <xsl:text>label-nochange </xsl:text>
                 </xsl:if>
                 <xsl:if test="bedsheet = 'EMPTY'">
-                    label-empty
+                    <xsl:text>label-empty </xsl:text>
                 </xsl:if>
             </xsl:attribute>
             <xsl:value-of select="bedsheet"/>

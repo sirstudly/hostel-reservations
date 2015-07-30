@@ -30,6 +30,7 @@ class LHUnpaidDepositReport extends XslTransform {
      */
     function submitAllocationScraperJob() {
         LilHotelierDBO::insertAllocationScraperJob();
+        LilHotelierDBO::runProcessor();
     }
     
     /**

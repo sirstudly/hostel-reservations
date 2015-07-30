@@ -30,6 +30,7 @@ class LHGroupBookingsReport extends XslTransform {
      */
     function submitAllocationScraperJob() {
         LilHotelierDBO::insertAllocationScraperJob();
+        LilHotelierDBO::runProcessor();
     }
     
     /**

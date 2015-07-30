@@ -60,6 +60,7 @@ class HouseKeeping extends XslTransform {
     function submitRefreshJob() {
         LilHotelierDBO::insertJobOfType( self::JOB_TYPE,
             array( "selected_date" => $this->selectionDate->format('Y-m-d H:i:s') ) );
+        LilHotelierDBO::runProcessor();
     }
 
     /**

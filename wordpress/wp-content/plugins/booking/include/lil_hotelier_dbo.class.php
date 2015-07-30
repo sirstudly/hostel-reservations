@@ -200,48 +200,12 @@ class LilHotelierDBO {
      * Throws DatabaseException on insert error
      */
     static function insertAllocationScraperJob() {
-        $dblink = new DbTransaction();
-        try{
-            $jobId = self::doInsertAllocationScraperJob($dblink->mysqli);
-            $dblink->mysqli->commit();
-            $dblink->mysqli->close();
-            return $jobId;
-
-        } catch(Exception $e) {
-            $dblink->mysqli->rollback();
-            $dblink->mysqli->close();
-            throw $e;
-        }
-    }
-
-    /**
-     * Inserts a new AllocationScraperJob.
-     * $mysqli : manual db connection (for transaction handling)
-     * Returns id of inserted job id
-     * Throws DatabaseException on insert error
-     */
-    static function doInsertAllocationScraperJob($mysqli) {
-    
-        global $wpdb;
-        $stmt = $mysqli->prepare(
-            "INSERT INTO ".$wpdb->prefix."lh_jobs(classname, `status`, created_date, last_updated_date)
-             VALUES('com.macbackpackers.jobs.AllocationScraperJob', 'submitted', NOW(), NOW())");
-        
-        if(false === $stmt->execute()) {
-            throw new DatabaseException("Error during INSERT: " . $mysqli->error);
-        }
-        $stmt->close();
-
-        // insert the start end - end dates as parameters
-        $jobId = $mysqli->insert_id;
-
         $startDate = new DateTime();
-        self::insertJobParameter($mysqli, $jobId, 'start_date', $startDate->format('Y-m-d'));
-        self::insertJobParameter($mysqli, $jobId, 'days_ahead', '140'); // get data for next 4-5 months
-
-        return $jobId;
+        self::insertJobOfType( 'com.macbackpackers.jobs.AllocationScraperJob',
+            array( "start_date" => $startDate->format('Y-m-d'),
+                   "days_ahead" => '140' ) ); // get data for next 4-5 months
     }
-    
+
     /**
      * Inserts a new AllocationScraperJob parameter.
      * $mysqli : manual db connection (for transaction handling)
@@ -453,7 +417,6 @@ class LilHotelierDBO {
 
         // return single row
         $rec = array_shift($resultset);
-error_log('getLastCompletedBookingDiffsJob() returning job ' . $rec->job_id);
         return $rec;
     }
 
@@ -509,6 +472,15 @@ error_log('getLastCompletedBookingDiffsJob() returning job ' . $rec->job_id);
         return $resultset;
     }
 
+    /**
+     * Executes the processor in the background from the command line.
+     */
+    static function runProcessor() {
+        if (substr(php_uname(), 0, 7) != "Windows") {
+            $command = 'nohup /home/temperec/java2/run_processor_mini.sh > /dev/null 2>&1 &';
+            exec( $command );
+        }
+    }
 }
 
 ?>

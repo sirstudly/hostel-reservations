@@ -347,7 +347,7 @@ error_log(var_export($_POST, TRUE));
     function content_of_split_room_report_page() {
         $rep = new LHSplitRoomReport();
 
-        if (isset($_POST['allocation_scraper_job'])) {
+        if (isset($_POST['reload_data'])) {
             $rep->submitAllocationScraperJob();
         } 
 
@@ -361,7 +361,7 @@ error_log(var_export($_POST, TRUE));
     function content_of_unpaid_deposit_report_page() {
         $rep = new LHUnpaidDepositReport();
 
-        if (isset($_POST['allocation_scraper_job'])) {
+        if (isset($_POST['reload_data'])) {
             $rep->submitAllocationScraperJob();
         } 
 
@@ -375,7 +375,7 @@ error_log(var_export($_POST, TRUE));
     function content_of_group_bookings_page() {
         $rep = new LHGroupBookingsReport();
 
-        if (isset($_POST['allocation_scraper_job'])) {
+        if (isset($_POST['reload_data'])) {
             $rep->submitAllocationScraperJob();
         } 
 

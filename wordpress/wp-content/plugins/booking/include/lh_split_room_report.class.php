@@ -30,6 +30,7 @@ class LHSplitRoomReport extends XslTransform {
      */
     function submitAllocationScraperJob() {
         LilHotelierDBO::insertAllocationScraperJob();
+        LilHotelierDBO::runProcessor();
     }
     
     /**
