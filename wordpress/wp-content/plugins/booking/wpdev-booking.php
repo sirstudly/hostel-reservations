@@ -186,6 +186,21 @@ A c t u a l   T O D O   List:
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/housekeeping.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/housekeeping.class.php' ); }
 
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_bed_assignment.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_bed_assignment.class.php' ); }
+
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner.class.php' ); }
+
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner_bed_assign.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner_bed_assign.class.php' ); }
+
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner_bed_assign_page_content.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner_bed_assign_page_content.class.php' ); }
+
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner_bed_assign_page.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner_bed_assign_page.class.php' ); }
+
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_split_room_report.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_split_room_report.class.php' ); }
 

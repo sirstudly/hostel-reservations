@@ -48,6 +48,7 @@ class WP_HostelBackoffice {
         add_option('hbo_resources_url', 'admin/resources');
         add_option('hbo_editbooking_url', 'edit-booking');
         add_option('hbo_housekeeping_url', 'housekeeping');
+        add_option('hbo_cleaner_bed_assign_url', 'housekeeping/cleaner-bed-assign.php');
         add_option('hbo_split_room_report_url', 'reports/reservations-split-across-rooms');
         add_option('hbo_unpaid_deposit_report_url', 'reports/unpaid-deposit-report');
         add_option('hbo_group_bookings_report_url', 'reports/group-bookings');
@@ -77,6 +78,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_resources_url');
         delete_option('hbo_editbooking_url');
         delete_option('hbo_housekeeping_url');
+        delete_option('hbo_cleaner_bed_assign_url');
         delete_option('hbo_split_room_report_url');
         delete_option('hbo_unpaid_deposit_report_url');
         delete_option('hbo_group_bookings_report_url');
@@ -357,6 +359,24 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
+     * Write the contents of the cleaner bed assignment page.
+     */
+    function content_of_cleaner_bed_assign_page() {
+        error_log( 'In content_of_cleaner_bed_assign_page');
+        if (isset($_SESSION['CLEANER_BED_CONTROLLER'])) {
+            $pg = $_SESSION['CLEANER_BED_CONTROLLER'];
+error_log( 'content_of_cleaner_bed_assign_page - controller already set');
+        }
+        else {
+            $pg = new CleanerBedAssignmentsPage();
+            $_SESSION['CLEANER_BED_CONTROLLER'] = $pg;
+error_log( 'content_of_cleaner_bed_assign_page - creating new controller');
+        }
+        $pg->loadAssignments();
+        echo $pg->toHtml();
+    }
+
+    /**
      * Downloads the bedcounts page as a CSV file
      */
     function download_bedcounts_page_as_csv() {
@@ -421,6 +441,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_editbooking_url'), 'edit-booking.php');
         $this->do_redirect_for_page(get_option('hbo_resources_url'), 'resources.php');
         $this->do_redirect_for_page(get_option('hbo_housekeeping_url'), 'housekeeping.php');
+        $this->do_redirect_for_page(get_option('hbo_cleaner_bed_assign_url'), 'cleaner-bed-assign.php');
         $this->do_redirect_for_page(get_option('hbo_split_room_report_url'), 'reservations-split-across-rooms.php');
         $this->do_redirect_for_page(get_option('hbo_unpaid_deposit_report_url'), 'unpaid-deposit-report.php');
         $this->do_redirect_for_page(get_option('hbo_group_bookings_report_url'), 'group-bookings.php');
