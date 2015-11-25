@@ -366,6 +366,7 @@ class LilHotelierDBO {
                        ) c 
                        -- if unallocated (room_id = null), then ignore this join field and match on room_type_id
                        ON IFNULL(c.room_id, rm.id) = rm.id AND IFNULL(c.room, 'Unallocated') = rm.room AND c.room_type_id = rm.room_type_id
+                    WHERE rm.active_yn = 'Y' OR rm.room_type = 'OVERFLOW' OR rm.room = 'Unallocated'
               ) p
              GROUP BY IF(p.room_type = 'OVERFLOW', '30', p.room), p.capacity, p.room_type
           ) t
