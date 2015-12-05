@@ -1,0 +1,72 @@
+/*
+Theme Name: Twenty Eleven CR Movie List
+Theme URI: http://wordpress.org/extend/themes/twentyeleven-movielist
+Author: sir_studly
+Author URI: http://wordpress.org/
+Template:     twentyeleven
+Description: XBOX Film List
+Version: 0.1
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: dark, light, white, black, gray, one-column, two-columns, left-sidebar, right-sidebar, fixed-width, flexible-width, custom-background, custom-colors, custom-header, custom-menu, editor-style, featured-image-header, featured-images, full-width-template, microformats, post-formats, rtl-language-support, sticky-post, theme-options, translation-ready
+Text Domain: twentyeleven-child
+*/
+
+@import url("../twentyeleven/style.css");
+@import url("tabs.css");
+
+/* =Theme customization starts here
+-------------------------------------------------------------- */
+
+  div.filmContent {
+    width:100%;
+    font-family:verdana;
+    font-size:12px;
+  }
+
+  table.films{
+    border-collapse: collapse;
+  }
+  table.films td{
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  td.filmTitle {
+    width: 300px;
+    font-weight: bold;
+    border: 1px solid black;
+  }
+
+  td.filmSubHeading {
+    font-weight: bold;
+  }
+
+  td.imdbRating {
+    padding-right: 60px;
+    width: 30px;
+  }
+
+  td.filmYear {
+    padding-right: 40px;
+    width: 30px;
+  }
+
+  td.filmRuntime {
+    width: 100px;
+  }
+
+  td.filmDirectors {
+    width: 200px;
+  }
+
+  td.filmSynopsis {
+    border-top: 1px solid black;
+    padding-bottom: 10px;
+  }
+
+  td.filmActors {
+    padding-bottom: 10px;
+  }
+
+
