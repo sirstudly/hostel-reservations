@@ -71,6 +71,20 @@
         error_log( "table actors created" );
     }
 
+    if ( false == does_table_exist('director_link') ) { 
+      $simple_sql = "CREATE TABLE ".$wpdb->prefix ."director_link (
+                    id bigint(20) unsigned NOT NULL auto_increment,
+                    actor_id bigint(20) unsigned NOT NULL,
+                    media_id bigint(20) unsigned NOT NULL,
+                    media_type varchar(255) DEFAULT NULL,
+                    PRIMARY KEY (id),
+                    INDEX idx_dirlnk_actor_id (actor_id)
+                ) $charset_collate;";
+
+        execute_simple_sql($simple_sql);
+        error_log( "table director_link created" );
+    }
+
     if ( false == does_table_exist('director_link_movie') ) { 
       $simple_sql = "CREATE TABLE ".$wpdb->prefix ."director_link_movie (
                     id bigint(20) unsigned NOT NULL auto_increment,
@@ -86,6 +100,22 @@
 
         execute_simple_sql($simple_sql);
         error_log( "table director_link_movie created" );
+    }
+
+    if ( false == does_table_exist('actor_link') ) { 
+        $simple_sql = "CREATE TABLE ".$wpdb->prefix ."actor_link (
+                    id bigint(20) unsigned NOT NULL auto_increment,
+                    actor_id bigint(20) unsigned NOT NULL,
+                    media_id bigint(20) unsigned NOT NULL,
+                    media_type varchar(255) DEFAULT NULL,
+                    role varchar(255),
+                    order_num int(11) DEFAULT NULL,
+                    PRIMARY KEY (id),
+                    INDEX idx_actlnk_actor_id (actor_id)
+                ) $charset_collate;";
+
+        execute_simple_sql($simple_sql);
+        error_log( "table actor_link_movie created" );
     }
 
     if ( false == does_table_exist('actor_link_movie') ) { 
@@ -239,7 +269,7 @@
                            WHEN c00 LIKE '[%' THEN SUBSTRING( c00, 2 )
                            ELSE c00
                       END AS sort_title,
-                      IF( c11 REGEXP '^[0-9]+$', CONCAT( c11, ' min' ), c11 ) AS duration
+                      IF( c11 REGEXP '^[0-9]+$', CONCAT( ROUND( c11 / 60 ), ' min' ), c11 ) AS duration
                  FROM ".$wpdb->prefix."movieview m
                  LEFT OUTER JOIN ".$wpdb->prefix."v_movie_d d1 ON m.id = d1.movie_id AND d1.rownum = 1
                  LEFT OUTER JOIN ".$wpdb->prefix."v_movie_d d2 ON m.id = d2.movie_id AND d2.rownum = 2
