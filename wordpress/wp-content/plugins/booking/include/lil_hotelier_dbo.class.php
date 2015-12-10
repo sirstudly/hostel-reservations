@@ -8,6 +8,7 @@ class LilHotelierDBO {
     const STATUS_COMPLETED = 'completed';
     const STATUS_SUBMITTED = 'submitted';
     const STATUS_PROCESSING = 'processing';
+    const STATUS_FAILED = 'failed';
 
     /**
      * Returns all bedsheet data for the given date.
@@ -99,9 +100,9 @@ class LilHotelierDBO {
     /**
      * Inserts a new job with the given name at the status of 'submitted'.
      * $jobName : classname of Job to create
-     * $jobParams : associative array of param name => param value for Job
+     * $jobParams : (optional) associative array of param name => param value for Job
      */
-    static function insertJobOfType( $jobName, $jobParams ) {
+    static function insertJobOfType( $jobName, $jobParams = array() ) {
         global $wpdb;
         if (false === $wpdb->insert($wpdb->prefix ."lh_jobs", 
                 array( 'classname' => $jobName, 
@@ -195,6 +196,83 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns report with all guest comments.
+     */
+    static function getGuestCommentsReport() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT job_id, reservation_id, GROUP_CONCAT(DISTINCT guest_name SEPARATOR ', ') `guest_name`, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, COUNT(num_guests) `num_guests`, notes, viewed_yn, comments, acknowledged_date
+               FROM ( -- some duplicates may occur; remove them first
+                   SELECT c.job_id, c.room, c.bed_name, c.reservation_id, c.guest_name, c.booking_reference, c.booking_source, c.checkin_date, c.checkout_date, c.booked_date, c.payment_outstanding, c.data_href, c.num_guests, c.notes, c.viewed_yn, g.comments, g.acknowledged_date
+                     FROM ".$wpdb->prefix."lh_calendar c
+			         JOIN ".$wpdb->prefix."lh_rpt_guest_comments g
+                       ON c.reservation_id = g.reservation_id
+                      AND c.job_id IN (
+					      -- retrieve the last run allocation scraper job id
+					      SELECT MAX(job_id) 
+                            FROM ".$wpdb->prefix."lh_jobs j 
+					   	   WHERE j.status = 'completed' 
+						     AND j.classname = 'com.macbackpackers.jobs.AllocationScraperJob' )
+                    WHERE g.comments IS NOT NULL ) x
+              GROUP BY reservation_id, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, notes, viewed_yn, comments, acknowledged_date 
+              ORDER BY checkin_date, booking_reference");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
+    /**
+     * Confirms a guest comment has been looked at.
+     * $reservationId : ID of LH reservation
+     */
+    static function acknowledgeGuestComment( $reservationId ) {
+        global $wpdb;
+        $returnval = $wpdb->update(
+            $wpdb->prefix."lh_rpt_guest_comments",
+            array( 'acknowledged_date' => current_time('mysql', 1) ),
+            array( 'reservation_id' => $reservationId ) );
+        
+        if(false === $returnval) {
+            throw new DatabaseException("Error occurred during UPDATE");
+        }
+    }
+
+    /**
+     * Clears a previous acknowledgement.
+     * $reservationId : ID of LH reservation
+     */
+    static function unacknowledgeGuestComment( $reservationId ) {
+        global $wpdb;
+
+        // attempting to use $wpdb directly to update timestamp to null
+        // results in it being set to "0000-00-00 00:00:00"
+        // so using direct SQL instead
+        $dblink = new DbTransaction();
+        try {
+            $stmt = $dblink->mysqli->prepare(
+                    "UPDATE ".$wpdb->prefix ."lh_rpt_guest_comments
+                        SET acknowledged_date = NULL
+                      WHERE reservation_id = ?");
+            $stmt->bind_param('i', $reservationId);
+            if(false === $stmt->execute()) {
+                throw new DatabaseException("Error occurred updating lh_rpt_guest_comments: ".$dblink->mysqli->error);
+            }
+            $stmt->close();
+
+        } catch(Exception $ex) {
+            $dblink->mysqli->rollback();
+            $dblink->mysqli->close();
+            throw $e;
+        }
+
+        $dblink->mysqli->commit();
+        $dblink->mysqli->close();
+    }
+
+    /**
      * Inserts a new AllocationScraperJob.
      * Returns id of inserted job id
      * Throws DatabaseException on insert error
@@ -204,6 +282,15 @@ class LilHotelierDBO {
         self::insertJobOfType( 'com.macbackpackers.jobs.AllocationScraperJob',
             array( "start_date" => $startDate->format('Y-m-d'),
                    "days_ahead" => '140' ) ); // get data for next 4-5 months
+    }
+
+    /**
+     * Inserts a new AllocationScraperJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertGuestCommentsReportJob() {
+        self::insertJobOfType( 'com.macbackpackers.jobs.GuestCommentsReportJob');
     }
 
     /**
@@ -297,6 +384,34 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns the date of the last job that hasn't been run/completed yet
+     * or null if none exists.
+     * $jobName : name of job to query
+     */
+    static function getDateTimeOfLastOutstandingJob( $jobName ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT MIN(created_date) `created_date`
+                  FROM ".$wpdb->prefix."lh_jobs 
+                 WHERE classname = %s
+                   AND status IN ( %s, %s )",  
+                $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // guaranteed null or int
+        $rec = array_shift($resultset);
+
+        // if null, then no job exists
+        if( $rec->created_date == null) {
+            return null;
+        }
+        return $rec->created_date;
+    }
+
+    /**
      * Returns the date of the last allocation scraper job that
      * ran succesfully before then given date or null if none found.
      *
@@ -334,6 +449,49 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns the date of the last job that ran succesfully.
+     * Returns null if none found.
+     */
+    static function getLastCompletedJob( $jobName ) {
+        return self::getLastRunJobOfType( $jobName, self::STATUS_COMPLETED );
+    }
+
+    /**
+     * Returns the date of the last job that failed.
+     * Returns null if none found.
+     */
+    static function getLastFailedJob( $jobName ) {
+        return self::getLastRunJobOfType( $jobName, self::STATUS_FAILED );
+    }
+
+    /**
+     * Returns the date/time of the last job of the given type and status.
+     * If none found, this function will return NULL.
+     */
+    static function getLastRunJobOfType( $jobName, $status ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT MAX(end_date) `end_date`
+                  FROM ".$wpdb->prefix."lh_jobs 
+                 WHERE classname = %s
+                   AND status = %s",  
+                $jobName, $status ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // guaranteed null or int
+        $rec = array_shift($resultset);
+
+        // if null, then no job exists
+        if( $rec->end_date == null) {
+            return null;
+        }
+        return $rec->end_date;
+    }
+
+    /**
      * Returns bedcount report.
      * $selectedDate : DateTime for selection date
      * $allocJobId : completed AllocationScraperJobId to use for querying data
@@ -366,7 +524,7 @@ class LilHotelierDBO {
                        ) c 
                        -- if unallocated (room_id = null), then ignore this join field and match on room_type_id
                        ON IFNULL(c.room_id, rm.id) = rm.id AND IFNULL(c.room, 'Unallocated') = rm.room AND c.room_type_id = rm.room_type_id
-                    WHERE rm.active_yn = 'Y' OR rm.room_type = 'OVERFLOW' OR rm.room = 'Unallocated'
+					WHERE rm.active_yn = 'Y' OR rm.room_type = 'OVERFLOW' OR rm.room = 'Unallocated'
               ) p
              GROUP BY IF(p.room_type = 'OVERFLOW', '30', p.room), p.capacity, p.room_type
           ) t
@@ -471,6 +629,139 @@ class LilHotelierDBO {
         }
 
         return $resultset;
+    }
+
+    /**
+     * Adds a new cleaner to the roster.
+     */
+    static function addCleaner($firstName, $lastName) {
+         global $wpdb;
+        if (false === $wpdb->insert($wpdb->prefix ."lh_cleaner", 
+                array( 'first_name' => $firstName, 
+                       'last_name' => $lastName,
+                       'active_yn' => 'Y' ), 
+                array( '%s', '%s' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $wpdb->insert_id;
+   }
+
+    /**
+     * Assigns a bed to the given cleaner for the given dates.
+     * cleanerId : unique id of cleaner to update
+     * roomId : unique id of room to assign to
+     * checkinDate : datetime of checkin
+     * checkoutDate : datetime of checkout
+     * Returns id of inserted assignment record
+     */
+    static function addCleanerBedAssignment($cleanerId, $roomId, $checkinDate, $checkoutDate) {
+        global $wpdb;
+
+        // first check if we have a date overlap
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT 1 FROM ".$wpdb->prefix."lh_cleaner_bed_assign
+              WHERE lh_cleaner_id = %d
+                AND %s < end_date
+                AND %s > start_date",
+            $cleanerId,
+            $checkinDate->format('Y-m-d'),
+            $checkoutDate->format('Y-m-d') ) );
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // if not empty, then an existing assignment date overlap exists
+        if(false === empty($resultset)) {
+            throw new ValidationException( "Date overlap detected" );
+        }
+
+        if (false === $wpdb->insert($wpdb->prefix ."lh_cleaner_bed_assign", 
+                array( 'lh_cleaner_id' => $cleanerId, 
+                       'room_id' => $roomId,
+                       'start_date' => $checkinDate->format('Y-m-d'),
+                       'end_date' => $checkoutDate->format('Y-m-d') ), 
+                array( '%s', '%s', '%s', '%s' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $wpdb->insert_id;
+   }
+
+    /**
+     * Returns all cleaner bed assignments (array of LHCleaner)
+     */
+    static function getCleanerBedAssignments() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+           "SELECT id, first_name, last_name, active_yn
+              FROM ".$wpdb->prefix."lh_cleaner
+             ORDER BY id");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        $cleaners = array();
+        foreach( $resultset as $record ) {
+            $cleaner = new LHCleaner( $record->id, $record->first_name, $record->last_name, $record->active_yn == 'Y' );
+            self::loadBedAssignmentsForCleaner($cleaner);
+            $cleaners[] = $cleaner;
+        }
+        return $cleaners;
+    }
+
+    /**
+     * Updates bed assignments on the specified cleaner.
+     * $cleaner : cleaner to update (LHCleaner)
+     */
+    static function loadBedAssignmentsForCleaner( $cleaner ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+           "SELECT cba.id, DATE_FORMAT( cba.start_date, '%%Y-%%m-%%d' ) AS start_date, 
+                   DATE_FORMAT( cba.end_date, '%%Y-%%m-%%d' ) AS end_date, 
+                   cba.room_id, r.room, r.bed_name
+              FROM ".$wpdb->prefix."lh_cleaner_bed_assign cba
+              JOIN ".$wpdb->prefix."lh_rooms r ON cba.room_id = r.id
+             WHERE cba.lh_cleaner_id = %d
+             ORDER BY cba.start_date", $cleaner->id ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        foreach( $resultset as $record ) {
+            $cleaner->addBedAssignment(
+                $record->room_id, $record->room, $record->bed_name, 
+                DateTime::createFromFormat('!Y-m-d', $record->start_date), 
+                DateTime::createFromFormat('!Y-m-d', $record->end_date) );
+        }
+    }
+
+    /**
+     * Fetches a list of all beds available for cleaners.
+     */
+    static function getAllAssignableCleanerBeds() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+           " SELECT id, room, bed_name 
+               FROM ".$wpdb->prefix."lh_rooms
+              WHERE active_yn = 'Y'
+                AND room_type NOT IN ( 'DBL', 'QUAD', 'TRIPLE', 'TWIN' )
+           ORDER BY room, bed_name");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        $cleanerBeds = array();
+        foreach( $resultset as $record ) {
+            $cleanerBeds[] = new LHBedAssignment($record->id, $record->room, $record->bed_name);
+        }
+        return $cleanerBeds;
     }
 
     /**

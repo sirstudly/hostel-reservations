@@ -53,6 +53,7 @@ class WP_HostelBackoffice {
         add_option('hbo_group_bookings_report_url', 'reports/group-bookings');
         add_option('hbo_booking_diffs_report_url', 'reports/booking-diffs');
         add_option('hbo_bedcounts_url', 'reports/bedcounts');
+        add_option('hbo_guest_comments_report_url', 'reports/guest-comments');
         add_option('hbo_redirect_to_url', 'redirect-to');
         self::build_db_schema();
         self::insert_site_pages();
@@ -74,6 +75,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_group_bookings_report_url');
         delete_option('hbo_booking_diffs_report_url');
         delete_option('hbo_bedcounts_url');
+        delete_option('hbo_guest_comments_report_url');
         delete_option('hbo_redirect_to_url');
 
         self::delete_site_pages();
@@ -455,6 +457,28 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
+     * Write the contents of the guest comments report.
+     */
+    function content_of_guest_comments_report_page() {
+
+        // use the same page controller if already defined
+        if (isset($_SESSION['GUEST_COMMENTS_CONTROLLER'])) {
+            $rep = $_SESSION['GUEST_COMMENTS_CONTROLLER'];
+        }
+        else {
+            $rep = new LHGuestCommentsReport();
+            $_SESSION['GUEST_COMMENTS_CONTROLLER'] = $rep;
+        }
+
+        if (isset($_POST['reload_data'])) {
+            $rep->submitReportJob();
+        } 
+
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+    }
+
+    /**
      * Display a top-level menu dropdown on the admin menu (when logged in as admin).
      */
     function add_admin_bar_bookings_menu(){
@@ -501,6 +525,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_group_bookings_report_url'), 'group-bookings.php');
         $this->do_redirect_for_page(get_option('hbo_booking_diffs_report_url'), 'booking-diffs.php');
         $this->do_redirect_for_page(get_option('hbo_bedcounts_url'), 'bedcounts.php');
+        $this->do_redirect_for_page(get_option('hbo_guest_comments_report_url'), 'guest-comments.php');
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
     }
 
@@ -963,8 +988,24 @@ error_log(var_export($_POST, TRUE));
             self::execute_simple_sql($simple_sql);
         }
 
-        if ( false == $this->does_table_exist('log4j_data') ) {
-            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."log4j_data (
+        // guest comments report
+        if ( false == $this->does_table_exist('lh_rpt_guest_comments') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rpt_guest_comments (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `reservation_id` bigint(20) unsigned DEFAULT NULL,
+              `comments` text,
+              `acknowledged_date` timestamp NULL DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              KEY `lh_rpt_gc_reservation` (`reservation_id`),
+              UNIQUE (`reservation_id`)
+            ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_with_exact_name_exist('log4j_data') ) {
+            $simple_sql = "CREATE TABLE log4j_data (
              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
              `job_id` VARCHAR(255) DEFAULT NULL,
              `date_logged` DATETIME NOT NULL,
@@ -991,7 +1032,26 @@ error_log(var_export($_POST, TRUE));
 
             self::execute_simple_sql($simple_sql);
         }
+    }
 
+    /**
+     * Tears down the schema specific for little hotelier
+     * $delete_data : bool (true to drop all transactional tables as well, false to keep transactional tables)
+     */
+    function teardown_lh_schema( $delete_data ) {
+        global $wpdb;
+        if( $delete_data ) {
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_job_param");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_jobs");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_job_param");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_jobs");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_calendar");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_unpaid_deposit");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_group_bookings");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_guest_comments");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rooms");
+            self::execute_simple_sql("DROP TABLE IF EXISTS log4j_data");
+        }
     }
 
     /**
@@ -1174,6 +1234,7 @@ error_log(var_export($_POST, TRUE));
             self::execute_simple_sql("DROP TABLE ".$wpdb->prefix ."bookingcomment");
             self::execute_simple_sql("DROP TABLE ".$wpdb->prefix ."booking");
         }
+//        self::teardown_lh_schema( $delete_data ); not implemented here
     }
 
     /**
@@ -1247,7 +1308,16 @@ error_log(var_export($_POST, TRUE));
         if (strpos($tablename, $wpdb->prefix) === false) {
             $tablename = $wpdb->prefix . $tablename;   
         }
+        return does_table_with_exact_name_exist( $tablename );
+    }
 
+    /**
+     * Check if the table exists.
+     * $tablename : exact name of table to check
+     * Returns true or false.
+     */
+    function does_table_with_exact_name_exist( $tablename ) {
+        global $wpdb;
         $res = $wpdb->get_results($wpdb->prepare(
                 "SELECT COUNT(*) AS count
                    FROM information_schema.tables
@@ -1282,9 +1352,6 @@ error_log(var_export($_POST, TRUE));
      */
     function does_routine_exist( $routineName ) {
         global $wpdb;
-        if (strpos($routineName, $wpdb->prefix) === false) {
-            $routineName = $wpdb->prefix . $routineName;   
-        }
 
         $res = $wpdb->get_results($wpdb->prepare(
                 "SELECT COUNT(*) AS count

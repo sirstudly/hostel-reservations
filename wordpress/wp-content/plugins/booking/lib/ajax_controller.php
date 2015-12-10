@@ -114,6 +114,26 @@ class AjaxController {
                 $this->run_unit_tests();
                 break;
 
+            case  'ADD_CLEANER':
+                $this->add_cleaner();
+                break;
+
+            case  'ADD_CLEANER_BED_ASSIGNMENT':
+                $this->add_cleaner_bed_assignment();
+                break;
+
+            case  'ACKNOWLEDGE_GUEST_COMMENT':
+                $this->acknowledge_guest_comment();
+                break;
+
+            case  'UNACKNOWLEDGE_GUEST_COMMENT':
+                $this->unacknowledge_guest_comment();
+                break;
+
+            case 'UPDATE_GUEST_COMMENTS_VIEW':
+                $this->update_guest_comments_report_view();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -620,6 +640,125 @@ error_log("done unit tests: $msg");
         echo $msg;
 
     }
+
+    /**
+     * Adds a new cleaner.
+     * Requires POST variables:
+     *   first_name : cleaner name
+     *   last_name : cleaner name
+     */
+    function add_cleaner() {
+        $firstName = $_POST['first_name'];
+        $lastName = $_POST['last_name'];
+error_log("in ajax_controller.add_cleaner"); 
+        if(isset($_SESSION['CLEANER_BED_CONTROLLER'])) {
+error_log("in ajax_controller.add_cleaner controller set"); 
+            $cleanerBedPage = $_SESSION['CLEANER_BED_CONTROLLER'];
+            $cleanerBedPage->addCleaner($firstName, $lastName);
+            echo $cleanerBedPage->toHtml();
+        }
+    }
+
+    /**
+     * Adds a new bed assignment for a cleaner.
+     * Requires POST variables:
+     *   cleaner_id : id of cleaner
+     *   room_id : id of room
+     *   checkin_date : date checking in YYYY-mm-dd
+     *   checkout_date : date checking out YYYY-mm-dd
+     */
+    function add_cleaner_bed_assignment() {
+error_log("in ajax_controller.add_cleaner_bed_assignment"); 
+        if(isset($_SESSION['CLEANER_BED_CONTROLLER'])) {
+error_log("in ajax_controller.add_cleaner_bed_assignment controller set"); 
+            $cleanerBedPage = $_SESSION['CLEANER_BED_CONTROLLER'];
+
+error_log("cleaner_id: ".$_POST['cleaner_id']); 
+error_log("room_id: ".$_POST['room_id']); 
+error_log("checkin: ".$_POST['checkin_date']); 
+error_log("checkout: ".$_POST['checkout_date']); 
+
+            if( empty( $_POST['cleaner_id'] )) {
+                throw new ValidationException( "cleaner_id not defined" );
+            }
+
+            // save what was POSTed so we can redisplay it to the user
+            $cleaner = $cleanerBedPage->getCleaner( $_POST['cleaner_id'] );
+            $cleaner->clearErrors();
+            $cleaner->setEditingRoomId( $_POST['room_id'] );
+            $cleaner->setEditingCheckinDate( $_POST['checkin_date'] );
+            $cleaner->setEditingCheckoutDate( $_POST['checkout_date'] );
+
+            // validation
+            $DATE_REGEX = '/[0-9]{4}-[0-9]{2}-[0-9]{2}/';
+            if( false == preg_match( $DATE_REGEX, $_POST['checkin_date'] ) ) {
+                $cleaner->addErrorMessage( 'checkin_date', 'Dates should be in YYYY-MM-DD format' );
+            }
+            if( false == preg_match( $DATE_REGEX, $_POST['checkout_date'] ) ) {
+                $cleaner->addErrorMessage( 'checkout_date', 'Dates should be in YYYY-MM-DD format' );
+            }
+
+            if( empty( $_POST['room_id'] )) {
+                $cleaner->addErrorMessage( 'room_id', "room not defined" );
+            }
+
+            $checkinDate = DateTime::createFromFormat('Y-m-d', $_POST['checkin_date']);
+            $checkoutDate = DateTime::createFromFormat('Y-m-d', $_POST['checkout_date']);
+
+            if( false === $cleaner->hasErrors() ) {
+                $cleanerBedPage->addCleanerBedAssignment(
+                    $_POST['cleaner_id'],
+                    $_POST['room_id'],
+                    $checkinDate,
+                    $checkoutDate);
+            }
+            echo $cleanerBedPage->toHtml();
+        }
+    }
+
+    /**
+     * Acknowledges a guest comment.
+     * Requires POST variables:
+     *   reservation_id : ID of LH reservation
+     */
+    function acknowledge_guest_comment() {
+        $reservationId = $_POST['reservation_id'];
+        if(isset($_SESSION['GUEST_COMMENTS_CONTROLLER'])) {
+            $commentPage = $_SESSION['GUEST_COMMENTS_CONTROLLER'];
+            $commentPage->acknowledgeComment( $reservationId );
+        }
+    }
+
+    /**
+     * Unacknowledges a guest comment.
+     * Requires POST variables:
+     *   reservation_id : ID of LH reservation
+     */
+    function unacknowledge_guest_comment() {
+        $reservationId = $_POST['reservation_id'];
+        if(isset($_SESSION['GUEST_COMMENTS_CONTROLLER'])) {
+            $commentPage = $_SESSION['GUEST_COMMENTS_CONTROLLER'];
+            $commentPage->unacknowledgeComment( $reservationId );
+        }
+    }
+
+    /**
+     * Updates the guest comments report table.
+     * Requires POST variables:
+     *   include_acknowledged : true to include acknowledged comments
+     */
+    function update_guest_comments_report_view() {
+        $includeAcknowledged = $_POST['include_acknowledged'];
+        $commentPage = new LHGuestCommentsReportData();
+        $commentPage->doView( $includeAcknowledged == 'true' );
+
+        ?> 
+        <script type="text/javascript">
+            document.getElementById('guest_comments_rpt').innerHTML = <?php echo json_encode($commentPage->toHtml()); ?>;
+        </script>
+        <?php
+    }
+
 }
 
 ?>

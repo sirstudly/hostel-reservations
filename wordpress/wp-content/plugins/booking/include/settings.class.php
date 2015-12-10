@@ -26,10 +26,12 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('editbookingurl', get_option('hbo_editbooking_url')));
         $xmlRoot->appendChild($domtree->createElement('resourcesurl', get_option('hbo_resources_url')));
         $xmlRoot->appendChild($domtree->createElement('housekeepingurl', get_option('hbo_housekeeping_url')));
+        $xmlRoot->appendChild($domtree->createElement('cleaner_bed_assign_url', get_option('hbo_cleaner_bed_assign_url')));
         $xmlRoot->appendChild($domtree->createElement('split_room_report_url', get_option('hbo_split_room_report_url')));
         $xmlRoot->appendChild($domtree->createElement('unpaid_deposit_report_url', get_option('hbo_unpaid_deposit_report_url')));
         $xmlRoot->appendChild($domtree->createElement('group_bookings_report_url', get_option('hbo_group_bookings_report_url')));
         $xmlRoot->appendChild($domtree->createElement('booking_diffs_report_url', get_option('hbo_booking_diffs_report_url')));
+        $xmlRoot->appendChild($domtree->createElement('guest_comments_report_url', get_option('hbo_guest_comments_report_url')));
         $xmlRoot->appendChild($domtree->createElement('bedcounts_url', get_option('hbo_bedcounts_url')));
         $xmlRoot->appendChild($domtree->createElement('redirect_to_url', get_option('hbo_redirect_to_url')));
         $xmlRoot->appendChild($domtree->createElement('delete_on_deactivate', get_option('hbo_delete_db_on_deactivate')));
@@ -46,10 +48,12 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_editbooking_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_resources_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_housekeeping_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_cleaner_bed_assign_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_split_room_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_unpaid_deposit_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_group_bookings_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_booking_diffs_report_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_guest_comments_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_bedcounts_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_redirect_to_url');
 

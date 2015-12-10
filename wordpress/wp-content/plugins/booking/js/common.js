@@ -410,3 +410,85 @@ function run_unit_tests(submit_form){
     });
 }
     
+// this will add a new cleaner.
+function add_cleaner() {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_respond').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'ADD_CLEANER',
+            first_name : document.getElementById('first_name').value,
+            last_name : document.getElementById('last_name').value
+        }
+    });
+}
+
+// this will add a new bed assignment for a cleaner
+function add_cleaner_bed_assignment(cleaner_id, room_id, checkin_date, checkout_date) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_respond').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'ADD_CLEANER_BED_ASSIGNMENT',
+            cleaner_id : cleaner_id,
+            room_id : room_id,
+            checkin_date : checkin_date,
+            checkout_date : checkout_date
+        }
+    });
+}
+
+// guest comments report
+// reservation_id : id of LH reservation to confirm
+function acknowledge_guest_comment( reservation_id ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){ /* no update to page */ },
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'ACKNOWLEDGE_GUEST_COMMENT',
+            reservation_id : reservation_id
+        }
+    });
+}
+
+// guest comments report
+// reservation_id : id of LH reservation to unconfirm
+function unacknowledge_guest_comment( reservation_id ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){ /* no update to page */ },
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'UNACKNOWLEDGE_GUEST_COMMENT',
+            reservation_id : reservation_id
+        }
+    });
+}
+
+// updates the guest comments report view
+// include_acknowledged : true to include acknowledged comments
+function update_guest_comments_report_view( include_acknowledged ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_respond').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'UPDATE_GUEST_COMMENTS_VIEW',
+            include_acknowledged : include_acknowledged
+        }
+    });
+}
+

@@ -59,6 +59,10 @@
                                         <td><input id="housekeeping_url"  name="hbo_housekeeping_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{housekeepingurl}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="housekeeping_url">Cleaner Bed Assignments Page</label></th>
+                                        <td><input id="hbo_cleaner_bed_assign_url"  name="hbo_cleaner_bed_assign_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{cleaner_bed_assign_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="redirect_to_url">Redirect Page</label></th>
                                         <td><input id="redirect_to_url"  name="hbo_redirect_to_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{redirect_to_url}" /></td>
                                     </tr>  
@@ -81,6 +85,10 @@
                                     <tr valign="top">
                                         <th scope="row"><label for="booking_diffs_report_url">Booking Engine Discrepancy Report</label></th>
                                         <td><input id="booking_diffs_report_url"  name="hbo_booking_diffs_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{booking_diffs_report_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="guest_comments_report_url">Guest Comments</label></th>
+                                        <td><input id="guest_comments_report_url"  name="hbo_guest_comments_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{guest_comments_report_url}" /></td>
                                     </tr>  
                                     <tr valign="top"><td colspan="2"><div style="border-bottom:1px solid #cccccc;"><xsl:comment/></div></td></tr>
                                     <tr valign="top"> 
