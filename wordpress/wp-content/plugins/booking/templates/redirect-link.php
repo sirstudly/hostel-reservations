@@ -9,7 +9,7 @@
 
   if (sizeof($url_path) > 1) {
     if ($url_path[1] === "HW_CustID" && sizeof($url_path) > 2) {
-      $link = "https://secure.hostelworld.com/bookings/bookingdetails.php?CustID=".$url_path[2];
+      $link = "https://inbox.hostelworld.com/booking/view/".$url_path[2];
     }
     elseif ($url_path[1] === "HW_ListBookingsByArrivalDate" && sizeof($url_path) > 2) {
       $link = "https://secure.hostelworld.com/inbox/bookings/searchresults.php?StartDate=".$url_path[2]."&EndDate=".$url_path[2]."&Category=ArrivalDate&Type=arrivaldate";
