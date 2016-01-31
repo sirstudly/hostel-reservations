@@ -10,6 +10,8 @@ class LHBookingsDiffsReport extends XslTransform {
     private $bookingDiffsReport;  // the view of the latest report
     private $lastCompletedJob; // date/time of last completed job for selectionDate
     private $isRefreshJobInProgress = false;
+    private $lastJob; // the last job (status) of this type that run
+    private $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
 
     /**
      * Default constructor.
@@ -29,6 +31,13 @@ class LHBookingsDiffsReport extends XslTransform {
                 $this->selectionDate, $this->lastCompletedJob->job_id );
         }
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
+
+        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
+        if( $this->lastJob ) {
+            $this->isLastFailedJobDueToCredentials = 
+                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
+                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
+        }
     }
 
     /**
@@ -57,6 +66,12 @@ class LHBookingsDiffsReport extends XslTransform {
 
         if( $this->isRefreshJobInProgress ) {
             $parentElement->appendChild($domtree->createElement('job_in_progress', 'true' ));
+        }
+
+        // did the last job fail to run?
+        if( $this->lastJob ) {
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
         }
 
         $parentElement->appendChild($domtree->createElement('selection_date_long', 

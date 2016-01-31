@@ -134,6 +134,18 @@ class AjaxController {
                 $this->update_guest_comments_report_view();
                 break;
 
+            case 'SAVE_LITTLE_HOTELIER_SETTINGS':
+                $this->saveLittleHotelierSettings();
+                break;
+
+            case 'SAVE_HOSTELWORLD_SETTINGS':
+                $this->saveHostelworldSettings();
+                break;
+
+            case 'SAVE_HOSTELBOOKERS_SETTINGS':
+                $this->saveHostelbookersSettings();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -759,6 +771,104 @@ error_log("checkout: ".$_POST['checkout_date']);
         <?php
     }
 
+    /**
+     * Updates the username, password for little hotelier.
+     * Requires POST variables:
+     *   username : LH username
+     *   password : LH password
+     */
+    function saveLittleHotelierSettings() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->saveLittleHotelierSettings( 
+                $_POST['username'], $_POST['password'] );
+
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_lh")
+                     .html('Settings saved successfully.')
+                     .css({ 'color': 'green' });
+                jQuery("#btn_save_lilho").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_lh")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_lilho").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Updates the username, password for hostelworld.
+     * Requires POST variables:
+     *   username : HW username
+     *   password : HW password
+     */
+    function saveHostelworldSettings() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->saveHostelworldSettings( 
+                $_POST['username'], $_POST['password'] );
+
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_hw")
+                     .html('Settings saved successfully.')
+                     .css({ 'color': 'green' });
+                jQuery("#btn_save_hw").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_hw")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_hw").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Updates the username, password for hostelbookers.
+     * Requires POST variables:
+     *   username : HW username
+     *   password : HW password
+     */
+    function saveHostelbookersSettings() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->saveHostelbookersSettings( 
+                $_POST['username'], $_POST['password'] );
+
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_hb")
+                     .html('Settings saved successfully.')
+                     .css({ 'color': 'green' });
+                jQuery("#btn_save_hb").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_hb")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_hb").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
 }
 
 ?>

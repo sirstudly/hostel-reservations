@@ -99,6 +99,7 @@ class LilHotelierDBO {
 
     /**
      * Inserts a new job with the given name at the status of 'submitted'.
+     * Returns the job id of the newly created job.
      * $jobName : classname of Job to create
      * $jobParams : (optional) associative array of param name => param value for Job
      */
@@ -122,6 +123,7 @@ class LilHotelierDBO {
                 throw new DatabaseException( $wpdb->last_error );
             }
         }
+        return $jobId;
     }
 
     /**
@@ -279,7 +281,7 @@ class LilHotelierDBO {
      */
     static function insertAllocationScraperJob() {
         $startDate = new DateTime();
-        self::insertJobOfType( 'com.macbackpackers.jobs.AllocationScraperJob',
+        return self::insertJobOfType( 'com.macbackpackers.jobs.AllocationScraperJob',
             array( "start_date" => $startDate->format('Y-m-d'),
                    "days_ahead" => '140' ) ); // get data for next 4-5 months
     }
@@ -290,7 +292,40 @@ class LilHotelierDBO {
      * Throws DatabaseException on insert error
      */
     static function insertGuestCommentsReportJob() {
-        self::insertJobOfType( 'com.macbackpackers.jobs.GuestCommentsReportJob');
+        return self::insertJobOfType( 'com.macbackpackers.jobs.GuestCommentsReportJob');
+    }
+
+    /**
+     * Inserts a new UpdateLittleHotelierSettingsJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertUpdateLittleHotelierSettingsJob( $username, $password ) {
+        return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateLittleHotelierSettingsJob',
+            array( "username" => $username,
+                   "password" => $password ) );
+    }
+
+    /**
+     * Inserts a new UpdateHostelworldSettingsJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertUpdateHostelworldSettingsJob( $username, $password ) {
+        return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateHostelworldSettingsJob',
+            array( "username" => $username,
+                   "password" => $password ) );
+    }
+
+    /**
+     * Inserts a new UpdateHostelbookersSettingsJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertUpdateHostelbookersSettingsJob( $username, $password ) {
+        return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateHostelbookersSettingsJob',
+            array( "username" => $username,
+                   "password" => $password ) );
     }
 
     /**
@@ -412,6 +447,52 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns the resultset (job_id, status) of the last job that ran.
+     * Returns null if job has never run before.
+     * $jobName : (class)name of job
+     */
+    static function getStatusOfLastJob( $jobName ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT job_id, status
+                  FROM ".$wpdb->prefix."lh_jobs
+                 WHERE classname = %s
+                   AND job_id = (SELECT MAX(job_id) 
+                                   FROM ".$wpdb->prefix."lh_jobs 
+				                  WHERE classname = %s
+                                    AND status NOT IN (%s, %s))",  
+                $jobName, $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return empty($resultset) ? null : array_shift($resultset);
+    }
+
+    /**
+     * This is probably not the best way to do this, but it'll do for now.
+     * Sift through the log messages for the given job and look for the
+     * error message where LH credentials don't seem to be valid.
+     * Returns true if error message found, false otherwise.
+     */
+    static function isCredentialsValidErrorMessageForJob( $jobId ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT 1 FROM log4j_data 
+                 WHERE job_id = %d 
+                   AND ( message = 'Current credentials not valid?'
+                         OR stacktrace LIKE '%%Incorrect password?%%')",  
+                $jobId ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return false == empty( $resultset );
+    }
+
+    /**
      * Returns the date of the last allocation scraper job that
      * ran succesfully before then given date or null if none found.
      *
@@ -489,6 +570,33 @@ class LilHotelierDBO {
             return null;
         }
         return $rec->end_date;
+    }
+
+    /**
+     * Returns the status of the given job.
+     * If job not found, this function will throw a DatabaseException.
+     * $jobId : id of job
+     */
+    static function getStatusOfJob( $jobId ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+               "SELECT status
+                  FROM ".$wpdb->prefix."lh_jobs 
+                 WHERE job_id = %d",  
+                $jobId ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // if empty, then no job exists
+        if(empty($resultset)) {
+            throw new DatabaseException( "Job $jobId not found." );
+        }
+
+        // return single row
+        $rec = array_shift($resultset);
+        return $rec->status;
     }
 
     /**
@@ -607,6 +715,11 @@ class LilHotelierDBO {
                  FROM ".$wpdb->prefix."hw_booking b
                  JOIN ".$wpdb->prefix."hw_booking_dates d ON b.id = d.hw_booking_id
                  JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = d.room_type_id
+	            -- this little hack on HB records forces those that have a corresponding record in HB to not be included (hopefully)
+                -- I *think* that HB records that are fully migrated (ie. have a HW record in LH) will show hw_persons as '2 Males' or '2 Mixed' etc.
+                -- whereas older HB records that are visible in HB site have a integer value of '2' or '1' in hw_persons
+	            WHERE (b.booking_source = 'Hostelbookers.com' AND CONCAT('', b.persons * 1) != b.persons ) -- persons is a whole number
+                   OR  b.booking_source != 'Hostelbookers.com'
                 GROUP BY b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons, b.payment_outstanding, d.persons, d.room_type_id, r.room_type, r.capacity
                HAVING MIN(d.booked_date) = %s -- checkin date
              ) y
@@ -617,7 +730,7 @@ class LilHotelierDBO {
                  FROM ".$wpdb->prefix."lh_calendar c 
                  JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = c.room_type_id
                 WHERE c.job_id = %d
-                  AND c.booking_source IN ('Hostelworld', 'Hostelbookers')
+                  AND ( c.booking_source = 'Hostelbookers' OR c.booking_source LIKE 'Hostelworld%%' )
                 GROUP BY c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity
              ) z ON CONCAT(IF(y.booking_source = 'Hostelbookers', 'HBK-', 'HWL-551-'), y.booking_reference) = z.booking_reference 
                 -- if there is only 1 room type, then match by booking ref only
@@ -770,6 +883,16 @@ class LilHotelierDBO {
     static function runProcessor() {
         if (substr(php_uname(), 0, 7) != "Windows") {
             $command = 'nohup /home/temperec/java2/run_processor_mini.sh > /dev/null 2>&1 &';
+            exec( $command );
+        }
+    }
+
+    /**
+     * Executes the processor from the command line and waits for its completion.
+     */
+    static function runProcessorAndWait() {
+        if (substr(php_uname(), 0, 7) != "Windows") {
+            $command = '/home/temperec/java2/run_processor_mini.sh > /dev/null 2>&1';
             exec( $command );
         }
     }

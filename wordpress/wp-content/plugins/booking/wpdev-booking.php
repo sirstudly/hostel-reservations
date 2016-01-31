@@ -138,6 +138,12 @@ A c t u a l   T O D O   List:
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/database_exception.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/database_exception.class.php' ); }
 
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/validation_exception.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/validation_exception.class.php' ); }
+
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/processing_exception.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/processing_exception.class.php' ); }
+
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/db_transaction.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/db_transaction.class.php' ); }
 
@@ -206,6 +212,9 @@ A c t u a l   T O D O   List:
 
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_guest_comments_report.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_guest_comments_report.class.php' ); }
+
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_report_settings.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_report_settings.class.php' ); }
 
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lil_hotelier_dbo.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lil_hotelier_dbo.class.php' ); }

@@ -5,9 +5,13 @@
  */
 class LHGroupBookingsReport extends XslTransform {
 
+    const JOB_TYPE = "com.macbackpackers.jobs.AllocationScraperJob";
+
     var $groupBookingsReport;  // the view of the latest report
     var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
     var $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job
+    var $lastJob; // the last job (status) of this type that run
+    var $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
 
     /**
      * Default constructor.
@@ -23,6 +27,13 @@ class LHGroupBookingsReport extends XslTransform {
         $this->groupBookingsReport = LilHotelierDBO::getGroupBookingsReport();
         $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
         $this->lastCompletedAllocScraperJob = LilHotelierDBO::getLastCompletedAllocationScraperJob();
+
+        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
+        if( $this->lastJob ) {
+            $this->isLastFailedJobDueToCredentials = 
+                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
+                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
+        }
     }
 
     /**
@@ -42,13 +53,19 @@ class LHGroupBookingsReport extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {
 
         if( $this->lastSubmittedAllocScraperJob ) {
-            $recordRoot = $parentElement->appendChild($domtree->createElement('last_submitted_job', 
+            $parentElement->appendChild($domtree->createElement('last_submitted_job', 
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastSubmittedAllocScraperJob)->format('D, d M Y H:i:s')));
         }
 
         if( $this->lastCompletedAllocScraperJob ) {
             $parentElement->appendChild($domtree->createElement('last_completed_job', 
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedAllocScraperJob)->format('D, d M Y H:i:s')));
+        }
+
+        // did the last job fail to run?
+        if( $this->lastJob ) {
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
         }
 
         if ( $this->groupBookingsReport ) {

@@ -112,9 +112,21 @@ td.cancelled a {
             </div>
     
             <div class="control-group" style="float:left;">
-                <p class="help-block" style="float:left;padding-left:5px;font-style: italic;">
+                <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
                     <xsl:if test="last_completed_job">
                         This report aggregates data as it appeared on <xsl:value-of select="last_completed_job"/>.
+                    </xsl:if>
+                    <xsl:if test="last_job_status = 'failed'">
+                        <div style="color: red;">The last update of this report failed to run.
+                            <xsl:choose>
+                                <xsl:when test="check_credentials = 'true'">
+                                    Have any of the LH/HW/HB passwords changed recently? If so, update it on the admin page.
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    Check the log for details.
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </div>
                     </xsl:if>
                 </p>
             </div>

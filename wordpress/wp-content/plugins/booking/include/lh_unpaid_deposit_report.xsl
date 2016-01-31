@@ -66,10 +66,22 @@ tr.unread {
         <form  name="report_form" action="" method="post" id="report_form"  class="form-inline">
 
             <div class="control-group" style="float:left;">
-                <p class="help-block" style="float:left;padding-left:5px;font-style: italic;">
+                <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
                     <xsl:if test="last_completed_job">
                         This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
                         It is automatically run daily at 10:50pm.
+                    </xsl:if>
+                    <xsl:if test="last_job_status = 'failed'">
+                        <div style="color: red;">The last update of this report failed to run.
+                            <xsl:choose>
+                                <xsl:when test="check_credentials = 'true'">
+                                    Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    Check the log for details.
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </div>
                     </xsl:if>
                 </p>
             </div>

@@ -10,6 +10,8 @@ class HouseKeeping extends XslTransform {
     var $bedsheetView;  // the view of the current bedsheet counts on $selectionDate
     var $jobInfo; // latest COMPLETED job we will show the report on
     var $isRefreshJobInProgress = false;
+    var $lastJob; // the last job (status) of this type that run
+    var $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
 
     const JOB_TYPE = "com.macbackpackers.jobs.HousekeepingJob";
     
@@ -52,6 +54,13 @@ class HouseKeeping extends XslTransform {
         }
 
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
+
+        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
+        if( $this->lastJob ) {
+            $this->isLastFailedJobDueToCredentials = 
+                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
+                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
+        }
     }
 
     /** 
@@ -139,6 +148,12 @@ class HouseKeeping extends XslTransform {
 
         if( $this->isRefreshJobInProgress ) {
             $parentElement->appendChild($domtree->createElement('job_in_progress', 'true' ));
+        }
+
+        // did the last job fail to run?
+        if( $this->lastJob ) {
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
         }
 
         if ( $this->bedsheetView ) {

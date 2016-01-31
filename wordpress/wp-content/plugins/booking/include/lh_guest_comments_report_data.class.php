@@ -8,11 +8,13 @@ class LHGuestCommentsReportData extends XslTransform {
     var $guestCommentsReport;  // the view of the latest report
     var $lastSubmittedJob; // date/time of last submitted report job that hasn't run yet
     var $lastCompletedJob; // date/time of last completed job
-    var $lastFailedJob; // date/time of last failed job
     var $includeAcknowledged = FALSE; // true to include acknowledged comments
 
     // this is the job we're interested in
     const JOB_TYPE = 'com.macbackpackers.jobs.GuestCommentsReportJob';
+
+    // this is the job this report is depended on
+    const ALLOC_SCRAPER_JOB_TYPE = "com.macbackpackers.jobs.AllocationScraperJob";
 
     /**
      * Default constructor.
@@ -31,7 +33,13 @@ class LHGuestCommentsReportData extends XslTransform {
         $this->filterGuestCommentsReport();
         $this->lastCompletedJob = LilHotelierDBO::getLastCompletedJob( self::JOB_TYPE );
         $this->lastSubmittedJob = LilHotelierDBO::getDateTimeOfLastOutstandingJob( self::JOB_TYPE );
-        $this->lastFailedJob = LilHotelierDBO::getLastFailedJob( self::JOB_TYPE );
+
+        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::ALLOC_SCRAPER_JOB_TYPE );
+        if( $this->lastJob ) {
+            $this->isLastFailedJobDueToCredentials = 
+                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
+                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
+        }
     }
 
     /**
@@ -92,13 +100,13 @@ class LHGuestCommentsReportData extends XslTransform {
             $parentElement->appendChild($domtree->createElement('last_completed_job', 
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedJob)->format('D, d M Y H:i:s')));
         }
-        if( $this->lastFailedJob ) {
-            // only include failed job if it occurs *after* the last completed job
-            if( $this->lastCompletedJob == NULL || $this->lastFailedJob > $this->lastCompletedJob ) {
-                $parentElement->appendChild($domtree->createElement('last_failed_job', 
-                    DateTime::createFromFormat('Y-m-d H:i:s', $this->lastFailedJob)->format('D, d M Y H:i:s')));
-            }
+
+        // did the last job fail to run?
+        if( $this->lastJob ) {
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
         }
+
         $parentElement->appendChild($domtree->createElement('show_acknowledged', $this->includeAcknowledged ? 'true' : 'false' ));
 
         if ( $this->guestCommentsReport ) {

@@ -54,6 +54,7 @@ class WP_HostelBackoffice {
         add_option('hbo_booking_diffs_report_url', 'reports/booking-diffs');
         add_option('hbo_bedcounts_url', 'reports/bedcounts');
         add_option('hbo_guest_comments_report_url', 'reports/guest-comments');
+        add_option('hbo_report_settings_url', 'admin/report-settings');
         add_option('hbo_redirect_to_url', 'redirect-to');
         self::build_db_schema();
         self::insert_site_pages();
@@ -76,6 +77,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_booking_diffs_report_url');
         delete_option('hbo_bedcounts_url');
         delete_option('hbo_guest_comments_report_url');
+        delete_option('hbo_report_settings_url');
         delete_option('hbo_redirect_to_url');
 
         self::delete_site_pages();
@@ -298,6 +300,16 @@ error_log($rpp->toXml());
             }
             echo $resources->toHtml();
         }
+    }
+
+    
+    /**
+     * Write the contents of the Report Settings page.
+     */
+    function content_of_report_settings_page() {
+        $s = new LHReportSettings();
+        $s->doView();
+        echo $s->toHtml();
     }
 
     /**
@@ -526,6 +538,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_booking_diffs_report_url'), 'booking-diffs.php');
         $this->do_redirect_for_page(get_option('hbo_bedcounts_url'), 'bedcounts.php');
         $this->do_redirect_for_page(get_option('hbo_guest_comments_report_url'), 'guest-comments.php');
+        $this->do_redirect_for_page(get_option('hbo_report_settings_url'), 'report-settings.php');
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
     }
 
@@ -1000,6 +1013,20 @@ error_log(var_export($_POST, TRUE));
               KEY `lh_rpt_gc_reservation` (`reservation_id`),
               UNIQUE (`reservation_id`)
             ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        // permissions for each individual setting
+        if ( false == $this->does_table_exist('options_permissions') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."options_permissions (
+                `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                `option_id` bigint(20) unsigned NOT NULL,
+                `role` varchar(255) NOT NULL,
+                `permission` varchar(255) NOT NULL, -- one of read, write
+                PRIMARY KEY (`id`),
+                UNIQUE (`option_id`, `role`, `permission`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }

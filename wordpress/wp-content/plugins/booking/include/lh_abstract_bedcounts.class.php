@@ -12,6 +12,8 @@ abstract class AbstractBedCounts extends XslTransform {
     protected $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job for selectionDate
     protected $bedcountData;  // array() of BedCountEntry
     protected $isRefreshJobInProgress = false;
+    protected $lastJob; // the last job (status) of this type that run
+    protected $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
 
     /**
      * Default constructor.
@@ -36,6 +38,13 @@ abstract class AbstractBedCounts extends XslTransform {
             $this->lastCompletedAllocScraperJob = $allocJobRec->end_date;
         }
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
+        
+        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
+        if( $this->lastJob ) {
+            $this->isLastFailedJobDueToCredentials = 
+                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
+                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
+        }
     }
     
     /**
@@ -56,6 +65,12 @@ abstract class AbstractBedCounts extends XslTransform {
 
         if( $this->isRefreshJobInProgress ) {
             $parentElement->appendChild($domtree->createElement('job_in_progress', 'true' ));
+        }
+
+        // did the last job fail to run?
+        if( $this->lastJob ) {
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
         }
 
         $xmlRoot = $parentElement->appendChild($domtree->createElement('bedcounts'));
@@ -96,6 +111,7 @@ abstract class AbstractBedCounts extends XslTransform {
         $domtree = new DOMDocument('1.0', 'UTF-8');
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
         $this->addSelfToDocument($domtree, $xmlRoot);
+error_log($domtree->saveXML());
         return $domtree->saveXML();
     }
 

@@ -492,3 +492,63 @@ function update_guest_comments_report_view( include_acknowledged ) {
     });
 }
 
+// saves the login details for little hotelier
+// username : LH username
+// password : LH password
+function save_little_hotelier_settings( username, password ) {
+
+    jQuery('#ajax_respond_lh').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_lh').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_LITTLE_HOTELIER_SETTINGS',
+            username : username,
+            password : password
+        }
+    });
+}
+
+// saves the login details for hostelworld
+// username : HW username
+// password : HW password
+function save_hostelworld_settings( username, password ) {
+
+    jQuery('#ajax_respond_hw').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_hw').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_HOSTELWORLD_SETTINGS',
+            username : username,
+            password : password
+        }
+    });
+}
+
+// saves the login details for hostelbookers
+// username : HB username
+// password : HB password
+function save_hostelbookers_settings( username, password ) {
+
+    jQuery('#ajax_respond_hb').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_hb').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_HOSTELBOOKERS_SETTINGS',
+            username : username,
+            password : password
+        }
+    });
+}
+

@@ -90,16 +90,22 @@
 
         <div class="control-group" style="float:left;">
             <xsl:if test="last_completed_job">
-                <p class="help-block" style="padding-left:5px;font-style: italic;">
+                <p class="help-block" style="padding-left:5px;font-style: italic; width: 100%">
                     This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
                     It is automatically run daily at 7:00am.
                 </p>
             </xsl:if>
-            <xsl:if test="last_failed_job">
-                <p style="color: #A33; padding-top: 10px;">
-                    !! This report failed the last time it was run at <xsl:value-of select="last_failed_job"/>. !!<br/> 
-                    Has the password changed recently?
-                </p>
+            <xsl:if test="last_job_status = 'failed'">
+                <div style="color: red;">The last update of this report failed to run.
+                    <xsl:choose>
+                        <xsl:when test="check_credentials = 'true'">
+                            Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                        </xsl:when>
+                        <xsl:otherwise>
+                            Check the log for details.
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
             </xsl:if>
         </div>
     

@@ -90,6 +90,10 @@
                                         <th scope="row"><label for="guest_comments_report_url">Guest Comments</label></th>
                                         <td><input id="guest_comments_report_url"  name="hbo_guest_comments_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{guest_comments_report_url}" /></td>
                                     </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="report_settings_url">Report Settings</label></th>
+                                        <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
+                                    </tr>  
                                     <tr valign="top"><td colspan="2"><div style="border-bottom:1px solid #cccccc;"><xsl:comment/></div></td></tr>
                                     <tr valign="top"> 
                                         <td colspan="2">

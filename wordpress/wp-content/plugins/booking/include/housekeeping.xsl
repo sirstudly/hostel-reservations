@@ -59,6 +59,18 @@ td.border_bottom {
                                     This report has never been updated for this date.
                                 </xsl:otherwise>
                             </xsl:choose>
+                            <xsl:if test="last_job_status = 'failed'">
+                                <div style="color: red;">The last update of this report failed to run.
+                                    <xsl:choose>
+                                        <xsl:when test="check_credentials = 'true'">
+                                            Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            Check the log for details.
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </div>
+                            </xsl:if>
                             <br/>It is re-run daily at 6:30am, 9:00am and 10:20am.
                             </p>
                         </div>
