@@ -15,11 +15,15 @@
 <style media="screen" type="text/css">
 
 #group_bookings_rpt tbody tr:nth-child(odd) td {
-	background-color: #e3e3e3
+	background-color: #e3e3e3;
 }
 
 tr.unread {
     font-weight: bold;
+}
+
+.six_bed_dorm {
+    color: #882e44;
 }
 
 </style>
@@ -69,8 +73,9 @@ tr.unread {
                 <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
                     <xsl:if test="last_completed_job">
                         This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
-                        It is automatically run daily at 10:50pm.
+                        It is automatically run daily at 10:50pm.<br/>
                     </xsl:if>
+                    <div class="six_bed_dorm">Bookings of 5 guests into 6 bed dorms are formatted like this. You'll probably want to email them to upgrade to a larger dorm or to book the entire room.</div>
                     <xsl:if test="last_job_status = 'failed'">
                         <div style="color: red;">The last update of this report failed to run.
                             <xsl:choose>
@@ -142,6 +147,7 @@ tr.unread {
     <tr>
         <xsl:attribute name="class">
             <xsl:if test="viewed_yn = 'N'">unread</xsl:if>
+            <xsl:if test="num_guests = 5">six_bed_dorm</xsl:if>
         </xsl:attribute>
         <td><a target="_blank"><xsl:attribute name="href">
                    https://emea.littlehotelier.com<xsl:value-of select="data_href"/>
