@@ -10,8 +10,7 @@ class LHUnpaidDepositReport extends XslTransform {
     var $unpaidDepositReport;  // the view of the latest unpaid deposit report
     var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
     var $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job
-    var $lastJob; // the last job (status) of this type that run
-    var $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
+    var $lastJob; // the last job of this type that has run
 
     /**
      * Default constructor.
@@ -27,13 +26,7 @@ class LHUnpaidDepositReport extends XslTransform {
         $this->unpaidDepositReport = LilHotelierDBO::getUnpaidDepositReport();
         $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
         $this->lastCompletedAllocScraperJob = LilHotelierDBO::getLastCompletedAllocationScraperJob();
-
-        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
-        if( $this->lastJob ) {
-            $this->isLastFailedJobDueToCredentials = 
-                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
-                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
-        }
+        $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
     }
 
     /**
@@ -64,8 +57,11 @@ class LHUnpaidDepositReport extends XslTransform {
 
         // did the last job fail to run?
         if( $this->lastJob ) {
-            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
-            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob['status'] ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->lastJob['lastJobFailedDueToCredentials'] ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_error_log', 
+                get_option('hbo_log_directory_url') . "/job-" . $this->lastJob['jobId'] . ".txt" ));
         }
 
         if ( $this->unpaidDepositReport ) {

@@ -97,7 +97,7 @@
                                     Has the LittleHotelier password changed recently? If so, update it on the admin page.
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    Check the log for details.
+                                    Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
                                 </xsl:otherwise>
                             </xsl:choose>
                         </div>

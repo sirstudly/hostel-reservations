@@ -12,8 +12,7 @@ abstract class AbstractBedCounts extends XslTransform {
     protected $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job for selectionDate
     protected $bedcountData;  // array() of BedCountEntry
     protected $isRefreshJobInProgress = false;
-    protected $lastJob; // the last job (status) of this type that run
-    protected $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
+    protected $lastJob; // the last job of this type that has run
 
     /**
      * Default constructor.
@@ -38,13 +37,7 @@ abstract class AbstractBedCounts extends XslTransform {
             $this->lastCompletedAllocScraperJob = $allocJobRec->end_date;
         }
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
-        
-        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
-        if( $this->lastJob ) {
-            $this->isLastFailedJobDueToCredentials = 
-                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
-                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
-        }
+        $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
     }
     
     /**
@@ -69,8 +62,11 @@ abstract class AbstractBedCounts extends XslTransform {
 
         // did the last job fail to run?
         if( $this->lastJob ) {
-            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
-            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob['status'] ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->lastJob['lastJobFailedDueToCredentials'] ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_error_log', 
+                get_option('hbo_log_directory_url') . "/job-" . $this->lastJob['jobId'] . ".txt" ));
         }
 
         $xmlRoot = $parentElement->appendChild($domtree->createElement('bedcounts'));
@@ -111,7 +107,6 @@ abstract class AbstractBedCounts extends XslTransform {
         $domtree = new DOMDocument('1.0', 'UTF-8');
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
         $this->addSelfToDocument($domtree, $xmlRoot);
-error_log($domtree->saveXML());
         return $domtree->saveXML();
     }
 

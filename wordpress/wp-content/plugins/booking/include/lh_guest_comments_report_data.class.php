@@ -9,6 +9,7 @@ class LHGuestCommentsReportData extends XslTransform {
     var $lastSubmittedJob; // date/time of last submitted report job that hasn't run yet
     var $lastCompletedJob; // date/time of last completed job
     var $includeAcknowledged = FALSE; // true to include acknowledged comments
+    var $lastJob; // the last job of this type that has run
 
     // this is the job we're interested in
     const JOB_TYPE = 'com.macbackpackers.jobs.GuestCommentsReportJob';
@@ -33,13 +34,7 @@ class LHGuestCommentsReportData extends XslTransform {
         $this->filterGuestCommentsReport();
         $this->lastCompletedJob = LilHotelierDBO::getLastCompletedJob( self::JOB_TYPE );
         $this->lastSubmittedJob = LilHotelierDBO::getDateTimeOfLastOutstandingJob( self::JOB_TYPE );
-
-        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::ALLOC_SCRAPER_JOB_TYPE );
-        if( $this->lastJob ) {
-            $this->isLastFailedJobDueToCredentials = 
-                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
-                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
-        }
+        $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::ALLOC_SCRAPER_JOB_TYPE );
     }
 
     /**
@@ -103,8 +98,11 @@ class LHGuestCommentsReportData extends XslTransform {
 
         // did the last job fail to run?
         if( $this->lastJob ) {
-            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
-            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob['status'] ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->lastJob['lastJobFailedDueToCredentials'] ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_error_log', 
+                get_option('hbo_log_directory_url') . "/job-" . $this->lastJob['jobId'] . ".txt" ));
         }
 
         $parentElement->appendChild($domtree->createElement('show_acknowledged', $this->includeAcknowledged ? 'true' : 'false' ));

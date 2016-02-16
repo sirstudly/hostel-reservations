@@ -10,8 +10,7 @@ class LHBookingsDiffsReport extends XslTransform {
     private $bookingDiffsReport;  // the view of the latest report
     private $lastCompletedJob; // date/time of last completed job for selectionDate
     private $isRefreshJobInProgress = false;
-    private $lastJob; // the last job (status) of this type that run
-    private $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
+    private $lastJob; // the last job of this type that has run
 
     /**
      * Default constructor.
@@ -31,13 +30,7 @@ class LHBookingsDiffsReport extends XslTransform {
                 $this->selectionDate, $this->lastCompletedJob->job_id );
         }
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
-
-        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
-        if( $this->lastJob ) {
-            $this->isLastFailedJobDueToCredentials = 
-                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
-                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
-        }
+        $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
     }
 
     /**
@@ -70,8 +63,11 @@ class LHBookingsDiffsReport extends XslTransform {
 
         // did the last job fail to run?
         if( $this->lastJob ) {
-            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
-            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob['status'] ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->lastJob['lastJobFailedDueToCredentials'] ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_error_log', 
+                get_option('hbo_log_directory_url') . "/job-" . $this->lastJob['jobId'] . ".txt" ));
         }
 
         $parentElement->appendChild($domtree->createElement('selection_date_long', 

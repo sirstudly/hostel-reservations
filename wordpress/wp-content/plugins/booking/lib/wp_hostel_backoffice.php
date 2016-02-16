@@ -56,6 +56,8 @@ class WP_HostelBackoffice {
         add_option('hbo_guest_comments_report_url', 'reports/guest-comments');
         add_option('hbo_report_settings_url', 'admin/report-settings');
         add_option('hbo_redirect_to_url', 'redirect-to');
+        add_option('hbo_log_directory', 'logs');
+        add_option('hbo_log_directory_url', 'logs');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -79,6 +81,8 @@ class WP_HostelBackoffice {
         delete_option('hbo_guest_comments_report_url');
         delete_option('hbo_report_settings_url');
         delete_option('hbo_redirect_to_url');
+        delete_option('hbo_log_directory');
+        delete_option('hbo_log_directory_url');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
@@ -1031,24 +1035,6 @@ error_log(var_export($_POST, TRUE));
             self::execute_simple_sql($simple_sql);
         }
 
-        if ( false == $this->does_table_with_exact_name_exist('log4j_data') ) {
-            $simple_sql = "CREATE TABLE log4j_data (
-             `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-             `job_id` VARCHAR(255) DEFAULT NULL,
-             `date_logged` DATETIME NOT NULL,
-             `location` VARCHAR(255) NOT NULL,
-             `log_level` VARCHAR(10) NOT NULL,
-             `message` TEXT,
-             `throwable` TEXT,
-             `stacktrace` TEXT,
-              PRIMARY KEY (`id`),
-              KEY `job_id_idx` (`job_id`),
-              KEY `date_idx` (`date_logged`)
-            ) ENGINE=InnoDB $charset_collate;";
-
-            self::execute_simple_sql($simple_sql);
-        }
-
         if ( false == $this->does_table_exist('lh_rooms') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rooms (
               `id` bigint(20) unsigned NOT NULL,
@@ -1077,7 +1063,6 @@ error_log(var_export($_POST, TRUE));
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_group_bookings");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_guest_comments");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rooms");
-            self::execute_simple_sql("DROP TABLE IF EXISTS log4j_data");
         }
     }
 

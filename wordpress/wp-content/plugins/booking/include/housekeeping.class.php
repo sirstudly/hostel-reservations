@@ -10,8 +10,7 @@ class HouseKeeping extends XslTransform {
     var $bedsheetView;  // the view of the current bedsheet counts on $selectionDate
     var $jobInfo; // latest COMPLETED job we will show the report on
     var $isRefreshJobInProgress = false;
-    var $lastJob; // the last job (status) of this type that run
-    var $isLastFailedJobDueToCredentials; // if $lastJob = failed, whether it is due to invalid credentials
+    var $lastJob; // the last job of this type that has run
 
     const JOB_TYPE = "com.macbackpackers.jobs.HousekeepingJob";
     
@@ -54,13 +53,7 @@ class HouseKeeping extends XslTransform {
         }
 
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
-
-        $this->lastJob = LilHotelierDBO::getStatusOfLastJob( self::JOB_TYPE );
-        if( $this->lastJob ) {
-            $this->isLastFailedJobDueToCredentials = 
-                $this->lastJob->status == LilHotelierDBO::STATUS_FAILED ? 
-                    LilHotelierDBO::isCredentialsValidErrorMessageForJob( $this->lastJob->job_id ) : null;
-        }
+        $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
     }
 
     /** 
@@ -152,8 +145,11 @@ class HouseKeeping extends XslTransform {
 
         // did the last job fail to run?
         if( $this->lastJob ) {
-            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob->status ));
-            $parentElement->appendChild($domtree->createElement('check_credentials', $this->isLastFailedJobDueToCredentials ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
+            $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob['status'] ));
+            $parentElement->appendChild($domtree->createElement('check_credentials', $this->lastJob['lastJobFailedDueToCredentials'] ? 'true' : 'false' ));
+            $parentElement->appendChild($domtree->createElement('last_job_error_log', 
+                get_option('hbo_log_directory_url') . "/job-" . $this->lastJob['jobId'] . ".txt" ));
         }
 
         if ( $this->bedsheetView ) {

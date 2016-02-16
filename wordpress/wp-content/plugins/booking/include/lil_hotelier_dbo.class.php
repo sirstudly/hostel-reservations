@@ -447,11 +447,16 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns the resultset (job_id, status) of the last job that ran.
-     * Returns null if job has never run before.
-     * $jobName : (class)name of job
+     * Returns the details for the last finished job.
+     * $jobName : the fully qualified name of the job
+     * Returns array with the following keys (or null if last job doesn't exist):
+     *   jobId : PK of job
+     *   status : job status
+     *   lastJobFailedDueToCredentials : true if status = 'failed' and failure due to incorrect credentials, false otherwise
      */
-    static function getStatusOfLastJob( $jobName ) {
+    static function getDetailsOfLastJob( $jobName ) {
+
+        // first, determine the status of the job
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT job_id, status
@@ -467,7 +472,17 @@ class LilHotelierDBO {
             throw new DatabaseException($wpdb->last_error);
         }
 
-        return empty($resultset) ? null : array_shift($resultset);
+        // no job has finished running yet
+        if( empty( $resultset )) {
+            return null;
+        }
+
+        $jobDetailsRow = array_shift($resultset);
+        return array(
+                'jobId' => $jobDetailsRow->job_id,
+                'status' => $jobDetailsRow->status,
+                'lastJobFailedDueToCredentials' => self::isCredentialsValidErrorMessageForJob( $jobDetailsRow->job_id )
+            );        
     }
 
     /**
@@ -477,19 +492,28 @@ class LilHotelierDBO {
      * Returns true if error message found, false otherwise.
      */
     static function isCredentialsValidErrorMessageForJob( $jobId ) {
-        global $wpdb;
-        $resultset = $wpdb->get_results($wpdb->prepare(
-               "SELECT 1 FROM log4j_data 
-                 WHERE job_id = %d 
-                   AND ( message = 'Current credentials not valid?'
-                         OR stacktrace LIKE '%%Incorrect password?%%')",  
-                $jobId ));
 
-        if($wpdb->last_error) {
-            throw new DatabaseException($wpdb->last_error);
+        if (substr(php_uname(), 0, 7) != "Windows") {
+            $logDirectory = get_option( 'hbo_log_directory' );
+            if( empty($logDirectory )) {
+                throw new ValidationException( "log_directory not specified" );
+            }
+
+            $command = "grep -q 'Current credentials not valid' $logDirectory/job-$jobId.txt";
+            $returnval = 0;
+            $output = array();
+            exec( $command, $output, $returnval );
+            if ( $returnval == 0 ) {
+                return true;
+            }
+
+            $command = "grep -q 'Incorrect password' $logDirectory/job-$jobId.txt";
+            exec( $command, $output, $returnval );
+            if ( $returnval == 0 ) {
+                return true;
+            }
         }
-
-        return false == empty( $resultset );
+        return false;
     }
 
     /**
