@@ -602,9 +602,18 @@ class LilHotelierDBO {
      * $jobId : id of job
      */
     static function getStatusOfJob( $jobId ) {
+        return self::getJobDetails( $jobId )->status;
+    }
+
+    /**
+     * Returns the properties of the given job.
+     * If job not found, this function will throw a DatabaseException.
+     * $jobId : id of job
+     */
+    static function getJobDetails( $jobId ) {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
-               "SELECT status
+               "SELECT job_id, classname, status, start_date, end_date
                   FROM ".$wpdb->prefix."lh_jobs 
                  WHERE job_id = %d",  
                 $jobId ));
@@ -619,8 +628,7 @@ class LilHotelierDBO {
         }
 
         // return single row
-        $rec = array_shift($resultset);
-        return $rec->status;
+        return array_shift($resultset);
     }
 
     /**
@@ -899,6 +907,49 @@ class LilHotelierDBO {
             $cleanerBeds[] = new LHBedAssignment($record->id, $record->room, $record->bed_name);
         }
         return $cleanerBeds;
+    }
+
+    /**
+     * Returns the wp_lh_jobs records for the past number of days in reverse chrono order.
+     * $numberOfDays : number of days to include in the past
+     */
+    static function getJobHistory( $numberOfDays ) {
+
+        // include those records from the given number of days
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT job_id, classname, status, start_date, end_date
+               FROM ".$wpdb->prefix."lh_jobs
+              WHERE last_updated_date > NOW() - INTERVAL %d DAY", $numberOfDays));
+
+        $jobHistories = array();
+        foreach( $resultset as $record ) {
+            $jobHistories[$record->job_id] = $record;
+        }
+
+        krsort($jobHistories); // sort by key (by reverse job_id)
+        return $jobHistories;
+    }
+
+    /**
+     * Returns the job parameters for the given job
+     * $jobId : PK of job
+     * Returns array keyed by job parameter name containing value
+     */
+    static function getJobParameters( $jobId ) {
+
+        // include those records from the given number of days
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT name, value
+               FROM ".$wpdb->prefix."lh_job_param
+              WHERE job_id = %d", $jobId));
+
+        $jobParams = array();
+        foreach( $resultset as $record ) {
+            $jobParams[$record->name] = $record->value;
+        }
+        return $jobParams;
     }
 
     /**

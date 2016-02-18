@@ -94,6 +94,18 @@
                                         <th scope="row"><label for="report_settings_url">Report Settings</label></th>
                                         <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
                                     </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="job_history_url">Job History</label></th>
+                                        <td><input id="job_history_url"  name="hbo_job_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{job_history_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="log_directory">Log Directory</label></th>
+                                        <td><input id="log_directory"  name="hbo_log_directory" class="regular-text code" type="text" style="width:350px;" size="145" value="{log_directory}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="log_directory_url">Log Directory URL</label></th>
+                                        <td><input id="log_directory_url"  name="hbo_log_directory_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{log_directory_url}" /></td>
+                                    </tr>  
                                     <tr valign="top"><td colspan="2"><div style="border-bottom:1px solid #cccccc;"><xsl:comment/></div></td></tr>
                                     <tr valign="top"> 
                                         <td colspan="2">

@@ -213,6 +213,9 @@ A c t u a l   T O D O   List:
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_guest_comments_report.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_guest_comments_report.class.php' ); }
 
+    if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_job_history.class.php')) 
+        { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_job_history.class.php' ); }
+
     if (file_exists(WPDEV_BK_PLUGIN_DIR. '/include/lh_report_settings.class.php')) 
         { require_once(WPDEV_BK_PLUGIN_DIR. '/include/lh_report_settings.class.php' ); }
 

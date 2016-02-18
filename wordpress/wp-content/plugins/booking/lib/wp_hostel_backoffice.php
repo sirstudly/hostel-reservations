@@ -58,6 +58,7 @@ class WP_HostelBackoffice {
         add_option('hbo_redirect_to_url', 'redirect-to');
         add_option('hbo_log_directory', 'logs');
         add_option('hbo_log_directory_url', 'logs');
+        add_option('hbo_job_history_url', 'admin/job-history');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -83,6 +84,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_redirect_to_url');
         delete_option('hbo_log_directory');
         delete_option('hbo_log_directory_url');
+        delete_option('hbo_job_history_url');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
@@ -306,7 +308,15 @@ error_log($rpp->toXml());
         }
     }
 
-    
+    /**
+     * Write the contents of the Job History page.
+     */
+    function content_of_job_history_page() {
+        $s = new LHJobHistory();
+        $s->doView();
+        echo $s->toHtml();
+    }
+
     /**
      * Write the contents of the Report Settings page.
      */
@@ -544,6 +554,7 @@ error_log(var_export($_POST, TRUE));
         $this->do_redirect_for_page(get_option('hbo_guest_comments_report_url'), 'guest-comments.php');
         $this->do_redirect_for_page(get_option('hbo_report_settings_url'), 'report-settings.php');
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
+        $this->do_redirect_for_page(get_option('hbo_job_history_url'), 'job-history.php');
     }
 
     /**
@@ -888,7 +899,6 @@ error_log(var_export($_POST, TRUE));
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
               PRIMARY KEY (`job_param_id`)
-            --  FOREIGN KEY (`job_id`) REFERENCES `wp_lh_jobs`(`job_id`)  -- removed cause of hibernate
             ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
@@ -915,7 +925,6 @@ error_log(var_export($_POST, TRUE));
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
               PRIMARY KEY (`job_param_id`)
-            --  FOREIGN KEY (`job_id`) REFERENCES `wp_lh_scheduled_jobs`(`id`) -- removed cause of hibernate
             ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
@@ -957,12 +966,38 @@ error_log(var_export($_POST, TRUE));
             self::execute_simple_sql($simple_sql);
         }
 
+        // reporting table for reservations split across multiple rooms of the same type
+        if ( false == $this->does_table_exist('lh_rpt_split_rooms') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rpt_split_rooms (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `job_id` bigint(20) unsigned NOT NULL,
+              `reservation_id` bigint(20) unsigned DEFAULT NULL,
+              `guest_name` TEXT,
+              `checkin_date` datetime NOT NULL,
+              `checkout_date` datetime NOT NULL,
+              `data_href` varchar(255) DEFAULT NULL,
+              `lh_status` varchar(50) DEFAULT NULL,
+              `booking_reference` varchar(50) DEFAULT NULL,
+              `booking_source` varchar(50) DEFAULT NULL,
+              `booked_date` timestamp NULL DEFAULT NULL,
+              `eta` varchar(50) DEFAULT NULL,
+              `notes` text,
+              `viewed_yn` char(1) DEFAULT NULL,
+              `created_date` timestamp NULL DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `job_id_idx` (`job_id`),
+              FOREIGN KEY (`job_id`) REFERENCES ".$wpdb->prefix ."lh_jobs(`job_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
         // bookings where no deposit had been paid yet
         if ( false == $this->does_table_exist('lh_rpt_unpaid_deposit') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rpt_unpaid_deposit (
               `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
               `job_id` bigint(20) unsigned NOT NULL,
-              `guest_name` varchar(255) DEFAULT NULL,
+              `guest_name` TEXT,
               `checkin_date` datetime NOT NULL,
               `checkout_date` datetime NOT NULL,
               `payment_total` decimal(10,2) DEFAULT NULL,
@@ -975,7 +1010,7 @@ error_log(var_export($_POST, TRUE));
               `created_date` timestamp NULL DEFAULT NULL,
               PRIMARY KEY (`id`),
               KEY `job_id_idx` (`job_id`),
-              FOREIGN KEY (`job_id`) REFERENCES `wp_lh_jobs`(`job_id`)
+              FOREIGN KEY (`job_id`) REFERENCES ".$wpdb->prefix ."lh_jobs(`job_id`)
             ) ENGINE=InnoDB $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
@@ -986,7 +1021,7 @@ error_log(var_export($_POST, TRUE));
               `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
               `job_id` bigint(20) unsigned NOT NULL,
               `reservation_id` bigint(20) unsigned DEFAULT NULL,
-              `guest_name` varchar(255) DEFAULT NULL,
+              `guest_name` TEXT,
               `booking_reference` varchar(50) DEFAULT NULL,
               `booking_source` varchar(50) DEFAULT NULL,
               `checkin_date` datetime NOT NULL,
@@ -999,7 +1034,7 @@ error_log(var_export($_POST, TRUE));
               `viewed_yn` char(1) DEFAULT NULL,
               PRIMARY KEY (`id`),
               KEY `job_id_idx` (`job_id`),
-              FOREIGN KEY (`job_id`) REFERENCES `wp_lh_jobs`(`job_id`)
+              FOREIGN KEY (`job_id`) REFERENCES ".$wpdb->prefix ."lh_jobs(`job_id`)
             ) ENGINE=InnoDB $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
@@ -1054,14 +1089,15 @@ error_log(var_export($_POST, TRUE));
     function teardown_lh_schema( $delete_data ) {
         global $wpdb;
         if( $delete_data ) {
-            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_job_param");
-            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_jobs");
-            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_job_param");
-            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_jobs");
-            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_calendar");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_split_rooms");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_unpaid_deposit");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_group_bookings");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_guest_comments");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_job_param");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_jobs");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_calendar");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_job_param");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_jobs");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rooms");
         }
     }

@@ -34,8 +34,11 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('guest_comments_report_url', get_option('hbo_guest_comments_report_url')));
         $xmlRoot->appendChild($domtree->createElement('bedcounts_url', get_option('hbo_bedcounts_url')));
         $xmlRoot->appendChild($domtree->createElement('report_settings_url', get_option('hbo_report_settings_url')));
+        $xmlRoot->appendChild($domtree->createElement('job_history_url', get_option('hbo_job_history_url')));
         $xmlRoot->appendChild($domtree->createElement('redirect_to_url', get_option('hbo_redirect_to_url')));
         $xmlRoot->appendChild($domtree->createElement('delete_on_deactivate', get_option('hbo_delete_db_on_deactivate')));
+        $xmlRoot->appendChild($domtree->createElement('log_directory', get_option('hbo_log_directory')));
+        $xmlRoot->appendChild($domtree->createElement('log_directory_url', get_option('hbo_log_directory_url')));
     }
 
     /**
@@ -57,7 +60,10 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_guest_comments_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_bedcounts_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_report_settings_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_job_history_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_redirect_to_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory_url');
 
         update_option('hbo_delete_db_on_deactivate', isset($optionsArray['hbo_delete_db_on_deactivate']) ? 'On' : 'Off');
     }
