@@ -74,8 +74,6 @@ td.cancelled a {
                 <xsl:choose>
                     <xsl:when test="record">
                         <xsl:call-template name="report_data_hw"/>
-                        <div style="height:1px;clear:both;margin-top:30px;"><xsl:comment/></div>
-                        <xsl:call-template name="report_data_hb"/>
                     </xsl:when>
                     <xsl:otherwise>
                         <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
@@ -120,7 +118,7 @@ td.cancelled a {
                         <div style="color: red;">The last update of this report failed to run.
                             <xsl:choose>
                                 <xsl:when test="check_credentials = 'true'">
-                                    Have any of the LH/HW/HB passwords changed recently? If so, update it on the admin page.
+                                    Have any of the LH/HW passwords changed recently? If so, update it on the admin page.
                                 </xsl:when>
                                 <xsl:otherwise>
                                     Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
@@ -168,7 +166,7 @@ td.cancelled a {
     <table id="booking_diffs_rpt_hw" class="allocation_view booking_diffs_rpt" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
             <tr class="report_title_row">
-                <th colspan="13" class="report_title_cell">Hostelworld</th>
+                <th colspan="13" class="report_title_cell">Hostelworld / Hostelbookers</th>
             </tr>
             <tr>
                 <th colspan="6"><a target="_blank"><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/redirect-to/HW_ListBookingsByArrivalDate/<xsl:value-of select="selection_date"/></xsl:attribute>
@@ -197,57 +195,12 @@ td.cancelled a {
         </thead>
         <tbody>
             <xsl:if test="record">
-                <xsl:apply-templates select="record[booking_source != 'Hostelbookers']"/>
+                <xsl:apply-templates select="record"/>
             </xsl:if>
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="13">TOTAL: <xsl:value-of select="count(record[booking_source != 'Hostelbookers'])"/> records</td>
-            </tr>
-        </tfoot>
-    </table>
-</xsl:template>
-
-<!-- the main report body for Hostelbookers -->
-<xsl:template name="report_data_hb">
-    <table id="booking_diffs_rpt_hb" class="allocation_view booking_diffs_rpt" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <tr class="report_title_row">
-                <th colspan="13" class="report_title_cell">Hostelbookers</th>
-            </tr>
-            <tr>
-                <th colspan="6"><a target="_blank"><xsl:attribute name="href">https://admin.hostelbookers.com/backoffice/booking/index.cfm?fuseaction=search&amp;sub=query&amp;page=1&amp;searchType=Arrival&amp;strArrivalDateStart=<xsl:value-of select="selection_date_hb"/>&amp;strArrivalDateEnd=<xsl:value-of select="selection_date_hb"/>&amp;intArrivalStatusID=0&amp;intArrivalSourceID=0&amp;btnSubmit=Search</xsl:attribute>
-                    Hostelbookers</a>
-                </th>
-                <th></th>
-                <th colspan="6"><a target="_blank"><xsl:attribute name="href">https://emea.littlehotelier.com/extranet/properties/533/reservations?utf8=%E2%9C%93&amp;reservation_filter[guest_last_name]=&amp;reservation_filter[booking_reference_id]=HBK&amp;reservation_filter[date_type]=CheckIn&amp;reservation_filter[date_from_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_from]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[date_to_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_to]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[status]=&amp;commit=Search</xsl:attribute>
-                    Little Hotelier</a>
-                </th>
-            </tr>
-            <tr>
-            <th>Guest Name(s)</th>
-            <th>Room Type</th>
-            <th>Checkin Date</th>
-            <th>Checkout Date</th>
-            <th>Number of<br/>Guests</th>
-            <th>Payment Outstanding</th>
-            <th>HB Booking<br/>Reference</th>
-            <th>Room Type</th>
-            <th>Checkin Date</th>
-            <th>Checkout Date</th>
-            <th>Number of<br/>Guests</th>
-            <th>Payment Outstanding</th>
-            <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            <xsl:if test="record">
-                <xsl:apply-templates select="record[booking_source = 'Hostelbookers']"/>
-            </xsl:if>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="13">TOTAL: <xsl:value-of select="count(record[booking_source = 'Hostelbookers'])"/> records</td>
+                <td colspan="13">TOTAL: <xsl:value-of select="count(record)"/> records</td>
             </tr>
         </tfoot>
     </table>
@@ -259,14 +212,7 @@ td.cancelled a {
         <td>
             <a target="_blank">
                 <xsl:attribute name="href">
-                    <xsl:choose>
-                        <xsl:when test="booking_source = 'Hostelbookers'">
-                            <xsl:text>https://admin.hostelbookers.com/backoffice/booking/?fuseaction=detail&amp;i_id=</xsl:text><xsl:value-of select="substring(booking_reference, 6)"/><xsl:text>&amp;mode=search</xsl:text>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:value-of select="../homeurl"/>/redirect-to/HW_CustID/<xsl:value-of select="booking_reference"/>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                    <xsl:value-of select="../homeurl"/>/redirect-to/HW_CustID/<xsl:value-of select="booking_reference"/>
                 </xsl:attribute>
                 <xsl:value-of select="guest_name"/>
             </a>
