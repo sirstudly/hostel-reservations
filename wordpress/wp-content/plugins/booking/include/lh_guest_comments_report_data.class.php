@@ -112,7 +112,7 @@ class LHGuestCommentsReportData extends XslTransform {
                 $recordRoot = $parentElement->appendChild($domtree->createElement('record'));
                 $recordRoot->appendChild($domtree->createElement('reservation_id', $record->reservation_id));
                 // remove any remaining ampersands after HTML translation as they fuck up the DOM tree
-                $recordRoot->appendChild($domtree->createElement('guest_name', str_replace( '&', '', html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
+                $recordRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
                 $recordRoot->appendChild($domtree->createElement('booking_source', $record->booking_source));
                 $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));

@@ -82,7 +82,7 @@ class LHBookingsDiffsReport extends XslTransform {
         if ( $this->bookingDiffsReport ) {
             foreach( $this->bookingDiffsReport as $record ) {
                 $recordRoot = $parentElement->appendChild($domtree->createElement('record'));
-                $recordRoot->appendChild($domtree->createElement('guest_name', html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" )));
+                $recordRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $recordRoot->appendChild($domtree->createElement('hw_room_type', $record->hw_room_type));
                 $recordRoot->appendChild($domtree->createElement('hw_checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->hw_checkin_date)->format('d M Y')));
                 $recordRoot->appendChild($domtree->createElement('hw_checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->hw_checkout_date)->format('d M Y')));
