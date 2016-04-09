@@ -50,7 +50,7 @@ td.border_bottom {
                                     </xsl:otherwise>
                                 </xsl:choose>
                             </div>
-                            <p class="help-block" style="float:left;padding-left:5px;padding-right:15px;font-style:italic;">
+                            <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
                             <xsl:choose>
                                 <xsl:when test="job">
                                     This report was last updated on: <xsl:value-of select="job/end_date"/>
