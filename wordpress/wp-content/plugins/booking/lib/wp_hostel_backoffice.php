@@ -59,6 +59,7 @@ class WP_HostelBackoffice {
         add_option('hbo_log_directory', 'logs');
         add_option('hbo_log_directory_url', 'logs');
         add_option('hbo_job_history_url', 'admin/job-history');
+        add_option('hbo_run_processor_cmd', '~/java2/run_processor_mini.sh');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -85,6 +86,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_log_directory');
         delete_option('hbo_log_directory_url');
         delete_option('hbo_job_history_url');
+        delete_option('hbo_run_processor_cmd');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');
@@ -1056,20 +1058,6 @@ error_log(var_export($_POST, TRUE));
             self::execute_simple_sql($simple_sql);
         }
 
-        // permissions for each individual setting
-        if ( false == $this->does_table_exist('options_permissions') ) {
-            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."options_permissions (
-                `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                `option_id` bigint(20) unsigned NOT NULL,
-                `role` varchar(255) NOT NULL,
-                `permission` varchar(255) NOT NULL, -- one of read, write
-                PRIMARY KEY (`id`),
-                UNIQUE (`option_id`, `role`, `permission`)
-            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
-
-            self::execute_simple_sql($simple_sql);
-        }
-
         if ( false == $this->does_table_exist('lh_rooms') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rooms (
               `id` bigint(20) unsigned NOT NULL,
@@ -1356,7 +1344,7 @@ error_log(var_export($_POST, TRUE));
         if (strpos($tablename, $wpdb->prefix) === false) {
             $tablename = $wpdb->prefix . $tablename;   
         }
-        return does_table_with_exact_name_exist( $tablename );
+        return self::does_table_with_exact_name_exist( $tablename );
     }
 
     /**

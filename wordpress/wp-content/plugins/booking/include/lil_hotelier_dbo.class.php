@@ -729,10 +729,10 @@ class LilHotelierDBO {
 
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT y.guest_name, 
-                    IF( y.room_type IN ('DBL','TRIPLE','QUAD'), y.room_type, IF(y.room_type_id IS NULL, y.room_type, CONVERT(CONCAT(y.capacity, y.room_type) USING utf8))) `hw_room_type`,
+                    IF( y.room_type IN ('DBL','TRIPLE','QUAD','TWIN'), y.room_type, IF(y.room_type_id IS NULL, y.room_type, CONVERT(CONCAT(y.capacity, y.room_type) USING utf8))) `hw_room_type`,
                     y.checkin_date `hw_checkin_date`, y.checkout_date `hw_checkout_date`, y.hw_persons, y.payment_outstanding `hw_payment_outstanding`, y.booked_date, y.booking_source,
                     y.booking_reference, 
-	                IF( z.room_type IN ('DBL','TRIPLE','QUAD'), z.room_type, CONVERT(CONCAT(z.capacity, z.room_type) USING utf8)) `lh_room_type`, z.lh_status,
+	                IF( z.room_type IN ('DBL','TRIPLE','QUAD','TWIN'), z.room_type, CONVERT(CONCAT(z.capacity, z.room_type) USING utf8)) `lh_room_type`, z.lh_status,
                     z.checkin_date `lh_checkin_date`, z.checkout_date `lh_checkout_date`, z.lh_persons, z.payment_outstanding `lh_payment_outstanding`, z.data_href, z.notes,
                     IF( IFNULL(y.hw_person_count,0) = IFNULL(z.lh_persons,0), 'Y', 'N' ) `matched_persons`,
 	                IF( IFNULL(y.room_type_id,-1) = IFNULL(z.room_type_id,0), 'Y', 'N' ) `matched_room_type`, -- if room type id not matched, this will always be N
@@ -951,8 +951,9 @@ class LilHotelierDBO {
      * Executes the processor in the background from the command line.
      */
     static function runProcessor() {
-        if (substr(php_uname(), 0, 7) != "Windows") {
-            $command = 'nohup /home/temperec/java2/run_processor_mini.sh > /dev/null 2>&1 &';
+        $process_cmd = get_option('hbo_run_processor_cmd');
+        if (substr(php_uname(), 0, 7) != "Windows" && false === empty($process_cmd)) {
+            $command = "nohup $process_cmd > /dev/null 2>&1 &";
             exec( $command );
         }
     }
@@ -961,8 +962,9 @@ class LilHotelierDBO {
      * Executes the processor from the command line and waits for its completion.
      */
     static function runProcessorAndWait() {
-        if (substr(php_uname(), 0, 7) != "Windows") {
-            $command = '/home/temperec/java2/run_processor_mini.sh > /dev/null 2>&1';
+        $process_cmd = get_option('hbo_run_processor_cmd');
+        if (substr(php_uname(), 0, 7) != "Windows" && false === empty($process_cmd)) {
+            $command = "$process_cmd > /dev/null 2>&1";
             exec( $command );
         }
     }

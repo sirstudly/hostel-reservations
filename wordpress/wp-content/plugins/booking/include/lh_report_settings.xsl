@@ -50,10 +50,6 @@
     margin-bottom: 30px;
 }
 
-#hb-container {
-    width: 400px;
-}
-
 .shadow {
     padding: 10px;
     border: 2px solid #f0f0f0;
@@ -69,6 +65,7 @@ jQuery(document).ready( function(){
 
     // allow user to show/hide passwords
     // http://www.experts-exchange.com/articles/19779/Passwords-in-HTML-Forms-Allow-the-Client-to-Show-or-Hide.html
+    <xsl:if test="hbo_lilho_username != 'highstreet'">
     jQuery("#hw_pwcheck").click(function(){
         if (jQuery("#hw_pwcheck").is(":checked"))
         {
@@ -83,21 +80,7 @@ jQuery(document).ready( function(){
                 .prev().remove();
         }
     });
-
-    jQuery("#hb_pwcheck").click(function(){
-        if (jQuery("#hb_pwcheck").is(":checked"))
-        {
-            jQuery("#hb_password").clone()
-                .attr("type", "text").insertAfter("#hb_password")
-                .prev().remove();
-        }
-        else
-        {
-            jQuery("#hb_password").clone()
-                .attr("type","password").insertAfter("#hb_password")
-                .prev().remove();
-        }
-    });
+    </xsl:if>
 
     jQuery("#lh_pwcheck").click(function(){
         if (jQuery("#lh_pwcheck").is(":checked"))
@@ -150,6 +133,7 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
+    <xsl:if test="hbo_lilho_username != 'highstreet'">
         <div id="hw-container" class="shadow">
             <h3>Hostelworld</h3> 
             <table class="form-table">
@@ -171,28 +155,7 @@ jQuery(document).ready( function(){
                 <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value); this.disabled=true;">Validate &amp; Save</a>
             </div>
         </div>
-
-        <div id="hb-container" class="shadow">
-            <h3>Hostelbookers</h3> 
-            <table class="form-table">
-                <tbody>
-                    <tr valign="top">
-                        <th scope="row"><label for="hb_username">Username:</label></th>
-                        <td><input id="hb_username" name="hbo_hb_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_hb_username}"/></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="hb_password">Password:</label></th>
-                        <td><input id="hb_password" name="hbo_hb_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_hb_password}" /><br/>
-                            <input type="checkbox" id="hb_pwcheck" /> Show Password</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="btn-container">
-                <div style="float: left;" id="ajax_respond_hb"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_hb" class="btn btn-primary" style="float: right;" onclick="save_hostelbookers_settings(document.post_option.hb_username.value, document.post_option.hb_password.value); this.disabled=true;">Validate &amp; Save</a>
-            </div>
-        </div>
+    </xsl:if>
 
     </form>
     </div>

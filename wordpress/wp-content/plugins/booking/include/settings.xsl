@@ -106,6 +106,10 @@
                                         <th scope="row"><label for="log_directory_url">Log Directory URL</label></th>
                                         <td><input id="log_directory_url"  name="hbo_log_directory_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{log_directory_url}" /></td>
                                     </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="run_processor_cmd">Run Processor Command</label></th>
+                                        <td><input id="run_processor_cmd"  name="hbo_run_processor" class="regular-text code" type="text" style="width:350px;" size="145" value="{run_processor_cmd}" /></td>
+                                    </tr>  
                                     <tr valign="top"><td colspan="2"><div style="border-bottom:1px solid #cccccc;"><xsl:comment/></div></td></tr>
                                     <tr valign="top"> 
                                         <td colspan="2">

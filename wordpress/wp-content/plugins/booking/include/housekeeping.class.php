@@ -75,7 +75,7 @@ class HouseKeeping extends XslTransform {
      * 'upstairs' => 'Y+Z+A beds'
      * 'total' => 'X+Y+Z+A beds'
      */
-    function calculateBedChangeCountsByRooms() {
+    function calculateBedChangeCountsByRoomsCastleRock() {
         $bedcounts = array();
         if($this->bedsheetView) {
             foreach( $this->bedsheetView as $bed ) {
@@ -90,6 +90,22 @@ class HouseKeeping extends XslTransform {
                 ( isset( $bedcounts['level6_7'] ) ? + $bedcounts['level6_7'] : 0 );
             $bedcounts['total'] = $bedcounts['upstairs'] +
                 ( isset( $bedcounts['level2'] ) ? $bedcounts['level2'] : 0 );
+        }
+        return $bedcounts;
+    }
+
+    /**
+     * Calculates the number of beds to be changed grouped by
+     * the following:
+     * 'total' => 125 
+     * (where 125 is the number of beds to be changed)
+     */
+    function calculateBedChangeCountsByRoomsGeneric() {
+        $bedcounts = array();
+        if($this->bedsheetView) {
+            foreach( $this->bedsheetView as $bed ) {
+                $this->update_bedsheets_to_change( $bedcounts, $bed, '/^.*/', 'total' );
+            }
         }
         return $bedcounts;
     }
@@ -164,8 +180,12 @@ class HouseKeeping extends XslTransform {
                 $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet));
             }
         }
-        
-        $bedcounts = $this->calculateBedChangeCountsByRooms();
+
+        // calculate bedcounts
+        $bedcounts = get_option('hbo_lilho_username') === 'CastleRock' ?
+            $this->calculateBedChangeCountsByRoomsCastleRock() :
+            $this->calculateBedChangeCountsByRoomsGeneric();
+
         if( !empty( $bedcounts )) {
             $totalsRoot = $parentElement->appendChild($domtree->createElement('totals'));
             foreach( $bedcounts as $bedcountKey => $bedcountValue ) {

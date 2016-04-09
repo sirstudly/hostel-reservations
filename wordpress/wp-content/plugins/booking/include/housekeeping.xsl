@@ -95,6 +95,7 @@ td.border_bottom {
         </xsl:choose>
         -->
 
+        <xsl:if test="totals/level2">
         <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
             <thead>
                 <th>20s : <xsl:value-of select="totals/level2"/></th>
@@ -103,9 +104,13 @@ td.border_bottom {
                 <th>60s / 70s : <xsl:value-of select="totals/level6_7"/></th>
             </thead>
         </table>
+        </xsl:if>
+        
         <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
             <thead>
-                <th style="text-align: left; padding-left: 20%;">Upstairs : <xsl:value-of select="totals/upstairs"/></th>
+                <xsl:if test="totals/upstairs">
+                    <th style="text-align: left; padding-left: 20%;">Upstairs : <xsl:value-of select="totals/upstairs"/></th>
+                </xsl:if>
                 <th style="text-align: left; padding-left: 20%;">Total : <xsl:value-of select="totals/total"/></th>
             </thead>
         </table>

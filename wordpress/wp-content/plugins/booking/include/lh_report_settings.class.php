@@ -89,6 +89,7 @@ class LHReportSettings extends XslTransform {
 
    /**
     * Updates details for hostelbookers.
+    * ** Now deprecated. HB merged with HW. 9/4/2016 **
     */
    function saveHostelbookersSettings( $username, $password ) {
        error_log( "saveHostelbookersSettings: $username , $password ");

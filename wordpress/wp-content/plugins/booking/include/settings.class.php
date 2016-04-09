@@ -39,6 +39,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('delete_on_deactivate', get_option('hbo_delete_db_on_deactivate')));
         $xmlRoot->appendChild($domtree->createElement('log_directory', get_option('hbo_log_directory')));
         $xmlRoot->appendChild($domtree->createElement('log_directory_url', get_option('hbo_log_directory_url')));
+        $xmlRoot->appendChild($domtree->createElement('run_processor_cmd', get_option('hbo_run_processor_cmd')));
     }
 
     /**
@@ -64,6 +65,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_redirect_to_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_run_processor_cmd');
 
         update_option('hbo_delete_db_on_deactivate', isset($optionsArray['hbo_delete_db_on_deactivate']) ? 'On' : 'Off');
     }
