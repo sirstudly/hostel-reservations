@@ -91,8 +91,7 @@
         <div class="control-group" style="float:left;">
             <xsl:if test="last_completed_job">
                 <p class="help-block" style="padding-left:5px;font-style: italic; width: 100%">
-                    This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
-                    It is automatically run daily at 7:00am.
+                    This report was last run on <xsl:value-of select="last_completed_job"/>.
                 </p>
             </xsl:if>
             <xsl:if test="last_job_status = 'failed'">
