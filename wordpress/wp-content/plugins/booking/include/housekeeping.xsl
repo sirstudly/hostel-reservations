@@ -71,7 +71,7 @@ td.border_bottom {
                                     </xsl:choose>
                                 </div>
                             </xsl:if>
-                            <br/>It is re-run daily at 6:30am, 9:00am and 10:20am.
+                            <br/>It is re-run daily at 6:30am and 10:00am.
                             </p>
                         </div>
                     </div>
