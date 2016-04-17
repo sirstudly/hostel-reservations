@@ -1,10 +1,25 @@
 <?php 
-    get_header();
 
-    if (false === isset($_SESSION['WP_HOSTELBACKOFFICE'])) {
-        $_SESSION['WP_HOSTELBACKOFFICE'] = new WP_HostelBackoffice();
+    $selectionDate = new DateTime('now', new DateTimeZone('UTC'));
+
+    // if date is defined, update the date
+    if (isset($_POST['selectiondate']) && trim($_POST['selectiondate']) != '') {
+        $selectionDate = DateTime::createFromFormat(
+            '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC'));
     }
-    $_SESSION['WP_HOSTELBACKOFFICE']->content_of_booking_diffs_report_page(); 
 
-    get_footer(); 
+    $rep = new LHBookingsDiffsReport( $selectionDate );
+
+    if (isset($_POST['reload_data']) && trim($_POST['reload_data']) == 'true') {
+        $rep->submitBookingDiffsJob();
+        wp_redirect( get_permalink() ); // redirect after POST to avoid resubmissions
+        exit;
+    }
+    else {
+        get_header();
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+        get_footer(); 
+    }
+
 ?>

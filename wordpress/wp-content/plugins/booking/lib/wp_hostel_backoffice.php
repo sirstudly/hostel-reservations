@@ -115,11 +115,6 @@ class WP_HostelBackoffice {
                 WPDEV_BK_FILE .'wpdev-booking-summary', array(&$this, 'content_of_summary_page')  );
         add_action("admin_print_scripts-" . $pagehook5 , array( &$this, 'add_js_css_files'));
             
-        ///////////////// HOUSEKEEPING /////////////////////////////////////////////
-        $pagehook9 = add_submenu_page(WPDEV_BK_FILE . 'wpdev-booking',__('Housekeeping', 'wpdev-booking'), __('Housekeeping', 'wpdev-booking'), 'administrator',
-                WPDEV_BK_FILE .'wpdev-booking-housekeeping', array(&$this, 'content_of_housekeeping_page')  );
-        add_action("admin_print_scripts-" . $pagehook9 , array( &$this, 'add_js_css_files'));
-            
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // A D D     R E S E R V A T I O N
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -358,110 +353,6 @@ error_log(var_export($_POST, TRUE));
     }
 
     /**
-     * Write the contents of the Housekeeping page.
-     */
-    function content_of_housekeeping_page() {
-        $hk = new HouseKeeping();
-
-        if (isset($_POST['housekeeping_job'])) {
-            $hk->submitRefreshJob();
-        } 
-
-        $hk->doView(); // update the view
-        echo $hk->toHtml();
-    }
-
-    /**
-     * Write the contents of the Reports page.
-     */
-    function content_of_split_room_report_page() {
-        $rep = new LHSplitRoomReport();
-
-        if (isset($_POST['reload_data'])) {
-            $rep->submitAllocationScraperJob();
-        } 
-
-        $rep->doView(); // update the view
-        echo $rep->toHtml();
-    }
-
-    /**
-     * Write the contents of the Unpaid Deposits Report page.
-     */
-    function content_of_unpaid_deposit_report_page() {
-        $rep = new LHUnpaidDepositReport();
-
-        if (isset($_POST['reload_data'])) {
-            $rep->submitAllocationScraperJob();
-        } 
-
-        $rep->doView(); // update the view
-        echo $rep->toHtml();
-    }
-
-    /**
-     * Write the contents of the group bookings report.
-     */
-    function content_of_group_bookings_page() {
-        $rep = new LHGroupBookingsReport();
-
-        if (isset($_POST['reload_data'])) {
-            $rep->submitAllocationScraperJob();
-        } 
-
-        $rep->doView(); // update the view
-        echo $rep->toHtml();
-    }
-
-    /**
-     * Write the contents of the booking diffs report.
-     */
-    function content_of_booking_diffs_report_page() {
-
-        $selectionDate = new DateTime('now', new DateTimeZone('UTC'));
-
-        // if date is defined, update the date
-        if (isset($_POST['selectiondate']) && trim($_POST['selectiondate']) != '') {
-            $selectionDate = DateTime::createFromFormat(
-                '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC'));
-        }
-
-        $rep = new LHBookingsDiffsReport( $selectionDate );
-
-        if (isset($_POST['reload_data']) && trim($_POST['reload_data']) == 'true') {
-            $rep->submitBookingDiffsJob();
-        } 
-
-        $rep->doView(); // update the view
-        echo $rep->toHtml();
-    }
-
-    /**
-     * Write the contents of the bedcounts report.
-     */
-    function content_of_bedcounts_page() {
-
-        $selectionDate = new DateTime('now', new DateTimeZone('UTC'));
-        $selectionDate->sub(new DateInterval('P1D')); // default to 1 day in the past
-
-        // if date is defined, update the date
-        if (isset($_POST['selectiondate']) && trim($_POST['selectiondate']) != '') {
-            $selectionDate = DateTime::createFromFormat(
-                '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC'));
-        }
-
-        $bc = new BedCounts( $selectionDate );
-
-        if (isset($_POST['bedcount_job']) && trim($_POST['bedcount_job']) == 'true' ) {
-            $bc->submitRefreshJob();
-        } 
-
-        $bc->updateBedcounts();
-
-        echo $bc->toHtml();
-    }
-
-    /**
      * Downloads the bedcounts page as a CSV file
      */
     function download_bedcounts_page_as_csv() {
@@ -482,28 +373,6 @@ error_log(var_export($_POST, TRUE));
 
             die();      
         }
-    }
-
-    /**
-     * Write the contents of the guest comments report.
-     */
-    function content_of_guest_comments_report_page() {
-
-        // use the same page controller if already defined
-        if (isset($_SESSION['GUEST_COMMENTS_CONTROLLER'])) {
-            $rep = $_SESSION['GUEST_COMMENTS_CONTROLLER'];
-        }
-        else {
-            $rep = new LHGuestCommentsReport();
-            $_SESSION['GUEST_COMMENTS_CONTROLLER'] = $rep;
-        }
-
-        if (isset($_POST['reload_data'])) {
-            $rep->submitReportJob();
-        } 
-
-        $rep->doView(); // update the view
-        echo $rep->toHtml();
     }
 
     /**

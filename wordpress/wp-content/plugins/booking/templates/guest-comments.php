@@ -1,10 +1,24 @@
 <?php 
-    get_header();
 
-    if (false === isset($_SESSION['WP_HOSTELBACKOFFICE'])) {
-        $_SESSION['WP_HOSTELBACKOFFICE'] = new WP_HostelBackoffice();
+    // use the same page controller if already defined
+    if (isset($_SESSION['GUEST_COMMENTS_CONTROLLER'])) {
+        $rep = $_SESSION['GUEST_COMMENTS_CONTROLLER'];
     }
-    $_SESSION['WP_HOSTELBACKOFFICE']->content_of_guest_comments_report_page(); 
+    else {
+        $rep = new LHGuestCommentsReport();
+        $_SESSION['GUEST_COMMENTS_CONTROLLER'] = $rep;
+    }
 
-    get_footer(); 
+    if (isset($_POST['reload_data'])) {
+        $rep->submitReportJob();
+        wp_redirect( get_permalink() ); // redirect after POST to avoid resubmissions
+        exit;
+    }
+    else {
+        get_header();
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+        get_footer(); 
+    }
+
 ?>

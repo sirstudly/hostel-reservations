@@ -1,10 +1,16 @@
 <?php 
-    get_header();
 
-    if (false === isset($_SESSION['WP_HOSTELBACKOFFICE'])) {
-        $_SESSION['WP_HOSTELBACKOFFICE'] = new WP_HostelBackoffice();
+    $rep = new LHUnpaidDepositReport();
+    if (isset($_POST['reload_data'])) {
+        $rep->submitAllocationScraperJob();
+        wp_redirect( get_permalink() ); // redirect after POST to avoid resubmissions
+        exit;
     }
-    $_SESSION['WP_HOSTELBACKOFFICE']->content_of_unpaid_deposit_report_page(); 
+    else {
+        get_header();
+        $rep->doView(); // update the view
+        echo $rep->toHtml();
+        get_footer(); 
+    }
 
-    get_footer(); 
 ?>

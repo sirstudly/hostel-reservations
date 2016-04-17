@@ -1,10 +1,16 @@
 <?php 
-    get_header();
 
-    if (false === isset($_SESSION['WP_HOSTELBACKOFFICE'])) {
-        $_SESSION['WP_HOSTELBACKOFFICE'] = new WP_HostelBackoffice();
+    $hk = new HouseKeeping();
+    if (isset($_POST['housekeeping_job'])) {
+        $hk->submitRefreshJob();
+        wp_redirect( get_permalink() ); // redirect after POST to avoid resubmissions
+        exit;
+    } 
+    else {
+        get_header();
+        $hk->doView(); // update the view
+        echo $hk->toHtml();
+        get_footer(); 
     }
-    $_SESSION['WP_HOSTELBACKOFFICE']->content_of_housekeeping_page(); 
 
-    get_footer(); 
 ?>
