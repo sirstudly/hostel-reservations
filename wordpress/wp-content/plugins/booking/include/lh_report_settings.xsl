@@ -65,7 +65,7 @@ jQuery(document).ready( function(){
 
     // allow user to show/hide passwords
     // http://www.experts-exchange.com/articles/19779/Passwords-in-HTML-Forms-Allow-the-Client-to-Show-or-Hide.html
-    <xsl:if test="hbo_lilho_username != 'highstreet'">
+    <xsl:if test="settings/hbo_lilho_username != 'highstreet'">
     jQuery("#hw_pwcheck").click(function(){
         if (jQuery("#hw_pwcheck").is(":checked"))
         {
