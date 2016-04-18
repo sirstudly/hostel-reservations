@@ -72,7 +72,7 @@ abstract class AbstractBedCounts extends XslTransform {
         $xmlRoot = $parentElement->appendChild($domtree->createElement('bedcounts'));
         foreach( $this->bedcountData as $row ) {
             $roomRoot = $xmlRoot->appendChild($domtree->createElement('room'));
-            $roomRoot->appendChild($domtree->createElement('id', $row->room));
+            $roomRoot->appendChild($domtree->createElement('id', htmlspecialchars($row->room)));
             $roomRoot->appendChild($domtree->createElement('capacity', $row->capacity));
             $roomRoot->appendChild($domtree->createElement('room_type', $row->room_type));
             $roomRoot->appendChild($domtree->createElement('num_empty', $row->num_empty));

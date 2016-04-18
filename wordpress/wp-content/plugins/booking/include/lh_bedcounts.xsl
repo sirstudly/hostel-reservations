@@ -88,8 +88,10 @@
             <div class="control-group" style="float:left;">
                 <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
                     <xsl:if test="last_completed_job">
-                        This report aggregates data as it appeared on <xsl:value-of select="last_completed_job"/>.
+                        This report aggregates data as it appeared on <xsl:value-of select="last_completed_job"/>.<br/>
                     </xsl:if>
+                    This report is automatically run daily at 4:00am.
+
                     <xsl:if test="last_job_status = 'failed'">
                         <div style="color: red;">The last update of this report failed to run.
                             <xsl:choose>
