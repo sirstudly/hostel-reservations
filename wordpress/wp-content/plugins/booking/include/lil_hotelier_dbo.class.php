@@ -24,7 +24,9 @@ class LilHotelierDBO {
                     IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
                     CASE WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
-                         WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0 THEN '3 DAY CHANGE'
+                         WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0
+                           -- don't do a 3-day change if they're checking out the following day
+                          AND DATEDIFF(IFNULL( c2.checkout_date, c.checkout_date ), constants.selected_date) > 1 THEN '3 DAY CHANGE'
                          WHEN IFNULL( c2.checkout_date, c.checkout_date ) > constants.selected_date THEN 'NO CHANGE'
                          ELSE 'EMPTY' END AS bedsheet
                FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
