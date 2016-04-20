@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-<xsl:output method="xml" indent="no" omit-xml-declaration="yes" />
+<xsl:output method="text" indent="no" omit-xml-declaration="yes" />
 
 <xsl:template match="/view">
 Bed Counts,<xsl:value-of select="selectiondate"/>
@@ -40,7 +40,7 @@ Total Occupied,<xsl:value-of select="sum(room/num_paid) + sum(room/num_noshow) +
 </xsl:text>
 </xsl:if>
 
-<xsl:value-of select="id"/><xsl:text>,</xsl:text>
+<xsl:text>"</xsl:text><xsl:value-of select="id"/><xsl:text>",</xsl:text>
 <xsl:value-of select="capacity"/><xsl:text>,</xsl:text>
 <xsl:choose>
     <xsl:when test="room_type = 'LT_FEMALE'">LongTerm (F)</xsl:when>
@@ -48,10 +48,10 @@ Total Occupied,<xsl:value-of select="sum(room/num_paid) + sum(room/num_noshow) +
     <xsl:when test="room_type = 'DBL'">DOUBLE</xsl:when>
     <xsl:otherwise><xsl:value-of select="room_type"/></xsl:otherwise>
 </xsl:choose><xsl:text>,</xsl:text>
-<xsl:if test="num_paid != 0"><xsl:value-of select="num_paid"/></xsl:if><xsl:text>,</xsl:text>
-<xsl:if test="num_staff != 0"><xsl:value-of select="num_staff"/></xsl:if><xsl:text>,</xsl:text>
-<xsl:if test="num_noshow != 0"><xsl:value-of select="num_noshow"/></xsl:if><xsl:text>,</xsl:text>
-<xsl:if test="num_empty != 0"><xsl:value-of select="num_empty"/></xsl:if>
+<xsl:if test="num_paid != 0 or /view/write_zeroes = 'true'"><xsl:value-of select="num_paid"/></xsl:if><xsl:text>,</xsl:text>
+<xsl:if test="num_staff != 0 or /view/write_zeroes = 'true'"><xsl:value-of select="num_staff"/></xsl:if><xsl:text>,</xsl:text>
+<xsl:if test="num_noshow != 0 or /view/write_zeroes = 'true'"><xsl:value-of select="num_noshow"/></xsl:if><xsl:text>,</xsl:text>
+<xsl:if test="num_empty != 0 or /view/write_zeroes = 'true'"><xsl:value-of select="num_empty"/></xsl:if>
 
 <!-- newline after each record -->
 <xsl:text>

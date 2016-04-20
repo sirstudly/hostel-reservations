@@ -641,8 +641,13 @@ class LilHotelierDBO {
     static function getBedcountReport( $selectedDate, $allocJobId ) {
         global $wpdb;
 
-        $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT room, capacity, room_type, 
+        $sql = "SELECT room, capacity, room_type, 
+                    -- these are the room types in the bedcounts for HSH
+					CASE WHEN capacity = 2 THEN 'Double/Twin'
+					WHEN capacity = 4 THEN 'Quad/4 Bed Dorm'
+					WHEN capacity BETWEEN 16 AND 18 THEN '16-18 Bed Dorm'
+					WHEN capacity BETWEEN 6 AND 12 THEN '6-12 Bed Dorm'
+					ELSE 'Unknown' END AS hsh_room_type,
                     -- magnify private rooms based on size of room
                     IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_empty * capacity, num_empty) `num_empty`, 
                     IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_staff * capacity, num_staff) `num_staff`, 
@@ -673,8 +678,21 @@ class LilHotelierDBO {
           -- only include OVERFLOW or Unallocated if we have something to report
          WHERE (room_type != 'OVERFLOW' AND room != 'Unallocated')
             OR ((room_type = 'OVERFLOW' OR room = 'Unallocated') AND (num_staff > 0 OR num_paid > 0 OR num_noshow > 0))
-         ORDER BY room", 
-         $selectedDate->format('Y-m-d H:i:s'), $allocJobId ));
+         ORDER BY room";
+
+        // HSH bedcounts are actually by room type
+        if( get_option('hbo_lilho_username') == 'highstreet' ) {
+            $sql = "SELECT GROUP_CONCAT(room ORDER BY room SEPARATOR ', ') AS room,
+                           hsh_room_type AS room_type, 
+                           SUM(capacity) AS capacity,
+		                   SUM(num_empty) AS num_empty, SUM(num_staff) AS num_staff, SUM(num_paid) AS num_paid, SUM(num_noshow) AS num_noshow
+                      FROM ( $sql ) hsh
+                     GROUP BY hsh_room_type
+                     ORDER BY capacity";
+        }
+         
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            $sql, $selectedDate->format('Y-m-d H:i:s'), $allocJobId ));
 
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);

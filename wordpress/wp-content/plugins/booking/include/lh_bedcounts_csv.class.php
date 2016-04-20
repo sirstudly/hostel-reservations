@@ -21,6 +21,16 @@ class BedCountsCSV extends AbstractBedCounts {
     }
 
     /**
+     * Overrides parent method to include configuration flag.
+     */
+    function addSelfToDocument($domtree, $parentElement) {
+        if( get_option('hbo_lilho_username') == 'highstreet') {
+            $parentElement->appendChild($domtree->createElement('write_zeroes', 'true'));
+        }
+        parent::addSelfToDocument($domtree, $parentElement);
+    }
+
+    /**
      * Converts and returns the generated bedcounts as a CSV.
      * Returns: CSV content
      */
