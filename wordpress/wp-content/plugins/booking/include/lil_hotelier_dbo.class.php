@@ -927,22 +927,23 @@ class LilHotelierDBO {
     /**
      * Returns the wp_lh_jobs records for the past number of days in reverse chrono order.
      * $numberOfDays : number of days to include in the past
+     * $maxNumRecords : maximum number of records to include (optional)
      */
-    static function getJobHistory( $numberOfDays ) {
+    static function getJobHistory( $numberOfDays, $maxNumRecords = null ) {
 
         // include those records from the given number of days
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT job_id, classname, status, start_date, end_date
                FROM ".$wpdb->prefix."lh_jobs
-              WHERE last_updated_date > NOW() - INTERVAL %d DAY", $numberOfDays));
+              WHERE last_updated_date > NOW() - INTERVAL %d DAY
+              ORDER BY job_id DESC " . 
+              ($maxNumRecords != null ? "LIMIT $maxNumRecords" : ""), $numberOfDays));
 
         $jobHistories = array();
         foreach( $resultset as $record ) {
             $jobHistories[$record->job_id] = $record;
         }
-
-        krsort($jobHistories); // sort by key (by reverse job_id)
         return $jobHistories;
     }
 

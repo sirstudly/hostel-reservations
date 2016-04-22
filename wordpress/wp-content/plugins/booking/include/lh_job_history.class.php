@@ -8,6 +8,7 @@ class LHJobHistory extends XslTransform {
     var $history = array();  // array() of wp_lh_jobs records
     var $jobParams = array(); // array() keyed by job_id containing job parameters array[key]=value
     const NUM_DAYS_TO_INCLUDE = 7; // number of days in the past to include
+    const MAX_NUM_RECORDS = 1000;  // max number of records to display
 
     /**
      * Default constructor.
@@ -20,7 +21,7 @@ class LHJobHistory extends XslTransform {
     * Reloads the view details.
     */
    function doView() {
-       $this->history = LilHotelierDBO::getJobHistory( self::NUM_DAYS_TO_INCLUDE );
+       $this->history = LilHotelierDBO::getJobHistory( self::NUM_DAYS_TO_INCLUDE, self::MAX_NUM_RECORDS );
        $this->jobParams = array(); // clear out old data
        foreach( $this->history as $job ) {
             $this->jobParams[$job->job_id] = LilHotelierDBO::getJobParameters( $job->job_id );
