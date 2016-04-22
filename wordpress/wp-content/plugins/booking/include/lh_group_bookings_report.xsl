@@ -131,8 +131,9 @@ tr.unread {
             <th>Booking Source</th>
             <th>Checkin Date</th>
             <th>Checkout Date</th>
-            <th>Payment Outstanding</th>
-            <th>Number of Guests</th>
+            <th>Booked Date</th>
+            <th>Payment<br/>Outstanding</th>
+            <th>Number of<br/>Guests</th>
             <th>Notes</th>
         </thead>
         <tbody>
@@ -159,6 +160,7 @@ tr.unread {
         <td><xsl:value-of select="booking_source"/></td>
         <td><xsl:value-of select="checkin_date"/></td>
         <td><xsl:value-of select="checkout_date"/></td>
+        <td><xsl:value-of select="booked_date"/></td>
         <td style="padding-left: 50px;"><xsl:value-of select="payment_outstanding"/></td>
         <td style="padding-left: 50px;"><xsl:value-of select="num_guests"/></td>
         <td><xsl:value-of select="notes"/></td>
