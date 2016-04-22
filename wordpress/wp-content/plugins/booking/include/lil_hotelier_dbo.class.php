@@ -166,12 +166,15 @@ class LilHotelierDBO {
      */
     static function getGroupBookingsReport() {
         global $wpdb;
-        $resultset = $wpdb->get_results(
+        $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT reservation_id, guest_name, booking_reference, booking_source, checkin_date, checkout_date, 
                     booked_date, payment_outstanding, num_guests, data_href, notes, viewed_yn 
                FROM ".$wpdb->prefix."lh_group_bookings
               WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_group_bookings)
-              ORDER BY checkin_date");
+                AND ( num_guests >= %d " .
+                       (get_option('hbo_include_5_guests_in_6bed_dorm') == 'true' ? ' OR num_guests = 5' : '' ) . "
+                    )
+              ORDER BY checkin_date", get_option('hbo_group_booking_size')));
 
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);

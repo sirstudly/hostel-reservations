@@ -29,7 +29,7 @@ tr.unread {
 </style>
 
     <div id="report-container" class="wrap bookingpage">
-        <h2>Bookings with 6 or More Guests</h2>
+        <h2>Bookings with <xsl:value-of select="group_size"/> or More Guests</h2>
         <div class="wpdevbk">
     
             <div style="margin-top:10px;" class="booking-submenu-tab-container">
@@ -75,7 +75,9 @@ tr.unread {
                         This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
                         It is automatically run daily at 10:50pm.<br/>
                     </xsl:if>
-                    <div class="six_bed_dorm">Bookings of 5 guests into 6 bed dorms are formatted like this. You'll probably want to email them to upgrade to a larger dorm or to book the entire room.</div>
+                    <xsl:if test="include_5_guests_in_6bed_dorm = 'true'">
+                        <div class="six_bed_dorm">Bookings of 5 guests into 6 bed dorms are formatted like this. You'll probably want to email them to upgrade to a larger dorm or to book the entire room.</div>
+                    </xsl:if>
                     <xsl:if test="last_job_status = 'failed'">
                         <div style="color: red;">The last update of this report failed to run.
                             <xsl:choose>

@@ -146,6 +146,10 @@ class AjaxController {
                 $this->saveHostelbookersSettings();
                 break;
 
+            case 'SAVE_GROUP_BOOKINGS_REPORT_SETTINGS':
+                $this->saveGroupBookingsReportSettings();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -869,6 +873,39 @@ error_log("checkout: ".$_POST['checkout_date']);
             <?php
         }
     }
+
+    /**
+     * Updates the settings for the group bookings report.
+     * Requires POST variables:
+     *   group_booking_size : group size in report
+     *   include_5_guests_in_6bed_dorm : checkbox value to include 5 guests in 6 bed dorm
+     */
+    function saveGroupBookingsReportSettings() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->saveGroupBookingsReportSettings( 
+                $_POST['group_booking_size'], $_POST['include_5_guests_in_6bed_dorm'] == 'true' );
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_group_bookings_rpt")
+                     .html('Settings saved successfully.')
+                     .css({ 'color': 'green' });
+                jQuery("#btn_save_group_rpt_settings").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_group_bookings_rpt")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_group_rpt_settings").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
+
 }
 
 ?>

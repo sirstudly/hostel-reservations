@@ -552,3 +552,23 @@ function save_hostelbookers_settings( username, password ) {
     });
 }
 
+// saves the login details for hostelworld
+// group_booking_size : group size in report
+// include_5_guests_in_6bed_dorm : checkbox value to include 5 guests in 6 bed dorm
+function save_group_bookings_report_settings( group_booking_size, include_5_guests_in_6bed_dorm ) {
+
+    jQuery('#ajax_respond_group_bookings_rpt').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_group_bookings_rpt').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_GROUP_BOOKINGS_REPORT_SETTINGS',
+            group_booking_size : group_booking_size,
+            include_5_guests_in_6bed_dorm : include_5_guests_in_6bed_dorm
+        }
+    });
+}
+

@@ -60,6 +60,8 @@ class WP_HostelBackoffice {
         add_option('hbo_log_directory_url', 'logs');
         add_option('hbo_job_history_url', 'admin/job-history');
         add_option('hbo_run_processor_cmd', '~/java2/run_processor_mini.sh');
+        add_option('hbo_group_booking_size', '6');
+        add_option('hbo_include_5_guests_in_6bed_dorm', 'true');
         self::build_db_schema();
         self::insert_site_pages();
     }
@@ -87,6 +89,8 @@ class WP_HostelBackoffice {
         delete_option('hbo_log_directory_url');
         delete_option('hbo_job_history_url');
         delete_option('hbo_run_processor_cmd');
+        delete_option('hbo_group_booking_size');
+        delete_option('hbo_include_5_guests_in_6bed_dorm');
 
         self::delete_site_pages();
         self::teardown_db_schema(get_option('hbo_delete_db_on_deactivate') == 'On');

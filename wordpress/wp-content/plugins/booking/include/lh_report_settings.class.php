@@ -25,13 +25,15 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
         $this->reportSettings['hbo_hb_username'] = get_option('hbo_hb_username');
         $this->reportSettings['hbo_hb_password'] = get_option('hbo_hb_password');
+        $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
+        $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
    }
 
    /**
     * Updates details for little hotelier.
     */
    function saveLittleHotelierSettings( $username, $password ) {
-       error_log( "saveLittleHotelierSettings: $username , $password ");
+
        if( empty( $username )) {
            throw new ValidationException( "Username cannot be blank" );
        }
@@ -61,7 +63,7 @@ class LHReportSettings extends XslTransform {
     * Updates details for hostelworld.
     */
    function saveHostelworldSettings( $username, $password ) {
-       error_log( "saveHostelworldSettings: $username , $password ");
+
        if( empty( $username )) {
            throw new ValidationException( "Username cannot be blank" );
        }
@@ -92,7 +94,7 @@ class LHReportSettings extends XslTransform {
     * ** Now deprecated. HB merged with HW. 9/4/2016 **
     */
    function saveHostelbookersSettings( $username, $password ) {
-       error_log( "saveHostelbookersSettings: $username , $password ");
+
        if( empty( $username )) {
            throw new ValidationException( "Username cannot be blank" );
        }
@@ -116,6 +118,27 @@ class LHReportSettings extends XslTransform {
        // if we get to this point, we have validated the login so save it
        update_option( "hbo_hb_username", $username );
        update_option( "hbo_hb_password", $password );
+   }
+
+   /**
+    * Updates details for the Group Bookings report.
+    * $groupBookingSize : number of guests for a booking to be considered a "group" (string)
+    * $include5guestsIn6bedDorms : boolean (true to include bookings of 5 guests in 6 bed dorms)
+    */
+   function saveGroupBookingsReportSettings( $groupBookingSize, $include5guestsIn6bedDorms ) {
+
+       if( empty( $groupBookingSize )) {
+           throw new ValidationException( "Group booking size cannot be blank" );
+       }
+       if( ctype_digit( $groupBookingSize ) === false ) {
+           throw new ValidationException( "Group booking size must be a number" );
+       }
+       else if( intval( $groupBookingSize ) < 6 ) {
+           throw new ValidationException( "Group booking size must be greater or equal to 6" );
+       }
+
+       update_option( "hbo_group_booking_size", $groupBookingSize );
+       update_option( "hbo_include_5_guests_in_6bed_dorm", $include5guestsIn6bedDorms ? 'true' : 'false' );
    }
 
     /**

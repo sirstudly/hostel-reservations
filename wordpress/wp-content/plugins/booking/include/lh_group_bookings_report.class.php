@@ -55,6 +55,9 @@ class LHGroupBookingsReport extends XslTransform {
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedAllocScraperJob)->format('D, d M Y H:i:s')));
         }
 
+        $parentElement->appendChild($domtree->createElement('group_size', get_option('hbo_group_booking_size') ));
+        $parentElement->appendChild($domtree->createElement('include_5_guests_in_6bed_dorm', get_option('hbo_include_5_guests_in_6bed_dorm') ));
+
         // did the last job fail to run?
         if( $this->lastJob ) {
             $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
@@ -89,6 +92,7 @@ class LHGroupBookingsReport extends XslTransform {
       Generates the following xml:
         <view>
             <last_submitted_job>2015-05-24 13:22:58</last_submitted_job>
+            <group_size>6</group_size>
             <record>
                 <reservation_id>123456</reservation_id>
                 <guest_name>Joe Bloggs</guest_name>

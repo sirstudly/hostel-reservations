@@ -50,6 +50,11 @@
     margin-bottom: 30px;
 }
 
+#group-report-container {
+    width: 400px;
+    margin-bottom: 30px;
+}
+
 .shadow {
     padding: 10px;
     border: 2px solid #f0f0f0;
@@ -157,6 +162,31 @@ jQuery(document).ready( function(){
         </div>
     </xsl:if>
 
+        <div id="group-report-container" class="shadow">
+            <h3>Group Bookings Report</h3> 
+            <table class="form-table">
+                <tbody>
+                    <tr valign="top">
+                        <th scope="row"><label for="group_booking_size">Group Booking Size:</label></th>
+                        <td><input id="group_booking_size" name="hbo_group_booking_size" class="regular-text code" type="text" style="width:200px;" size="75" value="{hbo_group_booking_size}"/></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="include_5_guests_in_6bed_dorm">Include Bookings of 5 Guests in a 6 Bed Dorm:</label></th>
+                        <td><input type="checkbox" id="include_5_guests_in_6bed_dorm" name="hbo_include_5_guests_in_6bed_dorm">
+                                <xsl:if test="hbo_include_5_guests_in_6bed_dorm = 'true'">
+                                    <xsl:attribute name="checked">checked</xsl:attribute>
+                                </xsl:if>
+                            </input>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="btn-container">
+                <div style="float: left;" id="ajax_respond_group_bookings_rpt"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_group_rpt_settings" class="btn btn-primary" style="float: right;" onclick="save_group_bookings_report_settings(document.post_option.group_booking_size.value, document.post_option.include_5_guests_in_6bed_dorm.checked); this.disabled=true;">Save</a>
+            </div>
+        </div>
     </form>
     </div>
 
