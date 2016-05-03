@@ -55,6 +55,10 @@
                                         <td><input id="resources_url"  name="hbo_resources_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{resourcesurl}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="cleaner_tasks_url">Cleaner Tasks Page</label></th>
+                                        <td><input id="cleaner_tasks_url"  name="hbo_cleaner_tasks_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{cleaner_tasks_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="housekeeping_url">Housekeeping Page</label></th>
                                         <td><input id="housekeeping_url"  name="hbo_housekeeping_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{housekeepingurl}" /></td>
                                     </tr>  

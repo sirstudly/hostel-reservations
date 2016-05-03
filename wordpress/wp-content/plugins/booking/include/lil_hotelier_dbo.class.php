@@ -928,6 +928,97 @@ class LilHotelierDBO {
     }
 
     /**
+     * Adds a new cleaner task. Returns id of created task.
+     * $name : name of task
+     * $description : description of task
+     * $defaultHours : (int) default number of hours for this tak
+     * $active : (boolean) true if active, false if not
+     */
+    static function addCleanerTask( $name, $description, $defaultHours, $active ) {
+        global $wpdb;
+        if (false === $wpdb->insert($wpdb->prefix ."lh_cleaner_task", 
+                array( 'name' => $name, 
+                       'description' => $description,
+                       'default_hours' => $defaultHours,
+                       'active_yn' => $active ? 'Y' : 'N',
+                       'last_updated_date' => current_time('mysql', 1) ), 
+                array( '%s', '%s', '%d', '%s' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $wpdb->insert_id;
+   }
+
+    /**
+     * Updates an existing cleaner task.
+     * $id : id of task to edit
+     * $name : name of task
+     * $description : description of task
+     * $defaultHours : (int) default number of hours for this tak
+     * $active : (boolean) true if active, false if not
+     */
+    static function editCleanerTask( $id, $name, $description, $defaultHours, $active ) {
+        global $wpdb;
+        $returnval = $wpdb->update(
+            $wpdb->prefix."lh_cleaner_task",
+                array( 'name', $name,
+                       'description' => $description,
+                       'defaultHours' => $defaultHours,
+                       'active' => $active ? 'Y' : 'N',
+                       'last_updated_date' => current_time('mysql', 1)),
+                array( 'id' => $id ) );
+        
+        if(false === $returnval) {
+            throw new DatabaseException("Error occurred during UPDATE");
+        }
+    }
+
+    /**
+     * Returns all the wp_lh_cleaner_task records.
+     */
+    static function getCleanerTasks() {
+
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT id, name, description, default_hours, active_yn
+               FROM ".$wpdb->prefix."lh_cleaner_task
+              ORDER BY id");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
+    /**
+     * Returns the wp_lh_cleaner_task record for the given unique task id.
+     * $taskId : PK of cleaner task table
+     */
+    static function getCleanerTask( $taskId ) {
+
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, name, description, default_hours, active_yn
+               FROM ".$wpdb->prefix."lh_cleaner_task
+              WHERE id = %d", $taskId ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // if empty, then no record exists
+        if(empty($resultset)) {
+            throw new DatabaseException( 'Invalid cleaner task: ' . $taskId );
+        }
+
+        // return single row
+        $rec = array_shift($resultset);
+        return $rec;
+    }
+
+    /**
      * Returns the wp_lh_jobs records for the past number of days in reverse chrono order.
      * $numberOfDays : number of days to include in the past
      * $maxNumRecords : maximum number of records to include (optional)

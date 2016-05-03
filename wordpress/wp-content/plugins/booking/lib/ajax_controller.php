@@ -122,6 +122,10 @@ class AjaxController {
                 $this->add_cleaner_bed_assignment();
                 break;
 
+            case  'ADD_CLEANER_TASK':
+                $this->add_cleaner_task();
+                break;
+
             case  'ACKNOWLEDGE_GUEST_COMMENT':
                 $this->acknowledge_guest_comment();
                 break;
@@ -729,6 +733,28 @@ error_log("checkout: ".$_POST['checkout_date']);
                     $checkoutDate);
             }
             echo $cleanerBedPage->toHtml();
+        }
+    }
+
+    /**
+     * Adds a new cleaner task.
+     * Requires POST variables:
+     *   task_name : name of task
+     *   task_description : task description
+     *   default_hours : (int) default number of hours
+     *   task_active : true for active, false otherwise
+     */
+    function add_cleaner_task() {
+
+error_log("in ajax_controller.add_cleaner_task"); 
+        if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
+            $cleanerTasksPage = $_SESSION['CLEANER_TASKS_CONTROLLER'];
+            $cleanerTasksPage->addTask( 
+                $_POST['task_name'], 
+                $_POST['task_description'], 
+                $_POST['default_hours'], 
+                $_POST['task_active'] );
+            echo $cleanerTasksPage->toHtml();
         }
     }
 

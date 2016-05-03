@@ -444,6 +444,24 @@ function add_cleaner_bed_assignment(cleaner_id, room_id, checkin_date, checkout_
     });
 }
 
+// this will add a new cleaner task.
+function add_cleaner_task(task_name, task_description, default_hours, task_active) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_respond').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'ADD_CLEANER_TASK',
+            task_name : task_name,
+            task_description : task_description,
+            default_hours : default_hours,
+            task_active : task_active
+        }
+    });
+}
+
 // guest comments report
 // reservation_id : id of LH reservation to confirm
 function acknowledge_guest_comment( reservation_id ) {
