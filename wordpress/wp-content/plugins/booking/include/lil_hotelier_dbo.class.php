@@ -822,6 +822,10 @@ class LilHotelierDBO {
     static function addCleanerBedAssignment($cleanerId, $roomId, $checkinDate, $checkoutDate) {
         global $wpdb;
 
+        if( $checkinDate >= $checkoutDate ) {
+            throw new ValidationException( "checkout date must be after checkin date" );
+        }
+
         // first check if we have a date overlap
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT 1 FROM ".$wpdb->prefix."lh_cleaner_bed_assign
@@ -855,9 +859,9 @@ class LilHotelierDBO {
    }
 
     /**
-     * Returns all cleaner bed assignments (array of LHCleaner)
+     * Returns all cleaners including bed assignments (array of LHCleaner)
      */
-    static function getCleanerBedAssignments() {
+    static function getCleaners() {
         global $wpdb;
         $resultset = $wpdb->get_results(
            "SELECT id, first_name, last_name, active_yn
@@ -871,17 +875,17 @@ class LilHotelierDBO {
         $cleaners = array();
         foreach( $resultset as $record ) {
             $cleaner = new LHCleaner( $record->id, $record->first_name, $record->last_name, $record->active_yn == 'Y' );
-            self::loadBedAssignmentsForCleaner($cleaner);
+            $cleaner->loadBedAssignments();
             $cleaners[] = $cleaner;
         }
         return $cleaners;
     }
 
     /**
-     * Updates bed assignments on the specified cleaner.
-     * $cleaner : cleaner to update (LHCleaner)
+     * Returns the bed assignments on the specified cleaner.
+     * $cleanerId : cleaner ID to query
      */
-    static function loadBedAssignmentsForCleaner( $cleaner ) {
+    static function getBedAssignmentsForCleaner( $cleanerId ) {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
            "SELECT cba.id, DATE_FORMAT( cba.start_date, '%%Y-%%m-%%d' ) AS start_date, 
@@ -890,18 +894,13 @@ class LilHotelierDBO {
               FROM ".$wpdb->prefix."lh_cleaner_bed_assign cba
               JOIN ".$wpdb->prefix."lh_rooms r ON cba.room_id = r.id
              WHERE cba.lh_cleaner_id = %d
-             ORDER BY cba.start_date", $cleaner->id ));
+             ORDER BY cba.start_date", $cleanerId ));
 
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
         }
 
-        foreach( $resultset as $record ) {
-            $cleaner->addBedAssignment(
-                $record->room_id, $record->room, $record->bed_name, 
-                DateTime::createFromFormat('!Y-m-d', $record->start_date), 
-                DateTime::createFromFormat('!Y-m-d', $record->end_date) );
-        }
+        return $resultset;
     }
 
     /**

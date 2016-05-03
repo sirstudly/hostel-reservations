@@ -14,7 +14,6 @@
 <xsl:template match="/view">
 
     <div id="ajax_respond">
-        <div id="flip">Move along, nothing to see here.</div>
         <div id="cleaner_page_contents">
             <xsl:call-template name="cleaner_page_contents"/>
         </div>

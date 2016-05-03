@@ -3,7 +3,7 @@
 /**
  * Encapsulates a cleaner and their past/future room assignments.
  */
-class LHCleaner {
+class LHCleaner extends XslTransform {
     var $id;     // unique id
     var $firstName;
     var $lastName;
@@ -31,14 +31,32 @@ class LHCleaner {
 
     /**
      * Add bed assignment for this cleaner.
-     * $roomId : unique id of room assigned
-     * $room : room number
-     * $bedName : name of bed
-     * $startDate : start date of room assignment
-     * $endDate : end date of room assignment (checkout date)
+     * $roomId : unique id of room to assign to
+     * $checkinDate : datetime of checkin
+     * $checkoutDate : datetime of checkout
      */
-    function addBedAssignment($roomId, $room, $bedName, $startDate, $endDate) {
-        $this->bedAssignments[] = new LHCleanerBedAssignment($roomId, $room, $bedName, $startDate, $endDate);
+    function addBedAssignment($roomId, $checkinDate, $checkoutDate) {
+        LilHotelierDBO::addCleanerBedAssignment( $this->id, $roomId, $checkinDate, $checkoutDate );
+        self::loadBedAssignments(); // reload
+    }
+
+    /**
+     * Loads the bed assignments for this cleaner from the database.
+     */
+    function loadBedAssignments() {
+        $this->bedAssignments = array(); // clear previous data
+        $resultset = LilHotelierDBO::getBedAssignmentsForCleaner( $this->id );
+        foreach( $resultset as $record ) {
+            $this->bedAssignments[] = new LHCleanerBedAssignment(
+                $record->room_id, 
+                $record->room, 
+                $record->bed_name, 
+                DateTime::createFromFormat('!Y-m-d', $record->start_date), 
+                DateTime::createFromFormat('!Y-m-d', $record->end_date));
+        }
+        $this->editingRoomId = null;
+        $this->editingCheckinDate = null;
+        $this->editingCheckoutDate = null;
     }
 
     /**
@@ -127,6 +145,15 @@ class LHCleaner {
     
     /** 
       Generates the following xml:
+      <view>
+        <rooms>
+            <room>
+                <id>2145</id>
+                <number>13</number>
+                <bed>Pinkie</bed>
+            </room>
+            ...
+        </rooms>
         <cleaner>
             <id>25</id>
             <firstname>Megan</firstname>
@@ -152,14 +179,34 @@ class LHCleaner {
             <availablecredits>2</availablecredits>
             <allocateduntil>26.05.2015</allocateduntil>
         </cleaner>
+      </view>
      */
     function toXml() {
         /* create a dom document with encoding utf8 */
         $domtree = new DOMDocument('1.0', 'UTF-8');
-        $this->addSelfToDocument($domtree, $domtree);
+
+        // create the root element
+        $viewRoot = $domtree->createElement('view');
+        $viewRoot = $domtree->appendChild($viewRoot);
+
+        // create the root element for the different beds available on the xml tree
+        $roomsRoot = $domtree->createElement('rooms');
+        $roomsRoot = $viewRoot->appendChild($roomsRoot);
+
+        foreach( LilHotelierDBO::getAllAssignableCleanerBeds() as $bedAssign ) {
+            $bedAssign->addSelfToDocument($domtree, $roomsRoot);
+        }
+
+        $this->addSelfToDocument($domtree, $viewRoot);
         return $domtree->saveXML();
     }
     
+    /**
+     * Returns the filename for the stylesheet to use during transform.
+     */
+    function getXslFilename() {
+        return WPDEV_BK_PLUGIN_DIR. '/include/lh_cleaner.xsl';
+    }
 }
 
 ?>

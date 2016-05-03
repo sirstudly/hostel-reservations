@@ -726,13 +726,13 @@ error_log("checkout: ".$_POST['checkout_date']);
             $checkoutDate = DateTime::createFromFormat('Y-m-d', $_POST['checkout_date']);
 
             if( false === $cleaner->hasErrors() ) {
-                $cleanerBedPage->addCleanerBedAssignment(
+                $cleaner = $cleanerBedPage->addCleanerBedAssignment(
                     $_POST['cleaner_id'],
                     $_POST['room_id'],
                     $checkinDate,
                     $checkoutDate);
             }
-            echo $cleanerBedPage->toHtml();
+            echo $cleaner->toHtml();
         }
     }
 

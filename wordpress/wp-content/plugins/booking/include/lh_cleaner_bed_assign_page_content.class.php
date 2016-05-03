@@ -16,7 +16,7 @@ class CleanerBedAssignmentsPageContent extends XslTransform {
      * Initialises all cleaner bed assignments from the DB.
      */
     function loadAssignments() {
-        $this->cleanersTable = LilHotelierDBO::getCleanerBedAssignments();
+        $this->cleanersTable = LilHotelierDBO::getCleaners();
     }
 
     /**
@@ -52,16 +52,17 @@ class CleanerBedAssignmentsPageContent extends XslTransform {
      * roomId : unique id of room to assign to
      * checkinDate : datetime of checkin
      * checkoutDate : datetime of checkout
+     * Returns cleaner which was modified.
      */
     function addCleanerBedAssignment( $cleanerId, $roomId, $checkinDate, $checkoutDate ) {
+        $cleaner = self::getCleaner( $cleanerId );
         try {
-            LilHotelierDBO::addCleanerBedAssignment( $cleanerId, $roomId, $checkinDate, $checkoutDate );
-            self::loadAssignments(); // reload
+            $cleaner->addBedAssignment( $roomId, $checkinDate, $checkoutDate );
         }
         catch( ValidationException $ex ) {
-            $cleaner = self::getCleaner( $cleanerId );
             $cleaner->addErrorMessage( 'add_assignment', $ex->getMessage() );
         }
+        return $cleaner;
     }
     
     /** 
