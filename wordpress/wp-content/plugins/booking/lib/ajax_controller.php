@@ -126,6 +126,18 @@ class AjaxController {
                 $this->add_cleaner_task();
                 break;
 
+            case  'EDIT_CLEANER_TASK':
+                $this->edit_cleaner_task();
+                break;
+
+            case  'CANCEL_EDIT_CLEANER_TASK':
+                $this->cancel_edit_cleaner_task();
+                break;
+
+            case  'UPDATE_CLEANER_TASK':
+                $this->update_cleaner_task();
+                break;
+
             case  'ACKNOWLEDGE_GUEST_COMMENT':
                 $this->acknowledge_guest_comment();
                 break;
@@ -745,8 +757,6 @@ error_log("checkout: ".$_POST['checkout_date']);
      *   task_active : true for active, false otherwise
      */
     function add_cleaner_task() {
-
-error_log("in ajax_controller.add_cleaner_task"); 
         if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
             $cleanerTasksPage = $_SESSION['CLEANER_TASKS_CONTROLLER'];
             $cleanerTasksPage->addTask( 
@@ -754,7 +764,54 @@ error_log("in ajax_controller.add_cleaner_task");
                 $_POST['task_description'], 
                 $_POST['default_hours'], 
                 $_POST['task_active'] );
-            echo $cleanerTasksPage->toHtml();
+            echo $cleanerTasksPage->getTasksTable()->toHtml();
+        }
+    }
+
+    /**
+     * Enables the editing of an existing cleaner task.
+     * Requires POST variables:
+     *   task_id : id of task that we're starting to edit
+     */
+    function edit_cleaner_task() {
+        if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
+            $cleanerTasksPage = $_SESSION['CLEANER_TASKS_CONTROLLER'];
+            $cleanerTasksPage->editTask( $_POST['task_id'] );
+            echo $cleanerTasksPage->getTasksTable()->toHtml();
+        }
+    }
+
+    /**
+     * Cancels the editing of an existing cleaner task.
+     * Requires no POST variables.
+     */
+    function cancel_edit_cleaner_task() {
+        if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
+            $cleanerTasksPage = $_SESSION['CLEANER_TASKS_CONTROLLER'];
+            $cleanerTasksPage->cancelEditTask();
+            echo $cleanerTasksPage->getTasksTable()->toHtml();
+        }
+    }
+
+    /**
+     * Updates an existing cleaner task.
+     * Requires POST variables:
+     *   task_id : id of task that we're editing
+     *   task_name : name of task
+     *   task_description : task description
+     *   default_hours : (int) default number of hours
+     *   task_active : true for active, false otherwise
+     */
+    function update_cleaner_task() {
+        if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
+            $cleanerTasksPage = $_SESSION['CLEANER_TASKS_CONTROLLER'];
+            $cleanerTasksPage->updateTask( 
+                $_POST['task_id'], 
+                $_POST['task_name'], 
+                $_POST['task_description'], 
+                $_POST['default_hours'], 
+                $_POST['task_active'] == 'true');
+            echo $cleanerTasksPage->getTasksTable()->toHtml();
         }
     }
 

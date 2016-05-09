@@ -13,6 +13,34 @@
 
 <xsl:template match="view">
 
+<style media="screen" type="text/css">
+
+#cleaner_task_tbl tbody tr:nth-child(odd) td {
+	background-color: #e3e3e3
+}
+
+#hdr_name {
+	width: 30%;
+}
+
+#hdr_description {
+	width: 40%;
+}
+
+#hdr_hours {
+	width: 10%;
+}
+
+#hdr_active {
+	width: 10%;
+}
+
+#hdr_controls {
+	width: 10%;
+}
+
+</style>
+
     <div id="report-container" class="wrap bookingpage">
         <h2>Cleaner Tasks</h2>
         <div class="wpdevbk">

@@ -23,7 +23,7 @@ class LHCleanerTasksTableRow extends XslTransform {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
-        $this->defaultHours = $default_hours;
+        $this->defaultHours = $defaultHours;
         $this->active = $active;
     }
 
@@ -41,18 +41,17 @@ class LHCleanerTasksTableRow extends XslTransform {
     }
 
     /**
-     * Edits an existing task.
-     * $id : id of task to edit
+     * Updates an existing task.
      * $name : name of task
      * $description : description of task
      * $defaultHours : (int) default number of hours for this task
      * $active : (boolean) true if active, false if not
      */
-    function editTask( $name, $description, $defaultHours, $active ) {
+    function updateTask( $name, $description, $defaultHours, $active ) {
         if( false === isset( $this->id )) {
             throw new ValidationException( "ID not set" );
         }
-        LilHotelierDBO::editCleanerTask( $this->id, $name, $description, $defaultHours, $active );
+        LilHotelierDBO::updateCleanerTask( $this->id, $name, $description, $defaultHours, $active );
         $this->name = $name;
         $this->description = $description;
         $this->defaultHours = $defaultHours;
@@ -74,7 +73,7 @@ class LHCleanerTasksTableRow extends XslTransform {
         $taskRoot->appendChild( $domtree->createElement('name', $this->name ) );
         $taskRoot->appendChild( $domtree->createElement('description', $this->description ) );
         $taskRoot->appendChild( $domtree->createElement('default_hours', $this->defaultHours ) );
-        $taskRoot->appendChild( $domtree->createElement('active', $this->active ) );
+        $taskRoot->appendChild( $domtree->createElement('active', $this->active ? 'true' : 'false' ) );
     }
 
     /** 

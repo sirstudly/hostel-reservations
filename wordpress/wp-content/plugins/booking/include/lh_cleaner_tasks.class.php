@@ -5,7 +5,7 @@
  */
 class LHCleanerTasks extends XslTransform {
 
-    var $tasks; // LHCleanerTasksTable
+    var $table; // LHCleanerTasksTable
 
     /**
      * Default constructor.
@@ -18,8 +18,15 @@ class LHCleanerTasks extends XslTransform {
      * Loads all tasks from the database.
      */
     function doView() {
-        $this->tasks = new LHCleanerTasksTable();
-        $this->tasks->doView();
+        $this->table = new LHCleanerTasksTable();
+        $this->table->doView();
+    }
+
+    /**
+     * Returns the backing LHCleanerTasksTable.
+     */
+    function getTasksTable() {
+        return $this->table;
     }
 
     /**
@@ -30,19 +37,34 @@ class LHCleanerTasks extends XslTransform {
      * $active : (boolean) true if active, false if not
      */
     function addTask( $name, $description, $defaultHours, $active ) {
-        return $this->tasks->addTask( $name, $description, $defaultHours, $active );
+        return $this->table->addTask( $name, $description, $defaultHours, $active );
     }
 
     /**
-     * Edits an existing task.
+     * Starts editing an existing task.
+     * $taskId : id of task we are starting to edit
+     */
+    function editTask( $taskId ) {
+        return $this->table->editTask( $taskId );
+    }
+
+    /**
+     * Cancels editing of an existing task.
+     */
+    function cancelEditTask() {
+        return $this->table->cancelEditTask();
+    }
+
+    /**
+     * Updates an existing task.
      * $id : id of task to edit
      * $name : name of task
      * $description : description of task
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
      */
-    function editTask( $id, $name, $description, $defaultHours, $active ) {
-        $this->tasks->editTask( $id, $name, $description, $defaultHours, $active );
+    function updateTask( $id, $name, $description, $defaultHours, $active ) {
+        $this->table->updateTask( $id, $name, $description, $defaultHours, $active );
     }
 
     /** 
@@ -66,7 +88,7 @@ class LHCleanerTasks extends XslTransform {
         /* create a dom document with encoding utf8 */
         $domtree = new DOMDocument('1.0', 'UTF-8');
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
-        $this->tasks->addSelfToDocument( $domtree, $xmlRoot );
+        $this->table->addSelfToDocument( $domtree, $xmlRoot );
         return $domtree->saveXML();
     }
     

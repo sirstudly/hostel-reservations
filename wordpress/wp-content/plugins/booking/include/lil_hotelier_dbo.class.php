@@ -957,14 +957,14 @@ class LilHotelierDBO {
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
      */
-    static function editCleanerTask( $id, $name, $description, $defaultHours, $active ) {
+    static function updateCleanerTask( $id, $name, $description, $defaultHours, $active ) {
         global $wpdb;
         $returnval = $wpdb->update(
             $wpdb->prefix."lh_cleaner_task",
-                array( 'name', $name,
+                array( 'name' => $name,
                        'description' => $description,
-                       'defaultHours' => $defaultHours,
-                       'active' => $active ? 'Y' : 'N',
+                       'default_hours' => $defaultHours,
+                       'active_yn' => $active ? 'Y' : 'N',
                        'last_updated_date' => current_time('mysql', 1)),
                 array( 'id' => $id ) );
         

@@ -12,34 +12,6 @@
 
 <xsl:template match="tasks">
 
-<style media="screen" type="text/css">
-
-#cleaner_task_tbl tbody tr:nth-child(odd) td {
-	background-color: #e3e3e3
-}
-
-#hdr_name {
-	width: 30%;
-}
-
-#hdr_description {
-	width: 40%;
-}
-
-#hdr_hours {
-	width: 10%;
-}
-
-#hdr_active {
-	width: 10%;
-}
-
-#hdr_controls {
-	width: 10%;
-}
-
-</style>
-
     <table id="cleaner_task_tbl" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
             <th id="hdr_name">Task Name</th>
@@ -51,11 +23,11 @@
         <tbody>
             <xsl:apply-templates select="task"/>
             <tr>
-                <td><input name="task_name" class="regular-text code" type="text" style="width:97%;" size="255" /></td>
-                <td><input name="task_description" class="regular-text code" type="text" style="width:97%;" /></td>
-                <td><input name="default_hours" class="regular-text code" type="text" style="width:97%;" /></td>
-                <td style="text-align: center;"><input type="checkbox" name="active_checkbox" checked="checked" /></td>
-                <td><a href="#">Add Task</a></td>
+                <td><input id="task_name" name="task_name" class="regular-text code" type="text" style="width:97%;" size="255" /></td>
+                <td><input id="task_description" name="task_description" class="regular-text code" type="text" style="width:97%;" /></td>
+                <td><input id="default_hours" name="default_hours" class="regular-text code" type="text" style="width:97%;" /></td>
+                <td style="text-align: center;"><input type="checkbox" id="active_checkbox" name="active_checkbox" checked="checked" /></td>
+                <td><a href="javascript:add_cleaner_task(document.getElementById('task_name').value, document.getElementById('task_description').value, document.getElementById('default_hours').value, document.getElementById('active_checkbox').checked);">Add Task</a></td>
             </tr>
         </tbody>
     </table>

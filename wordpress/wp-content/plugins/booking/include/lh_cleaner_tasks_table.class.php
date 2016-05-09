@@ -6,6 +6,7 @@
 class LHCleanerTasksTable extends XslTransform {
 
     var $tasks = array(); // array of LHCleanerTasksTableRow (indexed by id)
+    var $editingTaskId; // id of currently editing task (if any)
 
     /**
      * Default constructor.
@@ -44,15 +45,33 @@ class LHCleanerTasksTable extends XslTransform {
     }
 
     /**
-     * Edits an existing task.
+     * Starts editing an existing task.
+     * $id : id of task to edit
+     */
+    function editTask( $id ) {
+        if( isset( $this->tasks[$id] )) {
+            $this->editingTaskId = $id;
+        }
+    }
+
+    /**
+     * Cancels the editing of an existing task.
+     */
+    function cancelEditTask() {
+        $this->editingTaskId = null;
+    }
+
+    /**
+     * Updates an existing task.
      * $id : id of task to edit
      * $name : name of task
      * $description : description of task
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
      */
-    function editTask( $id, $name, $description, $defaultHours, $active ) {
-        $this->tasks[$id]->editTask( $name, $description, $defaultHours, $active );
+    function updateTask( $id, $name, $description, $defaultHours, $active ) {
+        $this->tasks[$id]->updateTask( $name, $description, $defaultHours, $active );
+        $this->editingTaskId = null; // we are done editing
     }
 
     /**
@@ -67,6 +86,12 @@ class LHCleanerTasksTable extends XslTransform {
         $xmlRoot = $domtree->createElement('tasks');
         $xmlRoot = $parentElement->appendChild($xmlRoot);
 
+        // include the editing task (if any)
+        if( $this->editingTaskId ) {
+            $editingTaskElem = $domtree->createElement('editing_task_id', $this->editingTaskId);
+            $xmlRoot->appendChild($editingTaskElem);
+        }
+
         // element for each task
         foreach( $this->tasks as $task ) {
             $task->addSelfToDocument( $domtree, $xmlRoot );
@@ -77,6 +102,7 @@ class LHCleanerTasksTable extends XslTransform {
     /** 
       Generates the following xml:
         <tasks>
+            <editing_task_id>7</editing_task_id>
             <task>
                 <id>5</id>
                 <name>5am Lounges</name>
