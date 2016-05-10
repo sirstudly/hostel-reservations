@@ -35,9 +35,12 @@ class LHCleanerTasks extends XslTransform {
      * $description : description of task
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean) true if task should be shown in the daily tasks page
+     * $sortOrder : (int) the order this task appears on the daily tasks page
+     * $frequency : (int) the number of times this task appears on the daily tasks page
      */
-    function addTask( $name, $description, $defaultHours, $active ) {
-        return $this->table->addTask( $name, $description, $defaultHours, $active );
+    function addTask( $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency ) {
+        return $this->table->addTask( $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency );
     }
 
     /**
@@ -62,9 +65,12 @@ class LHCleanerTasks extends XslTransform {
      * $description : description of task
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean) true if task should be shown in the daily tasks page
+     * $sortOrder : (int) the order this task appears on the daily tasks page
+     * $frequency : (int) the number of times this task appears on the daily tasks page
      */
-    function updateTask( $id, $name, $description, $defaultHours, $active ) {
-        $this->table->updateTask( $id, $name, $description, $defaultHours, $active );
+    function updateTask( $id, $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency ) {
+        $this->table->updateTask( $id, $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency );
     }
 
     /** 

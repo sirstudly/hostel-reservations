@@ -10,6 +10,9 @@ class LHCleanerTasksTableRow extends XslTransform {
     var $description;
     var $defaultHours; // (int)
     var $active; // (boolean)
+    var $showInDailyTasks; // (boolean)
+    var $sortOrder; // (int)
+    var $frequency; // (int)
 
     /**
      * Default constructor.
@@ -18,13 +21,20 @@ class LHCleanerTasksTableRow extends XslTransform {
      * $description : description of task (default null)
      * $defaultHours : (int) default number of hours for this task (default null)
      * $active : (boolean) true if active, false if not (default null)
+     * $showInDailyTasks : (boolean; default null) true if task should be shown in the daily tasks page
+     * $sortOrder : (int; default null) the order this task appears on the daily tasks page
+     * $frequency : (int; default null) the number of times this task appears on the daily tasks page
      */
-    function LHCleanerTasksTableRow( $id = null, $name = null, $description = null, $defaultHours = null, $active = null ) {
+    function LHCleanerTasksTableRow( $id = null, $name = null, $description = null, 
+            $defaultHours = null, $active = null, $showInDailyTasks = null, $sortOrder = null, $frequency = null ) {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
         $this->defaultHours = $defaultHours;
         $this->active = $active;
+        $this->showInDailyTasks = $showInDailyTasks;
+        $this->sortOrder = $sortOrder;
+        $this->frequency = $frequency;
     }
 
     /**
@@ -38,6 +48,9 @@ class LHCleanerTasksTableRow extends XslTransform {
         $this->description = $row->description;
         $this->defaultHours = $row->default_hours;
         $this->active = $row->active_yn == 'Y';
+        $this->showInDailyTasks = $row->show_in_daily_tasks_yn == 'Y';
+        $this->sortOrder = $row->sort_order;
+        $this->frequency = $row->frequency;
     }
 
     /**
@@ -46,16 +59,18 @@ class LHCleanerTasksTableRow extends XslTransform {
      * $description : description of task
      * $defaultHours : (int) default number of hours for this task
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean; default false) true if task should be shown in the daily tasks page
+     * $sortOrder : (int; default null) the order this task appears on the daily tasks page
+     * $frequency : (int; default null) the number of times this task appears on the daily tasks page
      */
-    function updateTask( $name, $description, $defaultHours, $active ) {
+    function updateTask( $name, $description, $defaultHours, $active, 
+            $showInDailyTasks = false, $sortOrder = null, $frequency = null ) {
+
         if( false === isset( $this->id )) {
             throw new ValidationException( "ID not set" );
         }
-        LilHotelierDBO::updateCleanerTask( $this->id, $name, $description, $defaultHours, $active );
-        $this->name = $name;
-        $this->description = $description;
-        $this->defaultHours = $defaultHours;
-        $this->active = $active;
+        LilHotelierDBO::updateCleanerTask( $this->id, $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder );
+        self::loadFromDB( $this->id );
     }
 
     /**
@@ -74,6 +89,9 @@ class LHCleanerTasksTableRow extends XslTransform {
         $taskRoot->appendChild( $domtree->createElement('description', $this->description ) );
         $taskRoot->appendChild( $domtree->createElement('default_hours', $this->defaultHours ) );
         $taskRoot->appendChild( $domtree->createElement('active', $this->active ? 'true' : 'false' ) );
+        $taskRoot->appendChild( $domtree->createElement('show_in_daily_tasks', $this->showInDailyTasks ? 'true' : 'false' ) );
+        $taskRoot->appendChild( $domtree->createElement('sort_order', $this->sortOrder ) );
+        $taskRoot->appendChild( $domtree->createElement('frequency', $this->frequency ) );
     }
 
     /** 
@@ -84,6 +102,9 @@ class LHCleanerTasksTableRow extends XslTransform {
             <description>Clean lounges, bathrooms, etc. from 5am - 7am.</description>
             <default_hours>2</default_hours>
             <active>true</active>
+            <show_in_daily_tasks>true</show_in_daily_tasks>
+            <sort_order>10</sort_order>
+            <frequency>2</frequency>
         </task>
      */
     function toXml() {

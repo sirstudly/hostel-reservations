@@ -932,16 +932,22 @@ class LilHotelierDBO {
      * $description : description of task
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean; default false) true if task should be shown in the daily tasks page
+     * $sortOrder : (int; default 0) the order this task appears on the daily tasks page
+     * $frequency : (int; default 1) the number of times this task appears on the daily tasks page
      */
-    static function addCleanerTask( $name, $description, $defaultHours, $active ) {
+    static function addCleanerTask( $name, $description, $defaultHours, $active, $showInDailyTasks = false, $sortOrder = 0, $frequency = 1 ) {
         global $wpdb;
         if (false === $wpdb->insert($wpdb->prefix ."lh_cleaner_task", 
                 array( 'name' => $name, 
                        'description' => $description,
                        'default_hours' => $defaultHours,
                        'active_yn' => $active ? 'Y' : 'N',
+                       'show_in_daily_tasks_yn' => $showInDailyTasks ? 'Y' : 'N',
+                       'sort_order' => $sortOrder,
+                       'frequency' => $frequency,
                        'last_updated_date' => current_time('mysql', 1) ), 
-                array( '%s', '%s', '%d', '%s' ))) {
+                array( '%s', '%s', '%d', '%s', '%s', '%d' ))) {
             error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
             throw new DatabaseException( $wpdb->last_error );
         }
@@ -954,10 +960,13 @@ class LilHotelierDBO {
      * $id : id of task to edit
      * $name : name of task
      * $description : description of task
-     * $defaultHours : (int) default number of hours for this tak
+     * $defaultHours : (int) default number of hours for this task
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean; default false) true if task should be shown in the daily tasks page
+     * $sortOrder : (int; default 0) the order this task appears on the daily tasks page
+     * $frequency : (int; default 1) the number of times this task appears on the daily tasks page
      */
-    static function updateCleanerTask( $id, $name, $description, $defaultHours, $active ) {
+    static function updateCleanerTask( $id, $name, $description, $defaultHours, $active, $showInDailyTasks = false, $sortOrder = 0, $frequency = 1 ) {
         global $wpdb;
         $returnval = $wpdb->update(
             $wpdb->prefix."lh_cleaner_task",
@@ -965,6 +974,9 @@ class LilHotelierDBO {
                        'description' => $description,
                        'default_hours' => $defaultHours,
                        'active_yn' => $active ? 'Y' : 'N',
+                       'show_in_daily_tasks_yn' => $showInDailyTasks ? 'Y' : 'N',
+                       'sort_order' => $sortOrder,
+                       'frequency' => $frequency,
                        'last_updated_date' => current_time('mysql', 1)),
                 array( 'id' => $id ) );
         
@@ -980,7 +992,7 @@ class LilHotelierDBO {
 
         global $wpdb;
         $resultset = $wpdb->get_results(
-            "SELECT id, name, description, default_hours, active_yn
+            "SELECT id, name, description, default_hours, active_yn, show_in_daily_tasks_yn, sort_order, frequency
                FROM ".$wpdb->prefix."lh_cleaner_task
               ORDER BY id");
 
@@ -999,7 +1011,7 @@ class LilHotelierDBO {
 
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, name, description, default_hours, active_yn
+            "SELECT id, name, description, default_hours, active_yn, show_in_daily_tasks_yn, sort_order, frequency
                FROM ".$wpdb->prefix."lh_cleaner_task
               WHERE id = %d", $taskId ));
 

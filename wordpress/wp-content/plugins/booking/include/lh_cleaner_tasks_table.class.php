@@ -26,7 +26,10 @@ class LHCleanerTasksTable extends XslTransform {
                 $task->name,
                 $task->description,
                 $task->default_hours,
-                $task->active_yn == 'Y'
+                $task->active_yn == 'Y',
+                $task->show_in_daily_tasks_yn == 'Y',
+                $task->sort_order,
+                $task->frequency
             );
         }
     }
@@ -37,10 +40,13 @@ class LHCleanerTasksTable extends XslTransform {
      * $description : description of task
      * $defaultHours : (int) default number of hours for this tak
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean) true if task should be shown in the daily tasks page
+     * $sortOrder : (int) the order this task appears on the daily tasks page
+     * $frequency : (int) the number of times this task appears on the daily tasks page
      */
-    function addTask( $name, $description, $defaultHours, $active ) {
-        $taskId = LilHotelierDBO::addCleanerTask( $name, $description, $defaultHours, $active );
-        $this->tasks[$taskId] = new LHCleanerTasksTableRow( $taskId, $name, $description, $defaultHours, $active );
+    function addTask( $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency ) {
+        $taskId = LilHotelierDBO::addCleanerTask( $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency );
+        self::doView();
         return $taskId;
     }
 
@@ -66,11 +72,14 @@ class LHCleanerTasksTable extends XslTransform {
      * $id : id of task to edit
      * $name : name of task
      * $description : description of task
-     * $defaultHours : (int) default number of hours for this tak
+     * $defaultHours : (int) default number of hours for this task
      * $active : (boolean) true if active, false if not
+     * $showInDailyTasks : (boolean) true if task should be shown in the daily tasks page
+     * $sortOrder : (int) the order this task appears on the daily tasks page
+     * $frequency : (int) the number of times this task appears on the daily tasks page
      */
-    function updateTask( $id, $name, $description, $defaultHours, $active ) {
-        $this->tasks[$id]->updateTask( $name, $description, $defaultHours, $active );
+    function updateTask( $id, $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency ) {
+        $this->tasks[$id]->updateTask( $name, $description, $defaultHours, $active, $showInDailyTasks, $sortOrder, $frequency );
         $this->editingTaskId = null; // we are done editing
     }
 

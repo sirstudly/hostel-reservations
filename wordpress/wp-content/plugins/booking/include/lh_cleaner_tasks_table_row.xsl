@@ -12,19 +12,25 @@
     <tr id="task{id}">
         <xsl:choose>
             <xsl:when test="id = ../editing_task_id">
-                <td><input id="task_name" name="task_name" class="regular-text code" type="text" style="width:97%;" size="255" value="{name}"/></td>
-                <td><input id="task_description" name="task_description" class="regular-text code" type="text" style="width:97%;" value="{description}" /></td>
-                <td><input id="default_hours" name="default_hours" class="regular-text code" type="text" style="width:97%;" value="{default_hours}"/></td>
-                <td style="text-align: center;"><input type="checkbox" id="active_checkbox" name="active_checkbox"><xsl:if test="active = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input></td>
-                <td><a href="javascript:update_cleaner_task({id}, document.getElementById('task_name').value, document.getElementById('task_description').value, document.getElementById('default_hours').value, document.getElementById('active_checkbox').checked);">OK</a>
+                <td><input id="edit_task_name" name="task_name" class="regular-text code" type="text" size="255" value="{name}"/></td>
+                <td><input id="edit_task_description" name="task_description" class="regular-text code" type="text" value="{description}" /></td>
+                <td><input id="edit_default_hours" name="default_hours" class="regular-text code" type="text" value="{default_hours}"/></td>
+                <td style="text-align: center;"><input type="checkbox" id="edit_active_checkbox" name="active_checkbox"><xsl:if test="active = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input></td>
+                <td style="text-align: center;"><input type="checkbox" id="edit_daily_tasks_checkbox" name="daily_tasks_checkbox"><xsl:if test="show_in_daily_tasks = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input></td>
+                <td><input id="edit_sort_order" name="sort_order" class="regular-text code" type="text" value="{sort_order}"/></td>
+                <td><input id="edit_frequency" name="frequency" class="regular-text code" type="text" value="{frequency}"/></td>
+                <td style="text-align: center;"><a href="javascript:update_cleaner_task({id}, jQuery('#edit_task_name').val(), jQuery('#edit_task_description').val(), jQuery('#edit_default_hours').val(), jQuery('#edit_active_checkbox').prop('checked'), jQuery('#edit_daily_tasks_checkbox').prop('checked'), jQuery('#edit_sort_order').val(), jQuery('#edit_frequency').val());">OK</a>
                     <a style="margin-left: 25px;" href="javascript:cancel_edit_cleaner_task();">Cancel</a></td>
             </xsl:when>
             <xsl:otherwise>
                 <td><xsl:value-of select="name"/></td>
                 <td><xsl:value-of select="description"/></td>
                 <td><xsl:value-of select="default_hours"/></td>
-                <td style="text-align: center;"><input type="checkbox" id="active_checkbox" name="active_checkbox" disabled="disabled"><xsl:if test="active = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input></td>
-                <td><a href="javascript:edit_cleaner_task({id});">Edit</a></td>
+                <td style="text-align: center;"><input type="checkbox" name="active_checkbox" disabled="disabled"><xsl:if test="active = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input></td>
+                <td style="text-align: center;"><input type="checkbox" name="daily_tasks_checkbox" disabled="disabled"><xsl:if test="show_in_daily_tasks = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input></td>
+                <td><xsl:value-of select="sort_order"/></td>
+                <td><xsl:value-of select="frequency"/></td>
+                <td style="text-align: center;"><a href="javascript:edit_cleaner_task({id});">Edit</a></td>
             </xsl:otherwise>
         </xsl:choose>
     </tr>

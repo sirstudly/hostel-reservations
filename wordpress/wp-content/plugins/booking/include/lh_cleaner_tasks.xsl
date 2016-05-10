@@ -16,27 +16,47 @@
 <style media="screen" type="text/css">
 
 #cleaner_task_tbl tbody tr:nth-child(odd) td {
-	background-color: #e3e3e3
+	background-color: #e3e3e3;
+}
+
+#cleaner_task_tbl tbody tr td {
+    padding-left: 10px;
+}
+
+#cleaner_task_tbl tbody tr td input[type='text'] {
+    width:90%;
 }
 
 #hdr_name {
-	width: 30%;
+	width: 20%;
 }
 
 #hdr_description {
-	width: 40%;
+	width: 25%;
 }
 
 #hdr_hours {
-	width: 10%;
+	width: 8%;
 }
 
 #hdr_active {
-	width: 10%;
+	width: 8%;
+}
+
+#hdr_daily_tasks {
+	width: 8%;
+}
+
+#hdr_sort_order {
+	width: 8%;
+}
+
+#hdr_frequency {
+	width: 8%;
 }
 
 #hdr_controls {
-	width: 10%;
+	width: 15%;
 }
 
 </style>

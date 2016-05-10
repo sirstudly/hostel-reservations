@@ -445,7 +445,7 @@ function add_cleaner_bed_assignment(cleaner_id, room_id, checkin_date, checkout_
 }
 
 // this will add a new cleaner task.
-function add_cleaner_task(task_name, task_description, default_hours, task_active) {
+function add_cleaner_task(task_name, task_description, default_hours, task_active, show_in_daily_tasks, sort_order, frequency) {
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -457,7 +457,10 @@ function add_cleaner_task(task_name, task_description, default_hours, task_activ
             task_name : task_name,
             task_description : task_description,
             default_hours : default_hours,
-            task_active : task_active
+            task_active : task_active,
+            show_in_daily_tasks : show_in_daily_tasks,
+            sort_order : sort_order,
+            frequency : frequency
         }
     });
 }
@@ -492,8 +495,7 @@ function cancel_edit_cleaner_task() {
 }
 
 // this will update an existing cleaner task.
-function update_cleaner_task(task_id, task_name, task_description, default_hours, task_active) {
-
+function update_cleaner_task(task_id, task_name, task_description, default_hours, task_active, show_in_daily_tasks, sort_order, frequency) {
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
         type:'POST',
@@ -505,7 +507,10 @@ function update_cleaner_task(task_id, task_name, task_description, default_hours
             task_name : task_name,
             task_description : task_description,
             default_hours : default_hours,
-            task_active : task_active
+            task_active : task_active,
+            show_in_daily_tasks : show_in_daily_tasks,
+            sort_order : sort_order,
+            frequency : frequency
         }
     });
 }

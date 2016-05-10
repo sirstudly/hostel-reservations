@@ -755,6 +755,9 @@ error_log("checkout: ".$_POST['checkout_date']);
      *   task_description : task description
      *   default_hours : (int) default number of hours
      *   task_active : true for active, false otherwise
+     *   show_in_daily_tasks : true to show in daily tasks, false otherwise
+     *   sort_order : order to show in daily tasks
+     *   frequency : number of times shown in daily tasks
      */
     function add_cleaner_task() {
         if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
@@ -763,7 +766,10 @@ error_log("checkout: ".$_POST['checkout_date']);
                 $_POST['task_name'], 
                 $_POST['task_description'], 
                 $_POST['default_hours'], 
-                $_POST['task_active'] );
+                $_POST['task_active'] == 'true',
+                $_POST['show_in_daily_tasks'] == 'true',
+                $_POST['sort_order'],
+                $_POST['frequency']);
             echo $cleanerTasksPage->getTasksTable()->toHtml();
         }
     }
@@ -801,6 +807,9 @@ error_log("checkout: ".$_POST['checkout_date']);
      *   task_description : task description
      *   default_hours : (int) default number of hours
      *   task_active : true for active, false otherwise
+     *   show_in_daily_tasks : true to show in daily tasks, false otherwise
+     *   sort_order : order to show in daily tasks
+     *   frequency : number of times shown in daily tasks
      */
     function update_cleaner_task() {
         if(isset($_SESSION['CLEANER_TASKS_CONTROLLER'])) {
@@ -810,7 +819,10 @@ error_log("checkout: ".$_POST['checkout_date']);
                 $_POST['task_name'], 
                 $_POST['task_description'], 
                 $_POST['default_hours'], 
-                $_POST['task_active'] == 'true');
+                $_POST['task_active'] == 'true',
+                $_POST['show_in_daily_tasks'] == 'true',
+                $_POST['sort_order'],
+                $_POST['frequency']);
             echo $cleanerTasksPage->getTasksTable()->toHtml();
         }
     }
