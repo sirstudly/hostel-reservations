@@ -80,7 +80,7 @@ class LHSplitRoomReport extends XslTransform {
                 }
                 $recordRoot->appendChild($domtree->createElement('eta', $record->eta));
                 $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
-                $recordRoot->appendChild($domtree->createElement('notes', $record->notes));
+                $recordRoot->appendChild($domtree->createElement('notes', htmlspecialchars($record->notes)));
                 $recordRoot->appendChild($domtree->createElement('created_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->created_date)->format('D, d M Y H:i:s')));
             }
         }
