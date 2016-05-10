@@ -138,7 +138,7 @@ class LHGuestCommentsReportData extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('num_guests', $record->num_guests));
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
                 if( $record->notes ) {
-                    $recordRoot->appendChild($domtree->createElement('notes', $record->notes));
+                    $recordRoot->appendChild($domtree->createElement('notes', htmlspecialchars($record->notes)));
                 }
                 $recordRoot->appendChild($domtree->createElement('comments', htmlspecialchars($record->comments, ENT_XML1, 'UTF-8')));
                 if( $record->acknowledged_date ) {
