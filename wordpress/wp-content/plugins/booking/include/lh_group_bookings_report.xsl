@@ -14,8 +14,12 @@
 
 <style media="screen" type="text/css">
 
-#group_bookings_rpt tbody tr:nth-child(odd) td {
-	background-color: #e3e3e3;
+#group_bookings_rpt tbody tr:nth-child(4n+1) td {
+	background-color: #e3e3e3
+}
+
+#group_bookings_rpt tbody tr:nth-child(4n+2) td {
+	background-color: #e3e3e3
 }
 
 tr.unread {
@@ -26,6 +30,19 @@ tr.unread {
     color: #882e44;
 }
 
+.comment_header {
+    float: left; 
+    margin: 5px 0 0 0; 
+    width: 100px;
+    font: 12px/1.5 Arial,Helvetica,sans-serif; 
+    font-weight: 700; 
+    color: rgb(31,74,146);
+}
+
+.comment_text {
+    float: left; 
+    margin: 5px 20px 0 20px;
+}
 </style>
 
     <div id="report-container" class="wrap bookingpage">
@@ -136,7 +153,6 @@ tr.unread {
             <th>Booked Date</th>
             <th>Payment<br/>Outstanding</th>
             <th>Number of<br/>Guests</th>
-            <th>Notes</th>
         </thead>
         <tbody>
             <xsl:apply-templates select="record"/>
@@ -165,7 +181,14 @@ tr.unread {
         <td><xsl:value-of select="booked_date"/></td>
         <td style="padding-left: 50px;"><xsl:value-of select="payment_outstanding"/></td>
         <td style="padding-left: 50px;"><xsl:value-of select="num_guests"/></td>
-        <td><xsl:value-of select="notes"/></td>
+    </tr>
+    <tr>
+        <td colspan="8">
+            <xsl:if test="string-length(notes) != 0">
+                <div class="comment_header">Notes: </div>
+                <div class="comment_text"><xsl:value-of select="notes"/></div>
+            </xsl:if>
+        </td>
     </tr>
 </xsl:template>
 
