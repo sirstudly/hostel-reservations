@@ -168,9 +168,8 @@ tr.unread {
             <xsl:if test="viewed_yn = 'N'">unread</xsl:if>
             <xsl:if test="num_guests = 5">six_bed_dorm</xsl:if>
         </xsl:attribute>
-        <td><a target="_blank"><xsl:attribute name="href">
-                   https://emea.littlehotelier.com<xsl:value-of select="data_href"/>
-               </xsl:attribute>
+        <td><a target="_blank">
+               <xsl:attribute name="href">https://emea.littlehotelier.com<xsl:value-of select="data_href"/>?reservation_filter[booking_reference_id]=99999999</xsl:attribute>
                <xsl:value-of select="guest_name"/>
             </a>
         </td>
