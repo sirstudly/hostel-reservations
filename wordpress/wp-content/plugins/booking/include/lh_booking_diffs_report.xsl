@@ -226,7 +226,7 @@ td.cancelled a {
             <xsl:attribute name="class">centered <xsl:if test="lh_status = 'cancelled'">cancelled</xsl:if></xsl:attribute>
             <xsl:choose>
                 <xsl:when test="string-length(lh_data_href) > 0">
-                    <a target="_blank"><xsl:attribute name="href">https://emea.littlehotelier.com<xsl:value-of select="lh_data_href"/></xsl:attribute>
+                    <a target="_blank"><xsl:attribute name="href">https://emea.littlehotelier.com<xsl:value-of select="lh_data_href"/>?reservation_filter%5Bbooking_reference_id%5D=HWL-551-<xsl:value-of select="booking_reference"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="lh_checkin_date_yyyymmdd"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="lh_checkin_date_yyyymmdd"/></xsl:attribute>
                        <xsl:value-of select="booking_reference"/>
                     </a>
                 </xsl:when>
