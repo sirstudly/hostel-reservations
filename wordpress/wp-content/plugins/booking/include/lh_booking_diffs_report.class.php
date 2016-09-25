@@ -94,6 +94,7 @@ class LHBookingsDiffsReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('lh_room_type', $record->lh_room_type));
                 $recordRoot->appendChild($domtree->createElement('lh_status', $record->lh_status));
                 $recordRoot->appendChild($domtree->createElement('lh_checkin_date', $record->lh_checkin_date == null ? null : DateTime::createFromFormat('Y-m-d H:i:s', $record->lh_checkin_date)->format('d M Y')));
+                $recordRoot->appendChild($domtree->createElement('lh_checkin_date_yyyymmdd', $record->lh_checkin_date == null ? null : DateTime::createFromFormat('Y-m-d H:i:s', $record->lh_checkin_date)->format('Y-m-d')));
                 $recordRoot->appendChild($domtree->createElement('lh_checkout_date', $record->lh_checkout_date == null ? null : DateTime::createFromFormat('Y-m-d H:i:s', $record->lh_checkout_date)->format('d M Y')));
                 $recordRoot->appendChild($domtree->createElement('lh_persons', $record->lh_persons));
                 $recordRoot->appendChild($domtree->createElement('lh_payment_outstanding', $record->lh_payment_outstanding));
