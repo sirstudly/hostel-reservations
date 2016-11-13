@@ -48,9 +48,11 @@ class LHGuestCommentsReportData extends XslTransform {
             $comment = trim( preg_replace( '/smoking preference: Non-Smoking/s', '', $record->comments ));
             $comment = trim( preg_replace( '/Macb[s]? Paid([ -]*RMB)?/si', '', $comment ));
             $comment = trim( preg_replace( '/Paid Macb[s]? ([ -]*RMB)?/si', '', $comment ));
-            $comment = trim( preg_replace( '/mac ?b tours?,? pd(, L)?/si', '', $comment ));
+            $comment = trim( preg_replace( '/mac ?b tours?,? pd,? L/si', '', $comment ));
+            $comment = trim( preg_replace( '/maccy b paid -k/si', '', $comment ));
             $comment = trim( preg_replace( '/Hostel World Booking Ref.*\(GBP\)/s', '', $comment ));
             $comment = trim( preg_replace( '/\*{3} Genius booker \*{3}/s', '', $comment ));
+            $comment = trim( preg_replace( '/,? ?booker_is_genius/s', '', $comment ));
             $comment = trim( preg_replace( '/Approximate time of arrival:.* hours( the next day.)?/s', '', $comment ));
             $comment = trim( preg_replace( '/You have a booker that prefers communication by (email|phone)/s', '', $comment ));
             $comment = trim( preg_replace( '/Children and Extra Bed Policy: Children cannot be accommodated at the hotel\./s', '', $comment ));
@@ -58,6 +60,7 @@ class LHGuestCommentsReportData extends XslTransform {
             $comment = trim( preg_replace( '/Deposit Policy: 20 percent of the total amount may be charged anytime after booking./s', '', $comment ));
             $comment = trim( preg_replace( '/Cancellation Policy: If cancelled or modified up to 2 days before date of arrival,  20 percent of the total price of the reservation will be charged\. If cancelled  later or in case of no-show, 100 percent of the first two nights will be charged\.( ,)?/s', '', $comment ));
             $comment = trim( preg_replace( '/Hotel Collect Booking  Collect Payment From Guest,?/s', '', $comment ));
+            $comment = trim( preg_replace( '/Hotel Collect Booking[, ]?/s', '', $comment ));
             $comment = trim( preg_replace( '/Non-Smoking,?/s', '', $comment ));
             $comment = trim( preg_replace( '/You have a booker that would prefer a quiet room\. \(based on availability\)/s', '', $comment ));
             $comment = trim( preg_replace( '/Booker is travelling for business and may be using a corporate credit card\./s', '', $comment ));
@@ -70,7 +73,7 @@ class LHGuestCommentsReportData extends XslTransform {
             if( strlen( $comment ) > 0 ) {
                 if( $this->includeAcknowledged || ( ! $this->includeAcknowledged && $record->acknowledged_date === NULL )) {
                     $newReport[] = $record;
-                    $record->comments = $comment; // update comment
+//                    $record->comments = $comment; // update comment
                 }
             }
         }
@@ -130,6 +133,7 @@ class LHGuestCommentsReportData extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
                 $recordRoot->appendChild($domtree->createElement('booking_source', $record->booking_source));
+                $recordRoot->appendChild($domtree->createElement('checkin_date_yyyymmdd', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('Y-m-d')));
                 $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->format('D, d M Y')));
                 if( $record->booked_date ) {
