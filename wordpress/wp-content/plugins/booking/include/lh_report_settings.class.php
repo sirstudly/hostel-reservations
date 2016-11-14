@@ -43,6 +43,7 @@ class LHReportSettings extends XslTransform {
 
        // insert the job and process it; verify the status afterwards
        $jobId = LilHotelierDBO::insertUpdateLittleHotelierSettingsJob( $username, $password );
+/* DISABLED as we're no longer running on the same server
        LilHotelierDBO::runProcessorAndWait();
        $jobStatus = LilHotelierDBO::getStatusOfJob( $jobId );
 
@@ -57,6 +58,7 @@ class LHReportSettings extends XslTransform {
        // if we get to this point, we have validated the login so save it
        update_option( "hbo_lilho_username", $username );
        update_option( "hbo_lilho_password", $password );
+*/
    }
 
    /**
@@ -71,6 +73,7 @@ class LHReportSettings extends XslTransform {
            throw new ValidationException( "Password cannot be blank" );
        }
 
+/* DISABLED as we're no longer running on the same server
        // insert the job and process it; verify the status afterwards
        $jobId = LilHotelierDBO::insertUpdateHostelworldSettingsJob( $username, $password );
        LilHotelierDBO::runProcessorAndWait();
@@ -83,7 +86,7 @@ class LHReportSettings extends XslTransform {
            }
            throw new ProcessingException( "Failed to update details. Check log for details." );
        }
-
+*/
        // if we get to this point, we have validated the login so save it
        update_option( "hbo_hw_username", $username );
        update_option( "hbo_hw_password", $password );
