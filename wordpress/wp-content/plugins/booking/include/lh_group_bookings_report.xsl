@@ -26,10 +26,6 @@ tr.unread {
     font-weight: bold;
 }
 
-.six_bed_dorm {
-    color: #882e44;
-}
-
 .comment_header {
     float: left; 
     margin: 5px 0 0 0; 
@@ -91,9 +87,6 @@ tr.unread {
                     <xsl:if test="last_completed_job">
                         This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
                         It is automatically run daily at 10:50pm.<br/>
-                    </xsl:if>
-                    <xsl:if test="include_5_guests_in_6bed_dorm = 'true'">
-                        <div class="six_bed_dorm">Bookings of 5 guests into 6 bed dorms are formatted like this. You'll probably want to email them to upgrade to a larger dorm or to book the entire room.</div>
                     </xsl:if>
                     <xsl:if test="last_job_status = 'failed'">
                         <div style="color: red;">The last update of this report failed to run.
@@ -166,7 +159,6 @@ tr.unread {
     <tr>
         <xsl:attribute name="class">
             <xsl:if test="viewed_yn = 'N'">unread</xsl:if>
-            <xsl:if test="num_guests = 5">six_bed_dorm</xsl:if>
         </xsl:attribute>
         <td><a target="_blank">
                <xsl:attribute name="href">https://emea.littlehotelier.com<xsl:value-of select="data_href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking_reference"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin_date_yyyymmdd"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin_date_yyyymmdd"/></xsl:attribute>
