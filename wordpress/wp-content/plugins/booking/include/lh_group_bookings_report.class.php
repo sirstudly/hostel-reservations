@@ -56,7 +56,6 @@ class LHGroupBookingsReport extends XslTransform {
         }
 
         $parentElement->appendChild($domtree->createElement('group_size', get_option('hbo_group_booking_size') ));
-        $parentElement->appendChild($domtree->createElement('include_5_guests_in_6bed_dorm', get_option('hbo_include_5_guests_in_6bed_dorm') ));
 
         // did the last job fail to run?
         if( $this->lastJob ) {
