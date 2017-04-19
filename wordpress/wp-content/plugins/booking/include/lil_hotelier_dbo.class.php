@@ -192,7 +192,7 @@ class LilHotelierDBO {
             "SELECT guest_name, checkin_date, checkout_date, payment_total, data_href, booking_reference, 
                     booking_source, booked_date, notes, viewed_yn, created_date
                FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit
-              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit)
+              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.AllocationScraperJob' AND status = 'completed')
               ORDER BY checkin_date");
 
         if($wpdb->last_error) {
@@ -331,6 +331,27 @@ class LilHotelierDBO {
         return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateHostelbookersSettingsJob',
             array( "username" => $username,
                    "password" => $password ) );
+    }
+
+    /**
+     * Inserts a new CreateTestGuestCheckoutEmailJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertCreateTestGuestCheckoutEmailJob( $firstName, $lastName, $emailAddress ) {
+        return self::insertJobOfType( 'com.macbackpackers.jobs.CreateTestGuestCheckoutEmailJob',
+            array( "first_name" => empty($firstName) ? "" : $firstName,
+                   "last_name" => empty($lastName) ? "" : $lastName,
+                   "email_address" => $emailAddress ) );
+    }
+
+    /**
+     * Inserts a new SendAllUnsentEmailJob.
+     * Returns id of inserted job id
+     * Throws DatabaseException on insert error
+     */
+    static function insertSendAllUnsentEmailJob() {
+        return self::insertJobOfType( 'com.macbackpackers.jobs.SendAllUnsentEmailJob');
     }
 
     /**
@@ -939,7 +960,7 @@ class LilHotelierDBO {
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT job_id, classname, status, start_date, end_date
                FROM ".$wpdb->prefix."lh_jobs
-              WHERE last_updated_date > NOW() - INTERVAL %d DAY
+              WHERE IFNULL(last_updated_date, created_date) > NOW() - INTERVAL %d DAY
               ORDER BY job_id DESC " . 
               ($maxNumRecords != null ? "LIMIT $maxNumRecords" : ""), $numberOfDays));
 

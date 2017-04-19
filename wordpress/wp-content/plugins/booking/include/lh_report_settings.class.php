@@ -27,6 +27,8 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_hb_password'] = get_option('hbo_hb_password');
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
         $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
+        $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
+        $this->reportSettings['hbo_guest_email_template'] = esc_textarea(stripslashes(get_option('hbo_guest_email_template')));
    }
 
    /**
@@ -142,6 +144,41 @@ class LHReportSettings extends XslTransform {
 
        update_option( "hbo_group_booking_size", $groupBookingSize );
        update_option( "hbo_include_5_guests_in_6bed_dorm", $include5guestsIn6bedDorms ? 'true' : 'false' );
+   }
+
+   /**
+    * Updates email template for all guests marked as checked-out.
+    * $emailSubject : email subject
+    * $emailTemplate : raw (HTML) template of guest email to send (string)
+    */
+   function saveCheckedOutEmailTemplate( $emailSubject, $emailTemplate ) {
+
+       if( empty( $emailSubject )) {
+           throw new ValidationException( "Email subject cannot be blank" );
+       }
+
+       if( empty( $emailTemplate )) {
+           throw new ValidationException( "Email template cannot be blank" );
+       }
+
+       update_option( "hbo_guest_email_subject", rawurldecode($emailSubject) );
+       update_option( "hbo_guest_email_template", base64_decode($emailTemplate) );
+   }
+
+    /**
+     * Sends a test email using the response template.
+     *   $firstName : first name of recipient
+     *   $lastName : last name of recipient
+     *   $recipientEmail : email address of recipient
+     */
+   function sendTestResponseEmail( $firstName, $lastName, $recipientEmail ) {
+       if( empty( $recipientEmail )) {
+           throw new ValidationException( "Email address cannot be blank" );
+       }
+
+       // insert the job
+       $jobId = LilHotelierDBO::insertCreateTestGuestCheckoutEmailJob( $firstName, $lastName, $recipientEmail );
+       LilHotelierDBO::insertSendAllUnsentEmailJob();
    }
 
     /**

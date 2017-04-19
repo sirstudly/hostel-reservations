@@ -150,6 +150,14 @@ class AjaxController {
                 $this->saveGroupBookingsReportSettings();
                 break;
 
+            case 'SAVE_CHECKOUT_EMAIL_TEMPLATE':
+                $this->saveCheckoutEmailTemplate();
+                break;
+
+            case 'SEND_TEST_RESPONSE_EMAIL':
+                $this->sendTestResponseEmail();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -906,6 +914,65 @@ error_log("checkout: ".$_POST['checkout_date']);
         }
     }
 
+    /**
+     * Updates the email template for guests marked as checked-out.
+     * Requires POST variables:
+     *   email_template : raw (HTML) of email template
+     */
+    function saveCheckoutEmailTemplate() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->saveCheckedOutEmailTemplate( $_POST['email_subject'], $_POST['email_template'] );
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_guest_email_template")
+                     .html('Email template saved successfully.')
+                     .css({ 'color': 'green' });
+                jQuery("#btn_save_guest_email_template").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_guest_email_template")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_guest_email_template").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Sends a test email using the response template.
+     * Requires POST variables:
+     *   first_name : first name of recipient
+     *   last_name : last name of recipient
+     *   recipient_email : email address of recipient
+     */
+    function sendTestResponseEmail() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->sendTestResponseEmail( $_POST['first_name'], $_POST['last_name'], $_POST['recipient_email'] );
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_guest_email_template")
+                     .html('Email job queued.')
+                     .css({ 'color': 'green' });
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_guest_email_template")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
 }
 
 ?>
