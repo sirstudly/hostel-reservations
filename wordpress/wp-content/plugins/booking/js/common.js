@@ -643,3 +643,43 @@ function save_group_bookings_report_settings( group_booking_size, include_5_gues
     });
 }
 
+// saves the email template for guest checkouts
+// email_subject : email subject
+// email_template : raw (HTML) email template
+function save_guest_checkout_template( email_subject, email_template ) {
+
+    jQuery('#ajax_respond_guest_email_template').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_guest_email_template').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_CHECKOUT_EMAIL_TEMPLATE',
+            email_subject : escape(email_subject),
+            email_template : btoa(email_template) // there is a security error when parsing <HTML> so escape it first
+        }
+    });
+}
+
+// send a test email using the template for guest checkouts
+// first_name : first name of email
+// last_name : last name of email
+// recipient_email : email to be sent to
+function send_test_response_email( first_name, last_name, recipient_email ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_guest_email_template').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SEND_TEST_RESPONSE_EMAIL',
+            first_name : first_name,
+            last_name : last_name,
+            recipient_email : recipient_email
+        }
+    });
+}
+

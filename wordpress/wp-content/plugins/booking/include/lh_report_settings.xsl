@@ -63,6 +63,16 @@
     -moz-border-radius: 5px;
     border-radius: 5px;
 }
+
+.mail_response_select {
+    width: 30%;
+    margin: 5px 5px;
+    float: left;
+}
+
+.mail_response_select input[type="checkbox"] {
+    margin: 0 10px;
+}
 </style>
 
 <script type="text/javascript">
@@ -70,23 +80,6 @@ jQuery(document).ready( function(){
 
     // allow user to show/hide passwords
     // http://www.experts-exchange.com/articles/19779/Passwords-in-HTML-Forms-Allow-the-Client-to-Show-or-Hide.html
-    <xsl:if test="settings/hbo_lilho_username != 'highstreet'">
-    jQuery("#hw_pwcheck").click(function(){
-        if (jQuery("#hw_pwcheck").is(":checked"))
-        {
-            jQuery("#hw_password").clone()
-                .attr("type", "text").insertAfter("#hw_password")
-                .prev().remove();
-        }
-        else
-        {
-            jQuery("#hw_password").clone()
-                .attr("type","password").insertAfter("#hw_password")
-                .prev().remove();
-        }
-    });
-    </xsl:if>
-
     jQuery("#lh_pwcheck").click(function(){
         if (jQuery("#lh_pwcheck").is(":checked"))
         {
@@ -134,33 +127,9 @@ jQuery(document).ready( function(){
 
             <div class="btn-container">
                 <div style="float: left;" id="ajax_respond_lh"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_lilho" class="btn btn-primary" style="float: right;" onclick="save_little_hotelier_settings(document.post_option.lilho_username.value, document.post_option.lilho_password.value); this.disabled=true;">Validate &amp; Save</a>
+                <a id="btn_save_lilho" class="btn btn-primary" style="float: right;" onclick="save_little_hotelier_settings(document.post_option.lilho_username.value, document.post_option.lilho_password.value); this.disabled=true;">Save</a>
             </div>
         </div>
-
-    <xsl:if test="hbo_lilho_username != 'highstreet'">
-        <div id="hw-container" class="shadow">
-            <h3>Hostelworld</h3> 
-            <table class="form-table">
-                <tbody>
-                    <tr valign="top">
-                        <th scope="row"><label for="hw_username">Username:</label></th>
-                        <td><input id="hw_username" name="hbo_hw_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_hw_username}"/></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="hw_password">Password:</label></th>
-                        <td><input id="hw_password" name="hbo_hw_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_hw_password}" /><br/>
-                            <input type="checkbox" id="hw_pwcheck" /> Show Password</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="btn-container">
-                <div style="float: left;" id="ajax_respond_hw"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value); this.disabled=true;">Validate &amp; Save</a>
-            </div>
-        </div>
-    </xsl:if>
 
         <div id="group-report-container" class="shadow">
             <h3>Group Bookings Report</h3> 
@@ -187,6 +156,72 @@ jQuery(document).ready( function(){
                 <a id="btn_save_group_rpt_settings" class="btn btn-primary" style="float: right;" onclick="save_group_bookings_report_settings(document.post_option.group_booking_size.value, document.post_option.include_5_guests_in_6bed_dorm.checked); this.disabled=true;">Save</a>
             </div>
         </div>
+
+    <xsl:if test="hbo_lilho_username != 'highstreet'">
+        <div id="hw-container" class="shadow" style="width: 600px;">
+            <h3>Checked-out Guest Response Email (Template)</h3> 
+            <p>If present, the following will be replaced in the subject/body: <br/>
+               <ul>
+                   <li><strong>%%GUEST_FIRSTNAME%%</strong> - guest's first name</li>
+                   <li><strong>%%GUEST_LASTNAME%%</strong> - guest's last name</li>
+               </ul>
+            </p>
+            <p>Applies only to the following bookings:<br/>
+                <span class="mail_response_select"><input type="checkbox" disabled="disabled" checked="checked"/>Hostelworld</span>
+                <span class="mail_response_select"><input type="checkbox" disabled="disabled"/>Booking.com</span>
+                <span class="mail_response_select"><input type="checkbox" disabled="disabled"/>Expedia</span>
+                <span class="mail_response_select"><input type="checkbox" disabled="disabled"/>Agoda</span>
+                <span class="mail_response_select"><input type="checkbox" disabled="disabled"/>Little Hotelier</span>
+            </p>
+            <table class="form-table" style="width: 100%;">
+                <tbody>
+                    <tr valign="top">
+                        <th scope="row"><label for="guest_email_subject">Subject:</label></th>
+                        <td><input id="guest_email_subject" name="hbo_guest_email_subject" class="regular-text code" type="text" autocomplete="false" style="width:400px;" size="75" value="{hbo_guest_email_subject}"/></td>
+                    </tr>
+                    <tr valign="top">
+                        <td colspan="2"><textarea id="guest_email_template" name="hbo_guest_email_template" class="regular-text code" style="width: 97%;"><xsl:value-of select="hbo_guest_email_template"/></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="btn-container">
+                <div style="float: left;" id="ajax_respond_guest_email_template"><xsl:comment/><!-- ajax response here--></div>
+                <div style="float:right;">
+                    <a id="btn_save_guest_email_template" class="btn btn-primary" onclick="save_guest_checkout_template(document.post_option.guest_email_subject.value, document.post_option.guest_email_template.value); this.disabled=true;">Save</a>
+                    <a class="btn btn-primary" style="margin-left: 10px;" onclick="jQuery('#test_send_email_dialog').dialog({{width:380, height:210}});">Send Test Email...</a>
+                </div>
+            </div>
+        </div>
+    </xsl:if>
+
+    <div id="test_send_email_dialog" title="Send a Test Email" style="display:none;">
+        <table class="form-table" style="width: 100%;">
+            <tbody>
+                <tr valign="top">
+                    <th scope="row"><label for="test_email_first_name"><div style="width: 100px;">First Name:</div></label></th>
+                    <td><input id="test_email_first_name" type="text" autocomplete="false" size="20"/></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row"><label for="test_email_last_name">Last Name:</label></th>
+                    <td><input id="test_email_last_name" type="text" autocomplete="false" size="20"/></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row"><label for="test_email_recipient">Email:</label></th>
+                    <td><input id="test_email_recipient" type="text" autocomplete="false" size="75" style="width:200px;"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div style="float:right;">
+                            <a id="btn_send_test_response_email" style="color: #fff; background-color: #006dcc;background-image: -moz-linear-gradient(center top , #08c, #04c);padding: 4px 10px;border-radius: 4px;border-width: 1px; cursor: pointer; text-decoration: none;" onclick="send_test_response_email(jQuery('#test_email_first_name').val(), jQuery('#test_email_last_name').val(), jQuery('#test_email_recipient').val()); jQuery('#test_send_email_dialog').dialog('close');">Send</a>
+                            <a style="color: #fff; background-color: #006dcc;background-image: -moz-linear-gradient(center top , #08c, #04c);padding: 4px 10px;border-radius: 4px;border-width: 1px; cursor: pointer; text-decoration: none; margin-left:10px;" onclick="jQuery('#test_send_email_dialog').dialog('close');">Cancel</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     </form>
     </div>
 
