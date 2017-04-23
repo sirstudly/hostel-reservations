@@ -151,7 +151,7 @@ class LilHotelierDBO {
             "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, lh_status, 
                     booking_reference, booking_source, booked_date, eta, viewed_yn, notes, created_date
                FROM ".$wpdb->prefix."lh_rpt_split_rooms
-              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_rpt_split_rooms)
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM ".$wpdb->prefix."lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.SplitRoomReservationReportJob' AND status = 'completed'))
               ORDER BY checkin_date");
 
         if($wpdb->last_error) {
@@ -170,7 +170,7 @@ class LilHotelierDBO {
             "SELECT reservation_id, guest_name, booking_reference, booking_source, checkin_date, checkout_date, 
                     booked_date, payment_outstanding, num_guests, data_href, notes, viewed_yn 
                FROM ".$wpdb->prefix."lh_group_bookings
-              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_group_bookings)
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM ".$wpdb->prefix."lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.GroupBookingsReportJob' AND status = 'completed'))
                 AND ( num_guests >= %d " .
                        (get_option('hbo_include_5_guests_in_6bed_dorm') == 'true' ? ' OR num_guests = 5' : '' ) . "
                     )
@@ -192,7 +192,7 @@ class LilHotelierDBO {
             "SELECT guest_name, checkin_date, checkout_date, payment_total, data_href, booking_reference, 
                     booking_source, booked_date, notes, viewed_yn, created_date
                FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit
-              WHERE job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.AllocationScraperJob' AND status = 'completed')
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM ".$wpdb->prefix."lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.UnpaidDepositReportJob' AND status = 'completed'))
               ORDER BY checkin_date");
 
         if($wpdb->last_error) {
