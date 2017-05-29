@@ -20,7 +20,7 @@ class HelpPage extends XslTransform {
      * $name : name of view (page) to be generated
      * Returns generated HTML
      */
-    function toHtml($name) {
+    function toHtml_deprecated($name) {
         $this->name = $name;
         return parent::toHtml();
     }
