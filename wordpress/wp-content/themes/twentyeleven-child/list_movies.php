@@ -13,7 +13,7 @@ class ListMovies extends XslTransform {
     /** 
      * Default constructor.
      */
-    function ListMovies() {
+    function __construct() {
         $this->results = array();
         $this->scottish = array();
         $this->newReleases = array();
