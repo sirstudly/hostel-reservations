@@ -393,9 +393,12 @@ class LilHotelierDBO {
                   FROM ".$wpdb->prefix."lh_jobs 
                  WHERE classname IN (
                            'com.macbackpackers.jobs.AllocationScraperJob', 
+                           'com.macbackpackers.jobs.AllocationScraperWorkerJob', 
+                           'com.macbackpackers.jobs.CreateAllocationScraperReportsJob', 
                            'com.macbackpackers.jobs.BookingScraperJob', 
                            'com.macbackpackers.jobs.SplitRoomReservationReportJob',
-                           'com.macbackpackers.jobs.UnpaidDepositReportJob' )
+                           'com.macbackpackers.jobs.UnpaidDepositReportJob',
+                           'com.macbackpackers.jobs.GroupBookingsReportJob' )
                    AND status IN ( %s, %s )",  
                 self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
 
