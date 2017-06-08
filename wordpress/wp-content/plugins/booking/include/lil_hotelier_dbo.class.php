@@ -214,13 +214,13 @@ class LilHotelierDBO {
                      FROM ".$wpdb->prefix."lh_calendar c
 			         JOIN ".$wpdb->prefix."lh_rpt_guest_comments g
                        ON c.reservation_id = g.reservation_id
-                      AND c.job_id IN (
+                    WHERE c.job_id IN (
 					      -- retrieve the last run allocation scraper job id
-					      SELECT MAX(job_id) 
+					      SELECT MAX(j.job_id) 
                             FROM ".$wpdb->prefix."lh_jobs j 
 					   	   WHERE j.status = 'completed' 
 						     AND j.classname = 'com.macbackpackers.jobs.AllocationScraperJob' )
-                    WHERE g.comments IS NOT NULL ) x
+                      AND g.comments IS NOT NULL ) x
               GROUP BY reservation_id, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, notes, viewed_yn, comments, acknowledged_date 
               ORDER BY checkin_date, booking_reference");
 
