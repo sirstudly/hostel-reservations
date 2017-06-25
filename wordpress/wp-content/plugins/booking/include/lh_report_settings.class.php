@@ -201,7 +201,7 @@ class LHReportSettings extends XslTransform {
       Generates the following xml:
         <view>
             <settings>
-                <lilhotelier.url.login>https://emea.littlehotelier.com/login</lilhotelier.url.login>
+                <lilhotelier.url.login>https://app.littlehotelier.com/login</lilhotelier.url.login>
                 ...
             </settings>
         </view>

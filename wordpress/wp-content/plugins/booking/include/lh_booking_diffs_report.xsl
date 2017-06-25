@@ -173,7 +173,7 @@ td.cancelled a {
                     Hostelworld</a>
                 </th>
                 <th></th>
-                <th colspan="6"><a target="_blank"><xsl:attribute name="href">https://emea.littlehotelier.com/extranet/properties/533/reservations?utf8=%E2%9C%93&amp;reservation_filter[guest_last_name]=&amp;reservation_filter[booking_reference_id]=HWL&amp;reservation_filter[date_type]=CheckIn&amp;reservation_filter[date_from_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_from]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[date_to_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_to]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[status]=&amp;commit=Search</xsl:attribute>
+                <th colspan="6"><a target="_blank"><xsl:attribute name="href">https://app.littlehotelier.com/extranet/properties/533/reservations?utf8=%E2%9C%93&amp;reservation_filter[guest_last_name]=&amp;reservation_filter[booking_reference_id]=HWL&amp;reservation_filter[date_type]=CheckIn&amp;reservation_filter[date_from_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_from]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[date_to_display]=<xsl:value-of select="selection_date_uri"/>&amp;reservation_filter[date_to]=<xsl:value-of select="selection_date"/>&amp;reservation_filter[status]=&amp;commit=Search</xsl:attribute>
                     Little Hotelier</a>
                 </th>
             </tr>
@@ -226,7 +226,7 @@ td.cancelled a {
             <xsl:attribute name="class">centered <xsl:if test="lh_status = 'cancelled'">cancelled</xsl:if></xsl:attribute>
             <xsl:choose>
                 <xsl:when test="string-length(lh_data_href) > 0">
-                    <a target="_blank"><xsl:attribute name="href">https://emea.littlehotelier.com<xsl:value-of select="lh_data_href"/>?reservation_filter%5Bbooking_reference_id%5D=HWL-551-<xsl:value-of select="booking_reference"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="lh_checkin_date_yyyymmdd"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="lh_checkin_date_yyyymmdd"/></xsl:attribute>
+                    <a target="_blank"><xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="lh_data_href"/>?reservation_filter%5Bbooking_reference_id%5D=HWL-551-<xsl:value-of select="booking_reference"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="lh_checkin_date_yyyymmdd"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="lh_checkin_date_yyyymmdd"/></xsl:attribute>
                        <xsl:value-of select="booking_reference"/>
                     </a>
                 </xsl:when>
