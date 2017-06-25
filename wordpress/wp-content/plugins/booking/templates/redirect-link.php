@@ -17,7 +17,7 @@
     elseif( $url_path[1] === "LH_RemainingCheckinsForToday" ) {
       $now = new DateTime();
       $today = $now->format('d+M+Y');
-      $link = "https://emea.littlehotelier.com/extranet/properties/533/reservations?utf8=%E2%9C%93&reservation_filter[guest_last_name]=&reservation_filter[booking_reference_id]=&reservation_filter[date_type]=CheckIn&reservation_filter[date_from_display]=$today&reservation_filter[date_from]=$today&reservation_filter[date_to_display]=$today&reservation_filter[date_to]=$today&reservation_filter[status]=confirmed&commit=Search";
+      $link = "https://app.littlehotelier.com/extranet/properties/533/reservations?utf8=%E2%9C%93&reservation_filter[guest_last_name]=&reservation_filter[booking_reference_id]=&reservation_filter[date_type]=CheckIn&reservation_filter[date_from_display]=$today&reservation_filter[date_from]=$today&reservation_filter[date_to_display]=$today&reservation_filter[date_to]=$today&reservation_filter[status]=confirmed&commit=Search";
     }
   }
 
