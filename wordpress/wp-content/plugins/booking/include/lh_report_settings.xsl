@@ -94,6 +94,21 @@ jQuery(document).ready( function(){
                 .prev().remove();
         }
     });
+
+    jQuery("#hw_pwcheck").click(function(){
+        if (jQuery("#hw_pwcheck").is(":checked"))
+        {
+            jQuery("#hw_password").clone()
+                .attr("type", "text").insertAfter("#hw_password")
+                .prev().remove();
+        }
+        else
+        {
+            jQuery("#hw_password").clone()
+                .attr("type","password").insertAfter("#hw_password")
+                .prev().remove();
+        }
+    });
 });
 </script>
     
@@ -128,6 +143,28 @@ jQuery(document).ready( function(){
             <div class="btn-container">
                 <div style="float: left;" id="ajax_respond_lh"><xsl:comment/><!-- ajax response here--></div>
                 <a id="btn_save_lilho" class="btn btn-primary" style="float: right;" onclick="save_little_hotelier_settings(document.post_option.lilho_username.value, document.post_option.lilho_password.value); this.disabled=true;">Save</a>
+            </div>
+        </div>
+
+        <div id="hw-container" class="shadow">
+            <h3>Hostelworld</h3> 
+            <table class="form-table">
+                <tbody>
+                    <tr valign="top">
+                        <th scope="row"><label for="hw_username">Username:</label></th>
+                        <td><input id="hw_username" name="hbo_hw_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_hw_username}"/></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="hw_password">Password:</label></th>
+                        <td><input id="hw_password" name="hbo_hw_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_hw_password}" /><br/>
+                            <input type="checkbox" id="hw_pwcheck" /> Show Password</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="btn-container">
+                <div style="float: left;" id="ajax_respond_hw"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value); this.disabled=true;">Save</a>
             </div>
         </div>
 
