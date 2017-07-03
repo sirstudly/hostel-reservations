@@ -57,6 +57,7 @@ class WP_HostelBackoffice {
         add_option('hbo_booking_diffs_report_url', 'reports/booking-diffs');
         add_option('hbo_bedcounts_url', 'reports/bedcounts');
         add_option('hbo_guest_comments_report_url', 'reports/guest-comments');
+        add_option('hbo_manual_charge_url', 'reports/manual-charge');
         add_option('hbo_report_settings_url', 'admin/report-settings');
         add_option('hbo_redirect_to_url', 'redirect-to');
         add_option('hbo_log_directory', 'logs');
@@ -94,6 +95,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_log_directory');
         delete_option('hbo_log_directory_url');
         delete_option('hbo_job_history_url');
+        delete_option('hbo_manual_charge_url');
         delete_option('hbo_run_processor_cmd');
         delete_option('hbo_group_booking_size');
         delete_option('hbo_include_5_guests_in_6bed_dorm');
@@ -343,8 +345,6 @@ error_log($rpp->toXml());
         if (false === empty($_POST)) {
             $s->updateOptions($_POST);
         }
-error_log($s->toXml());
-error_log(var_export($_POST, TRUE));
         echo $s->toHtml();
     }
 
@@ -491,6 +491,7 @@ error_log( 'content_of_cleaner_bed_assign_page - creating new controller');
         $this->do_redirect_for_page(get_option('hbo_report_settings_url'), 'report-settings.php');
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
         $this->do_redirect_for_page(get_option('hbo_job_history_url'), 'job-history.php');
+        $this->do_redirect_for_page(get_option('hbo_manual_charge_url'), 'manual-charge.php');
     }
 
     /**

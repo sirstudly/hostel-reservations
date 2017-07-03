@@ -99,6 +99,10 @@
                                         <td><input id="guest_comments_report_url"  name="hbo_guest_comments_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{guest_comments_report_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="manual_charge_url">Manual Charges</label></th>
+                                        <td><input id="manual_charge_url"  name="hbo_manual_charge_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{manual_charge_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="report_settings_url">Report Settings</label></th>
                                         <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
                                     </tr>  

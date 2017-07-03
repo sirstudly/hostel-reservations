@@ -174,6 +174,10 @@ class AjaxController {
                 $this->sendTestResponseEmail();
                 break;
 
+            case 'SUBMIT_MANUAL_CHARGE_JOB':
+                $this->submitManualChargeJob();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -1068,6 +1072,43 @@ error_log("checkout: ".$_POST['checkout_date']);
             <?php
         }
     }
+
+    /**
+     * Creates a new manual charge job.
+     * Requires POST variables:
+     *   booking_ref : booking reference e.g. HWL-551-12345789
+     *   charge_amount : amount to charge e.g. 13.44
+     *   charge_note : message to append to LH notes
+     */
+    function submitManualChargeJob() {
+        try {
+            $chargePage = new LHManualCharge();
+            $chargePage->submitManualChargeJob( 
+                $_POST['booking_ref'], $_POST['charge_amount'], $_POST['charge_note'] );
+
+            ?> 
+            <script type="text/javascript">
+                // blank out all fields to submit anew
+                jQuery("#booking_ref").val('');
+                jQuery("#charge_amount").val('');
+                jQuery("#charge_note").val('');
+                // reload the page anyways to refresh the table
+                window.location.reload(true); 
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#charge_button").css("visibility", "visible");
+            </script>
+            <?php
+        }
+    }
+
 }
 
 ?>

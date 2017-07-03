@@ -33,6 +33,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('booking_diffs_report_url', get_option('hbo_booking_diffs_report_url')));
         $xmlRoot->appendChild($domtree->createElement('guest_comments_report_url', get_option('hbo_guest_comments_report_url')));
         $xmlRoot->appendChild($domtree->createElement('bedcounts_url', get_option('hbo_bedcounts_url')));
+        $xmlRoot->appendChild($domtree->createElement('manual_charge_url', get_option('hbo_manual_charge_url')));
         $xmlRoot->appendChild($domtree->createElement('cleaner_tasks_url', get_option('hbo_cleaner_tasks_url')));
         $xmlRoot->appendChild($domtree->createElement('cleaning_hours_url', get_option('hbo_cleaning_hours_url')));
         $xmlRoot->appendChild($domtree->createElement('report_settings_url', get_option('hbo_report_settings_url')));
@@ -62,6 +63,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_booking_diffs_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_guest_comments_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_bedcounts_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_manual_charge_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_cleaner_tasks_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_cleaning_hours_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_report_settings_url');
