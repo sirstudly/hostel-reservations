@@ -825,7 +825,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results(
                "SELECT * FROM (
-                    SELECT jp1.value AS booking_reference, NULL as post_date, NULL AS masked_card_number, CAST(jp2.value AS DECIMAL) AS payment_amount, 
+                    SELECT jp1.value AS booking_reference, NULL as post_date, NULL AS masked_card_number, CAST(jp2.value AS DECIMAL(10,2)) AS payment_amount, 
                            NULL as successful, NULL AS help_text, j.status, NULL as data_href, NULL as checkin_date, COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
                       FROM ".$wpdb->prefix."lh_jobs j
                       JOIN ".$wpdb->prefix."lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
@@ -839,7 +839,7 @@ class LilHotelierDBO {
                            COALESCE(j.last_updated_date, j.created_date, p.last_updated_date, p.created_date) AS last_updated_date
                       FROM ".$wpdb->prefix."pxpost_transaction p
                       LEFT OUTER JOIN ".$wpdb->prefix."lh_job_param jp ON jp.name = 'booking_ref' AND jp.value = p.booking_reference
-                      LEFT OUTER JOIN ".$wpdb->prefix."lh_jobs j ON jp.job_id = j.job_id AND j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
+                      JOIN ".$wpdb->prefix."lh_jobs j ON jp.job_id = j.job_id AND j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
                      WHERE p.booking_reference LIKE 'HWL-%'
                  ) t ORDER BY last_updated_date DESC");
 
