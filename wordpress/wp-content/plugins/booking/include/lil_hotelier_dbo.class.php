@@ -110,7 +110,7 @@ class LilHotelierDBO {
         if (false === $wpdb->insert($wpdb->prefix ."lh_jobs", 
                 array( 'classname' => $jobName, 
                        'status' => self::STATUS_SUBMITTED, 
-                       'last_updated_date' => current_time('mysql') ), 
+                       'last_updated_date' => current_time('mysql', 1) ), 
                 array( '%s', '%s', '%s' ))) {
             error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
             throw new DatabaseException( $wpdb->last_error );
@@ -826,7 +826,10 @@ class LilHotelierDBO {
         $resultset = $wpdb->get_results(
                "SELECT * FROM (
                     SELECT jp1.value AS booking_reference, NULL as post_date, NULL AS masked_card_number, CAST(jp2.value AS DECIMAL(10,2)) AS payment_amount, 
-                           NULL as successful, NULL AS help_text, j.status, NULL as data_href, NULL as checkin_date, COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
+                           NULL as successful, NULL AS help_text, j.status, 
+                           (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS data_href,
+                           (SELECT MAX(c.checkin_date) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS checkin_date,
+                           COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
                       FROM ".$wpdb->prefix."lh_jobs j
                       JOIN ".$wpdb->prefix."lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
                       JOIN ".$wpdb->prefix."lh_job_param jp2 ON j.job_id = jp2.job_id AND jp2.name = 'amount'
