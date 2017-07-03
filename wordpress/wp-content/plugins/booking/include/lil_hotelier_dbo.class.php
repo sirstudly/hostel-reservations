@@ -819,6 +819,42 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns array of all ManualChargeJobs.
+     */
+    static function fetchLastManualTransactions() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+               "SELECT * FROM (
+                    SELECT jp1.value AS booking_reference, NULL as post_date, NULL AS masked_card_number, CAST(jp2.value AS DECIMAL) AS payment_amount, 
+                           NULL as successful, NULL AS help_text, j.status, NULL as data_href, NULL as checkin_date, COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
+                      FROM ".$wpdb->prefix."lh_jobs j
+                      JOIN ".$wpdb->prefix."lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
+                      JOIN ".$wpdb->prefix."lh_job_param jp2 ON j.job_id = jp2.job_id AND jp2.name = 'amount'
+                     WHERE j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
+                       AND jp1.value NOT IN (SELECT p.booking_reference FROM wp_pxpost_transaction p WHERE p.booking_reference LIKE 'HWL-%')
+                     UNION ALL
+                    SELECT p.booking_reference, p.post_date, p.masked_card_number, p.payment_amount, p.successful, p.help_text, j.status,
+                           (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = p.booking_reference) AS data_href,
+                           (SELECT MAX(c.checkin_date) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = p.booking_reference) AS checkin_date,
+                           COALESCE(j.last_updated_date, j.created_date, p.last_updated_date, p.created_date) AS last_updated_date
+                      FROM ".$wpdb->prefix."pxpost_transaction p
+                      LEFT OUTER JOIN ".$wpdb->prefix."lh_job_param jp ON jp.name = 'booking_ref' AND jp.value = p.booking_reference
+                      LEFT OUTER JOIN ".$wpdb->prefix."lh_jobs j ON jp.job_id = j.job_id AND j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
+                     WHERE p.booking_reference LIKE 'HWL-%'
+                 ) t ORDER BY last_updated_date DESC");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // if empty, then no jobs exists
+        if(empty($resultset)) {
+            return null;
+        }
+        return $resultset;
+    }
+
+    /**
      * Adds a new cleaner to the roster.
      */
     static function addCleaner($firstName, $lastName) {

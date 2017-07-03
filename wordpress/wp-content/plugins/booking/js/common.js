@@ -612,3 +612,25 @@ function send_test_response_email( first_name, last_name, recipient_email ) {
     });
 }
 
+// creates a new manual charge job
+// bookingRef : booking reference. e.g. HWL-551-123456789
+// amount : amount to charge e.g. 14.32
+// note : note to leave in LH notes
+function submit_manual_charge( bookingRef, amount, note ) {
+
+    jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SUBMIT_MANUAL_CHARGE_JOB',
+            booking_ref : bookingRef,
+            charge_amount : amount,
+            charge_note : note
+        }
+    });
+}
+
