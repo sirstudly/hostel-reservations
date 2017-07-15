@@ -60,7 +60,7 @@
                 </p>
                 <p>FYI, you cannot charge more than what is currently "outstanding" in Little Hotelier. <br/>
                    Please confirm (or update) the total outstanding in Little Hotelier prior to submitting! <br/>
-                   As a safety precaution, only a single charge attempt is allowed against each booking.</p>
+                   As a safety precaution, only one (successful) charge attempt is allowed against each booking.</p>
             </div>
 
             <table class="form-table">
