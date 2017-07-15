@@ -129,7 +129,7 @@ jQuery(document).ready( function(){
             <table class="form-table">
                 <tbody>
                     <tr valign="top">
-                        <th scope="row"><label for="lilho_username">Username:</label></th>
+                        <th scope="row"><label for="lilho_username">Email:</label></th>
                         <td><input id="lilho_username" name="hbo_lilho_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_lilho_username}"/></td>
                     </tr>
                     <tr valign="top">
