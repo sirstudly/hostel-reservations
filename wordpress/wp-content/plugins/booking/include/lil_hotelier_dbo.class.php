@@ -708,7 +708,7 @@ class LilHotelierDBO {
          ORDER BY room";
 
         // HSH bedcounts are actually by room type
-        if( get_option('hbo_lilho_username') == 'highstreet' ) {
+        if( strpos(get_option('hbo_lilho_username'), 'highstreet') === 0 ) {
             $sql = "SELECT GROUP_CONCAT(room ORDER BY room SEPARATOR ', ') AS room,
                            hsh_room_type AS room_type, 
                            SUM(capacity) AS capacity,
@@ -834,15 +834,14 @@ class LilHotelierDBO {
                       JOIN ".$wpdb->prefix."lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
                       JOIN ".$wpdb->prefix."lh_job_param jp2 ON j.job_id = jp2.job_id AND jp2.name = 'amount'
                      WHERE j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
-                       AND jp1.value NOT IN (SELECT p.booking_reference FROM wp_pxpost_transaction p WHERE p.booking_reference LIKE 'HWL-%')
+                       AND j.status != 'completed'
                      UNION ALL
                     SELECT p.booking_reference, p.post_date, p.masked_card_number, p.payment_amount, p.successful, p.help_text, j.status,
                            (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = p.booking_reference) AS data_href,
                            (SELECT MAX(c.checkin_date) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = p.booking_reference) AS checkin_date,
                            COALESCE(j.last_updated_date, j.created_date, p.last_updated_date, p.created_date) AS last_updated_date
                       FROM ".$wpdb->prefix."pxpost_transaction p
-                      LEFT OUTER JOIN ".$wpdb->prefix."lh_job_param jp ON jp.name = 'booking_ref' AND jp.value = p.booking_reference
-                      JOIN ".$wpdb->prefix."lh_jobs j ON jp.job_id = j.job_id AND j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
+                      LEFT OUTER JOIN ".$wpdb->prefix."lh_jobs j ON p.job_id = j.job_id
                      WHERE p.booking_reference LIKE 'HWL-%'
                  ) t ORDER BY last_updated_date DESC");
 

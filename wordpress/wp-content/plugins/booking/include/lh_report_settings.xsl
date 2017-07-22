@@ -194,7 +194,7 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-    <xsl:if test="hbo_lilho_username != 'highstreet'">
+    <xsl:if test="not(starts-with(hbo_lilho_username, 'highstreet'))">
         <div id="hw-container" class="shadow" style="width: 600px;">
             <h3>Checked-out Guest Response Email (Template)</h3> 
             <p>If present, the following will be replaced in the subject/body: <br/>

@@ -24,7 +24,7 @@ class BedCountsCSV extends AbstractBedCounts {
      * Overrides parent method to include configuration flag.
      */
     function addSelfToDocument($domtree, $parentElement) {
-        if( get_option('hbo_lilho_username') == 'highstreet') {
+        if( strpos(get_option('hbo_lilho_username'), 'highstreet') === 0 ) {
             $parentElement->appendChild($domtree->createElement('write_zeroes', 'true'));
         }
         parent::addSelfToDocument($domtree, $parentElement);
