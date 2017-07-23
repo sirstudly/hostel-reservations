@@ -187,6 +187,7 @@
             <xsl:choose>
                 <xsl:when test="room_type = 'LT_FEMALE'">LongTerm (F)</xsl:when>
                 <xsl:when test="room_type = 'LT_MALE'">LongTerm (M)</xsl:when>
+                <xsl:when test="room_type = 'LT_MIXED'">LongTerm</xsl:when>
                 <xsl:when test="room_type = 'DBL'">DOUBLE</xsl:when>
                 <xsl:otherwise><xsl:value-of select="room_type"/></xsl:otherwise>
             </xsl:choose>

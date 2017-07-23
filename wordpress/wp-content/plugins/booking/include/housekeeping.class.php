@@ -182,9 +182,9 @@ class HouseKeeping extends XslTransform {
         }
 
         // calculate bedcounts
-        $bedcounts = strpos(get_option('hbo_lilho_username'), 'highstreet') === 0 ?
-            $this->calculateBedChangeCountsByRoomsGeneric() :
-            $this->calculateBedChangeCountsByRoomsCastleRock();
+        $bedcounts = strpos(get_option('hbo_lilho_username'), 'castlerock') === 0 ?
+            $this->calculateBedChangeCountsByRoomsCastleRock() :
+            $this->calculateBedChangeCountsByRoomsGeneric();
 
         if( !empty( $bedcounts )) {
             $totalsRoot = $parentElement->appendChild($domtree->createElement('totals'));

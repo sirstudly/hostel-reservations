@@ -42,7 +42,7 @@ class LilHotelierDBO {
                 AND c2.checkin_date = c.checkout_date
                 AND c2.job_id = c.job_id
                 AND c2.guest_name = c.guest_name
-              WHERE r.room_type NOT IN ('LT_MALE', 'LT_FEMALE', 'OVERFLOW')
+              WHERE r.room_type NOT IN ('LT_MALE', 'LT_FEMALE', 'LT_MIXED', 'OVERFLOW')
                 AND r.active_yn = 'Y'
               GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, constants.selected_date,
                        c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name

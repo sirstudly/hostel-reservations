@@ -742,6 +742,7 @@ error_log($rpp->toXml());
         self::execute_simple_sql($simple_sql);
 
         self::build_triggers();
+        self::build_lh_schema();
     }
 
     /**
@@ -762,10 +763,13 @@ error_log($rpp->toXml());
               `status` varchar(20) NOT NULL,
               `start_date` timestamp NULL DEFAULT NULL,
               `end_date` timestamp NULL DEFAULT NULL,
+              `processed_by` varchar(255) NULL,
               `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
               `last_updated_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              PRIMARY KEY (`job_id`)
-            ) ENGINE=InnoDB $charset_collate;";
+              PRIMARY KEY (`job_id`),
+              KEY `lh_j_classname` (`classname`),
+              KEY `lh_j_class_status` (`classname`, `status`) 
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
@@ -776,7 +780,20 @@ error_log($rpp->toXml());
               `job_id` bigint(20) unsigned NOT NULL,
               `name` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
-              PRIMARY KEY (`job_param_id`)
+              PRIMARY KEY (`job_param_id`),
+              KEY `lh_j_job_id` (`job_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('lh_job_dependency') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_job_dependency (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `job_id` bigint(20) unsigned NOT NULL,
+              `depends_on_job_id` bigint(20) unsigned NOT NULL,
+              PRIMARY KEY (`id`),
+              KEY `lh_jd_job_id` (`job_id`)
             ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
@@ -791,7 +808,7 @@ error_log($rpp->toXml());
               `last_scheduled_date` timestamp NULL DEFAULT NULL,
               `last_updated_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
               PRIMARY KEY (`job_id`)
-            ) ENGINE=InnoDB $charset_collate;";
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
@@ -811,7 +828,7 @@ error_log($rpp->toXml());
         if ( false == $this->does_table_exist('lh_calendar') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_calendar (
               `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-              `job_id` bigint(2) unsigned DEFAULT NULL,
+              `job_id` bigint(20) unsigned DEFAULT NULL,
               `room_id` int(10) unsigned DEFAULT NULL,
               `room_type_id` int(10) unsigned DEFAULT NULL,
               `room` varchar(50) NOT NULL,
@@ -835,10 +852,12 @@ error_log($rpp->toXml());
               `viewed_yn` char(1) DEFAULT NULL,
               `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
               PRIMARY KEY (`id`),
-              KEY `lh_c_checkin` (`checkin_date`),
-              KEY `lh_c_checkout` (`checkout_date`),
+              KEY `lh_c_checkin` (`job_id`,`checkin_date`),
+              KEY `lh_c_checkout` (`job_id`,`checkout_date`),
               KEY `lh_c_jobid` (`job_id`),
-              KEY `lh_c_roomid` (`room_id`)
+              KEY `lh_c_jobid_reservationid` (`job_id`,`reservation_id`),
+              KEY `lh_c_roomid` (`job_id`,`room_id`),
+              KEY `lh_c_booking_ref` (`booking_reference`)
             ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
@@ -889,7 +908,7 @@ error_log($rpp->toXml());
               PRIMARY KEY (`id`),
               KEY `job_id_idx` (`job_id`),
               FOREIGN KEY (`job_id`) REFERENCES ".$wpdb->prefix ."lh_jobs(`job_id`)
-            ) ENGINE=InnoDB $charset_collate;";
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
@@ -913,7 +932,7 @@ error_log($rpp->toXml());
               PRIMARY KEY (`id`),
               KEY `job_id_idx` (`job_id`),
               FOREIGN KEY (`job_id`) REFERENCES ".$wpdb->prefix ."lh_jobs(`job_id`)
-            ) ENGINE=InnoDB $charset_collate;";
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
@@ -929,7 +948,7 @@ error_log($rpp->toXml());
               PRIMARY KEY (`id`),
               KEY `lh_rpt_gc_reservation` (`reservation_id`),
               UNIQUE (`reservation_id`)
-            ) ENGINE=InnoDB $charset_collate;";
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
 
             self::execute_simple_sql($simple_sql);
         }
@@ -937,10 +956,95 @@ error_log($rpp->toXml());
         if ( false == $this->does_table_exist('lh_rooms') ) {
             $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_rooms (
               `id` bigint(20) unsigned NOT NULL,
-              `room` int(5) unsigned,
+              `room` varchar(50) DEFAULT NULL,
               `bed_name` varchar(50) DEFAULT NULL,
-              PRIMARY KEY (`id`)
+              `capacity` smallint(6) DEFAULT NULL,
+              `room_type_id` int(10) unsigned DEFAULT NULL,
+              `room_type` varchar(45) DEFAULT NULL,
+              `active_yn` char(1) DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `lh_r_idx` (`room`,`bed_name`)
             ) ENGINE=InnoDB $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('hw_booking') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."hw_booking (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `guest_name` varchar(255) DEFAULT NULL,
+              `guest_email` varchar(255) DEFAULT NULL,
+              `guest_phone` varchar(255) DEFAULT NULL,
+              `guest_nationality` varchar(255) DEFAULT NULL,
+              `payment_total` decimal(10,2) DEFAULT NULL,
+              `payment_outstanding` decimal(10,2) DEFAULT NULL,
+              `persons` varchar(255) DEFAULT NULL,
+              `booking_reference` varchar(255) DEFAULT NULL,
+              `booking_source` varchar(255) DEFAULT NULL,
+              `booked_date` datetime NULL DEFAULT NULL,
+              `arrival_time` datetime NULL DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('hw_booking_dates') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."hw_booking_dates (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `hw_booking_id` bigint(20) unsigned NOT NULL,
+              `room_type_id` int(10) unsigned DEFAULT NULL,
+              `room_type` varchar(255) DEFAULT NULL,
+              `booked_date` datetime NOT NULL,
+              `persons` int(10) unsigned NOT NULL,
+              `price` decimal(10,2) DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              KEY `hw_fk_bookingid` (`hw_booking_id`),
+              KEY `hw_booked_date` (`booked_date`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 $charset_collate;";
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('pxpost_transaction') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."pxpost_transaction (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `booking_reference` varchar(255) NOT NULL,
+              `job_id` bigint(20) unsigned DEFAULT NULL,
+              `post_date` timestamp NULL DEFAULT NULL,
+              `masked_card_number` varchar(255) DEFAULT NULL,
+              `payment_amount` decimal(10,2) NOT NULL,
+              `payment_request_xml` text DEFAULT NULL,
+              `payment_response_http_code` smallint(6) unsigned DEFAULT NULL,
+              `payment_response_xml` text DEFAULT NULL,
+              `payment_status_response_xml` text DEFAULT NULL,
+              `successful` tinyint(3) unsigned DEFAULT NULL,
+              `help_text` varchar(255) DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `last_updated_date` timestamp NULL DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `job_id_idx` (`job_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=14823000 $charset_collate;"; // AUTO INCREMENT AT A UNIQUE VALUE PER INSTALLATION
+
+            self::execute_simple_sql($simple_sql);
+        }
+
+        if ( false == $this->does_table_exist('lh_send_email') ) {
+            $simple_sql = "CREATE TABLE ".$wpdb->prefix ."lh_send_email (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `email` varchar(255) NOT NULL,
+              `first_name` varchar(255) DEFAULT NULL,
+              `last_name` varchar(255) DEFAULT NULL,
+              `send_date` timestamp NULL DEFAULT NULL,
+              `send_subject` varchar(255) DEFAULT NULL,
+              `send_body` text DEFAULT NULL,
+              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `last_updated_date` timestamp NULL DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              UNIQUE (`email`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARACTER SET utf8;"; // fixed charset or key may overflow
 
             self::execute_simple_sql($simple_sql);
         }
@@ -959,10 +1063,15 @@ error_log($rpp->toXml());
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rpt_guest_comments");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_job_param");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_scheduled_jobs");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_job_dependency");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_calendar");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_job_param");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_jobs");
             self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_rooms");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."hw_booking");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."hw_booking_dates");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."pxpost_transaction");
+            self::execute_simple_sql("DROP TABLE IF EXISTS ".$wpdb->prefix ."lh_send_email");
         }
     }
 
