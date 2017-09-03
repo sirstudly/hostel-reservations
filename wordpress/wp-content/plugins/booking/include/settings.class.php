@@ -37,6 +37,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('cleaner_tasks_url', get_option('hbo_cleaner_tasks_url')));
         $xmlRoot->appendChild($domtree->createElement('cleaning_hours_url', get_option('hbo_cleaning_hours_url')));
         $xmlRoot->appendChild($domtree->createElement('report_settings_url', get_option('hbo_report_settings_url')));
+        $xmlRoot->appendChild($domtree->createElement('view_log_url', get_option('hbo_view_log_url')));
         $xmlRoot->appendChild($domtree->createElement('job_history_url', get_option('hbo_job_history_url')));
         $xmlRoot->appendChild($domtree->createElement('redirect_to_url', get_option('hbo_redirect_to_url')));
         $xmlRoot->appendChild($domtree->createElement('delete_on_deactivate', get_option('hbo_delete_db_on_deactivate')));
@@ -67,6 +68,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_report_settings_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_job_history_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_redirect_to_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_view_log_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_run_processor_cmd');

@@ -45,6 +45,7 @@ class LHReportSettings extends XslTransform {
 
        // insert the job and process it; verify the status afterwards
        $jobId = LilHotelierDBO::insertUpdateLittleHotelierSettingsJob( $username, $password );
+       LilHotelierDBO::runProcessor();
 /* DISABLED as we're no longer running on the same server
        LilHotelierDBO::runProcessorAndWait();
        $jobStatus = LilHotelierDBO::getStatusOfJob( $jobId );

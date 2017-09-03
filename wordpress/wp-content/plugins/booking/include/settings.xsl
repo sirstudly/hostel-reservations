@@ -99,6 +99,10 @@
                                         <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="view_log_url">View Job Log</label></th>
+                                        <td><input id="view_log_url"  name="hbo_view_log_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{view_log_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="job_history_url">Job History</label></th>
                                         <td><input id="job_history_url"  name="hbo_job_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{job_history_url}" /></td>
                                     </tr>  

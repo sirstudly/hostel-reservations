@@ -112,6 +112,7 @@
                         <th>Details</th>
                         <th>Job Status</th>
                         <th>Last Updated</th>
+                        <th>Log File</th>
                     </thead>
                     <tbody>
                         <xsl:apply-templates select="transaction"/>
@@ -145,6 +146,7 @@
         <td><xsl:value-of select="details"/></td>
         <td><xsl:value-of select="job-status"/></td>
         <td><xsl:value-of select="last-updated-date"/></td>
+        <td><xsl:if test="log_file"><a><xsl:attribute name="href"><xsl:value-of select="log_file"/></xsl:attribute>job-<xsl:value-of select="job_id"/>.log</a></xsl:if></td>
     </tr>
 </xsl:template>
 

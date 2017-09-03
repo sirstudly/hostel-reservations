@@ -63,6 +63,8 @@ class LHManualCharge extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {
 
         if ( $this->lastTransactions ) {
+            $logDirectory = get_option( 'hbo_log_directory' );
+            $logDirectoryUrl = get_option( 'hbo_log_directory_url' );
             $txnRoot = $parentElement->appendChild($domtree->createElement('transactions'));
             foreach( $this->lastTransactions as $record ) {
                 $recordRoot = $txnRoot->appendChild($domtree->createElement('transaction'));
@@ -80,6 +82,13 @@ class LHManualCharge extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('success', $record->successful == 1 ? 'yes' : 'no' ));
                 $recordRoot->appendChild($domtree->createElement('job-status', $record->status ));
                 $recordRoot->appendChild($domtree->createElement('last-updated-date', $record->last_updated_date));
+                $recordRoot->appendChild($domtree->createElement('job_id', $record->job_id));
+
+                // only include logfile if it exists
+                $jobLogFilename = "job-" . $record->job_id . ".log";
+                if( file_exists( $logDirectory . "/" . $jobLogFilename )) {
+                    $recordRoot->appendChild($domtree->createElement('log_file', $logDirectoryUrl . $record->job_id ));
+                }
             }
         }
     }

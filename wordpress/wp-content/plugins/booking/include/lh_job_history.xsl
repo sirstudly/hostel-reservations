@@ -115,7 +115,7 @@ a.tooltip span {
         <td><xsl:value-of select="status"/></td>
         <td><xsl:value-of select="start_date"/></td>
         <td><xsl:value-of select="end_date"/></td>
-        <td><xsl:if test="log_file"><a><xsl:attribute name="href"><xsl:value-of select="log_file"/></xsl:attribute>job-<xsl:value-of select="job_id"/>.txt</a></xsl:if></td>
+        <td><xsl:if test="log_file"><a><xsl:attribute name="href"><xsl:value-of select="log_file"/></xsl:attribute>job-<xsl:value-of select="job_id"/>.log</a></xsl:if></td>
     </tr>
 </xsl:template>
 
