@@ -824,7 +824,13 @@ class LilHotelierDBO {
     static function fetchLastManualTransactions() {
         global $wpdb;
         $resultset = $wpdb->get_results(
-               "SELECT * FROM (
+               "SELECT job_id, MAX(booking_reference) AS booking_reference, MAX(post_date) AS post_date, 
+                       MAX(masked_card_number) AS masked_card_number, MAX(payment_amount) AS payment_amount, 
+	                   MAX(successful) AS successful, MAX(help_text) AS help_text, MAX(status) AS status, 
+	                   MAX(data_href) AS data_href,
+	                   MAX(checkin_date) AS checkin_date,
+	                   MAX(last_updated_date) AS last_updated_date
+                  FROM (
                     SELECT j.job_id, jp1.value AS booking_reference, NULL as post_date, NULL AS masked_card_number, CAST(jp2.value AS DECIMAL(10,2)) AS payment_amount, 
                            NULL as successful, NULL AS help_text, j.status, 
                            (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS data_href,
@@ -843,7 +849,9 @@ class LilHotelierDBO {
                       FROM ".$wpdb->prefix."pxpost_transaction p
                       LEFT OUTER JOIN ".$wpdb->prefix."lh_jobs j ON p.job_id = j.job_id
                      WHERE p.booking_reference LIKE 'HWL-%'
-                 ) t ORDER BY last_updated_date DESC");
+                 ) t 
+                 GROUP BY COALESCE(job_id, UUID())
+                 ORDER BY last_updated_date DESC");
 
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
