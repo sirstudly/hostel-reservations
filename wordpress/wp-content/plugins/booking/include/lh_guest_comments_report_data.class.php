@@ -68,6 +68,7 @@ class LHGuestCommentsReportData extends XslTransform {
             $comment = trim( preg_replace( '/1 bed,/s', '', $comment ));
             $comment = trim( preg_replace( '/, 1 bed$/s', '', $comment ));
             $comment = trim( preg_replace( '/^1 bed$/s', '', $comment ));
+            $comment = trim( preg_replace( '/^AGODA BOOKING DO NOT CHARGE GUEST - RONBOT$/s', '', $comment ));
 
             // only include if there is something to say...
             if( strlen( $comment ) > 0 ) {
