@@ -532,20 +532,20 @@ function save_hostelworld_settings( username, password ) {
     });
 }
 
-// saves the login details for hostelbookers
-// username : HB username
-// password : HB password
-function save_hostelbookers_settings( username, password ) {
+// saves the login details for agoda
+// username : agoda username
+// password : agoda password
+function save_agoda_settings( username, password ) {
 
-    jQuery('#ajax_respond_hb').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_agoda').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
         type:'POST',
-        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_hb').html( data ); },
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_agoda').html( data ); },
         error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
-            ajax_action : 'SAVE_HOSTELBOOKERS_SETTINGS',
+            ajax_action : 'SAVE_AGODA_SETTINGS',
             username : username,
             password : password
         }

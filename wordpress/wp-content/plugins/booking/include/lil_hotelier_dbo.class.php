@@ -323,17 +323,6 @@ class LilHotelierDBO {
     }
 
     /**
-     * Inserts a new UpdateHostelbookersSettingsJob.
-     * Returns id of inserted job id
-     * Throws DatabaseException on insert error
-     */
-    static function insertUpdateHostelbookersSettingsJob( $username, $password ) {
-        return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateHostelbookersSettingsJob',
-            array( "username" => $username,
-                   "password" => $password ) );
-    }
-
-    /**
      * Inserts a new CreateTestGuestCheckoutEmailJob.
      * Returns id of inserted job id
      * Throws DatabaseException on insert error

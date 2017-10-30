@@ -40,12 +40,12 @@
     width: 100%;
 }
 
-#lilho-container {
+.lilho-container {
     width: 400px;
     margin-bottom: 30px;
 }
 
-#hw-container {
+.hw-container {
     width: 400px;
     margin-bottom: 30px;
 }
@@ -109,6 +109,21 @@ jQuery(document).ready( function(){
                 .prev().remove();
         }
     });
+
+    jQuery("#agoda_pwcheck").click(function(){
+        if (jQuery("#agoda_pwcheck").is(":checked"))
+        {
+            jQuery("#agoda_password").clone()
+                .attr("type", "text").insertAfter("#agoda_password")
+                .prev().remove();
+        }
+        else
+        {
+            jQuery("#agoda_password").clone()
+                .attr("type","password").insertAfter("#agoda_password")
+                .prev().remove();
+        }
+    });
 });
 </script>
     
@@ -124,7 +139,7 @@ jQuery(document).ready( function(){
 
         <div style="font-style:italic;">Note: It may take up to a minute to verify when saving the settings below.</div>
 
-        <div id="lilho-container" class="shadow">
+        <div class="shadow lilho-container">
             <h3>Little Hotelier</h3> 
             <table class="form-table">
                 <tbody>
@@ -146,7 +161,7 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-        <div id="hw-container" class="shadow">
+        <div class="shadow hw-container">
             <h3>Hostelworld</h3> 
             <table class="form-table">
                 <tbody>
@@ -165,6 +180,28 @@ jQuery(document).ready( function(){
             <div class="btn-container">
                 <div style="float: left;" id="ajax_respond_hw"><xsl:comment/><!-- ajax response here--></div>
                 <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value); this.disabled=true;">Save</a>
+            </div>
+        </div>
+
+        <div class="shadow hw-container">
+            <h3>Agoda</h3> 
+            <table class="form-table">
+                <tbody>
+                    <tr valign="top">
+                        <th scope="row"><label for="agoda_username">Username:</label></th>
+                        <td><input id="agoda_username" name="hbo_agoda_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_agoda_username}"/></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="agoda_password">Password:</label></th>
+                        <td><input id="agoda_password" name="hbo_agoda_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_agoda_password}" /><br/>
+                            <input type="checkbox" id="agoda_pwcheck" /> Show Password</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="btn-container">
+                <div style="float: left;" id="ajax_respond_agoda"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_agoda" class="btn btn-primary" style="float: right;" onclick="save_agoda_settings(document.post_option.agoda_username.value, document.post_option.agoda_password.value); this.disabled=true;">Save</a>
             </div>
         </div>
 
@@ -195,7 +232,7 @@ jQuery(document).ready( function(){
         </div>
 
     <xsl:if test="starts-with(hbo_lilho_username, 'castlerock')">
-        <div id="hw-container" class="shadow" style="width: 600px;">
+        <div class="shadow hw-container" style="width: 600px;">
             <h3>Checked-out Guest Response Email (Template)</h3> 
             <p>If present, the following will be replaced in the subject/body: <br/>
                <ul>

@@ -23,8 +23,8 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_lilho_password'] = get_option('hbo_lilho_password');
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
-        $this->reportSettings['hbo_hb_username'] = get_option('hbo_hb_username');
-        $this->reportSettings['hbo_hb_password'] = get_option('hbo_hb_password');
+        $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
+        $this->reportSettings['hbo_agoda_password'] = get_option('hbo_agoda_password');
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
         $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
         $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
@@ -96,10 +96,9 @@ class LHReportSettings extends XslTransform {
    }
 
    /**
-    * Updates details for hostelbookers.
-    * ** Now deprecated. HB merged with HW. 9/4/2016 **
+    * Updates details for Agoda.
     */
-   function saveHostelbookersSettings( $username, $password ) {
+   function saveAgodaSettings( $username, $password ) {
 
        if( empty( $username )) {
            throw new ValidationException( "Username cannot be blank" );
@@ -108,22 +107,8 @@ class LHReportSettings extends XslTransform {
            throw new ValidationException( "Password cannot be blank" );
        }
 
-       // insert the job and process it; verify the status afterwards
-       $jobId = LilHotelierDBO::insertUpdateHostelbookersSettingsJob( $username, $password );
-       LilHotelierDBO::runProcessorAndWait();
-       $jobStatus = LilHotelierDBO::getStatusOfJob( $jobId );
-
-       if( $jobStatus != LilHotelierDBO::STATUS_COMPLETED ) {
-           error_log( "saveHostelbookersSettings: Job $jobId is at $jobStatus");
-           if( $jobStatus == LilHotelierDBO::STATUS_FAILED ) {
-               throw new ProcessingException( "Could not login using given credentials. Changes not saved." );
-           }
-           throw new ProcessingException( "Failed to update details. Check log for details." );
-       }
-
-       // if we get to this point, we have validated the login so save it
-       update_option( "hbo_hb_username", $username );
-       update_option( "hbo_hb_password", $password );
+       update_option( "hbo_agoda_username", $username );
+       update_option( "hbo_agoda_password", $password );
    }
 
    /**
