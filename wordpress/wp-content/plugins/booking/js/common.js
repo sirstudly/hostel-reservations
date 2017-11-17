@@ -495,7 +495,7 @@ function update_guest_comments_report_view( include_acknowledged ) {
 // saves the login details for little hotelier
 // username : LH username
 // password : LH password
-function save_little_hotelier_settings( username, password ) {
+function save_little_hotelier_settings( username, password, lh_session ) {
 
     jQuery('#ajax_respond_lh').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
 
@@ -507,7 +507,8 @@ function save_little_hotelier_settings( username, password ) {
         data:{
             ajax_action : 'SAVE_LITTLE_HOTELIER_SETTINGS',
             username : username,
-            password : password
+            password : password,
+            lh_session : lh_session
         }
     });
 }
@@ -616,7 +617,8 @@ function send_test_response_email( first_name, last_name, recipient_email ) {
 // bookingRef : booking reference. e.g. HWL-551-123456789
 // amount : amount to charge e.g. 14.32
 // note : note to leave in LH notes
-function submit_manual_charge( bookingRef, amount, note ) {
+// override_card_details : true to use LH card details
+function submit_manual_charge( bookingRef, amount, note, override_card_details ) {
 
     jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
 
@@ -629,7 +631,8 @@ function submit_manual_charge( bookingRef, amount, note ) {
             ajax_action : 'SUBMIT_MANUAL_CHARGE_JOB',
             booking_ref : bookingRef,
             charge_amount : amount,
-            charge_note : note
+            charge_note : note,
+            override_card_details : override_card_details ? 1 : 0
         }
     });
 }

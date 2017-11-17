@@ -28,19 +28,17 @@ class LHManualCharge extends XslTransform {
     * $bookingRef : booking reference e.g. HWL-551-123456789
     * $amount : amount of booking. e.g. 12.44
     * $note : note to append to LH notes
+    * $overrideCardDetails : true to use LH card details
     */
-   function submitManualChargeJob( $bookingRef, $amount, $note ) {
+   function submitManualChargeJob( $bookingRef, $amount, $note, $overrideCardDetails ) {
 
        if( empty( $bookingRef )) {
            throw new ValidationException( "Booking Reference cannot be blank." );
        }
-       if( substr(strtoupper( $bookingRef ), 0, 3) !== 'HWL' ) {
-           throw new ValidationException( "Only HostelWorld bookings are supported." );
-       }
        if( empty( $amount )) {
            throw new ValidationException( "Amount cannot be blank." );
        }
-       if ( ! preg_match("/[0-9\.]/", $amount )) {
+       if ( ! preg_match("/^\d*\.{0,1}\d*$/", $amount )) {
            throw new ValidationException( "Incorrect amount format. e.g. 12.32" );
        }
        if( empty( $note )) {
@@ -50,7 +48,8 @@ class LHManualCharge extends XslTransform {
        LilHotelierDBO::insertJobOfType( self::JOB_TYPE,
            array( "booking_ref" => strtoupper( $bookingRef ),
                   "amount" => $amount,
-                  "message" => $note ) );
+                  "message" => $note,
+                  "use_lh_card_details" => $overrideCardDetails ? "true" : "false" ) );
        LilHotelierDBO::runProcessor();
    }
 

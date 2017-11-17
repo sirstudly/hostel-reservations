@@ -21,6 +21,7 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings = array();
         $this->reportSettings['hbo_lilho_username'] = get_option('hbo_lilho_username');
         $this->reportSettings['hbo_lilho_password'] = get_option('hbo_lilho_password');
+        $this->reportSettings['hbo_lilho_session'] = get_option('hbo_lilho_session');
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
@@ -34,7 +35,7 @@ class LHReportSettings extends XslTransform {
    /**
     * Updates details for little hotelier.
     */
-   function saveLittleHotelierSettings( $username, $password ) {
+   function saveLittleHotelierSettings( $username, $password, $lh_session ) {
 
        if( empty( $username )) {
            throw new ValidationException( "Username cannot be blank" );
@@ -42,6 +43,11 @@ class LHReportSettings extends XslTransform {
        if( empty( $password )) {
            throw new ValidationException( "Password cannot be blank" );
        }
+
+       // only the session is important
+       update_option( "hbo_lilho_username", $username );
+       update_option( "hbo_lilho_password", $password );
+       update_option( "hbo_lilho_session", $lh_session );
 
        // insert the job and process it; verify the status afterwards
        $jobId = LilHotelierDBO::insertUpdateLittleHotelierSettingsJob( $username, $password );

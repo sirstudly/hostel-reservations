@@ -55,7 +55,7 @@
             <h3>Process a Manual Charge</h3> 
 
             <div style="font-style:italic;">
-                <p>This will attempt to charge the card saved against the given booking. Only Hostelworld bookings are supported.<br/>
+                <p>This will attempt to charge the card saved against the given booking.<br/>
                    Note: Hostelworld only keeps card details 7 days after the checkin date for a booking.
                 </p>
                 <p>FYI, you cannot charge more than what is currently "outstanding" in Little Hotelier. <br/>
@@ -76,6 +76,11 @@
                         <td><span class="hint">in GBP. e.g. 13.20</span></td>
                     </tr>
                     <tr valign="top">
+                        <th scope="row"><label for="override_card_details">Use card details from LH:</label></th>
+                        <td><input id="override_card_details" name="override_card_details" type="checkbox"/></td>
+                        <td><span class="hint">Only applicable for HWL/EXP/AGO bookings</span></td>
+                    </tr>
+                    <tr valign="top">
                         <th scope="row"><label for="charge_note">Note:</label></th>
                         <td><textarea name="charge_note" class="regular-text code" style="width: 200px;">Charge attempt as no-show.</textarea></td>
                         <td><xsl:comment/></td>
@@ -83,7 +88,7 @@
                     <tr valign="top">
                         <td colspan="2">
                             <div id="ajax_response"><xsl:comment/></div>
-                            <a id="charge_button" class="btn btn-primary" style="float: right;" onclick="submit_manual_charge(post_manual_charge.booking_ref.value, post_manual_charge.charge_amount.value, post_manual_charge.charge_note.value); this.style.visibility='hidden';">Charge Now</a>
+                            <a id="charge_button" class="btn btn-primary" style="float: right;" onclick="submit_manual_charge(post_manual_charge.booking_ref.value, post_manual_charge.charge_amount.value, post_manual_charge.charge_note.value, post_manual_charge.override_card_details.checked); this.style.visibility='hidden';">Charge Now</a>
                         </td>
                         <td><xsl:comment/></td>
                     </tr>

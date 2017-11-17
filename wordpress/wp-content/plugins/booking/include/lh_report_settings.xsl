@@ -152,12 +152,16 @@ jQuery(document).ready( function(){
                         <td><input id="lilho_password" name="hbo_lilho_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_lilho_password}" /><br/>
                             <input type="checkbox" id="lh_pwcheck" /> Show Password</td>
                     </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="lilho_session">Session ID:</label></th>
+                        <td><input id="lilho_session" name="hbo_lilho_session" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_lilho_session}" /></td>
+                    </tr>
                 </tbody>
             </table>
 
             <div class="btn-container">
                 <div style="float: left;" id="ajax_respond_lh"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_lilho" class="btn btn-primary" style="float: right;" onclick="save_little_hotelier_settings(document.post_option.lilho_username.value, document.post_option.lilho_password.value); this.disabled=true;">Save</a>
+                <a id="btn_save_lilho" class="btn btn-primary" style="float: right;" onclick="save_little_hotelier_settings(document.post_option.lilho_username.value, document.post_option.lilho_password.value, document.post_option.lilho_session.value); this.disabled=true;">Save</a>
             </div>
         </div>
 

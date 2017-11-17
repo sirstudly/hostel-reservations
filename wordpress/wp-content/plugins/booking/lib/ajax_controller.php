@@ -797,7 +797,7 @@ error_log("checkout: ".$_POST['checkout_date']);
         try {
             $settingsPage = new LHReportSettings();
             $settingsPage->saveLittleHotelierSettings( 
-                $_POST['username'], $_POST['password'] );
+                $_POST['username'], $_POST['password'], $_POST['lh_session'] );
 
             ?> 
             <script type="text/javascript">
@@ -984,12 +984,13 @@ error_log("checkout: ".$_POST['checkout_date']);
      *   booking_ref : booking reference e.g. HWL-551-12345789
      *   charge_amount : amount to charge e.g. 13.44
      *   charge_note : message to append to LH notes
+     *   override_card_details : true to use LH card details
      */
     function submitManualChargeJob() {
         try {
             $chargePage = new LHManualCharge();
             $chargePage->submitManualChargeJob( 
-                $_POST['booking_ref'], $_POST['charge_amount'], $_POST['charge_note'] );
+                $_POST['booking_ref'], $_POST['charge_amount'], $_POST['charge_note'], $_POST['override_card_details'] );
 
             ?> 
             <script type="text/javascript">
@@ -997,6 +998,7 @@ error_log("checkout: ".$_POST['checkout_date']);
                 jQuery("#booking_ref").val('');
                 jQuery("#charge_amount").val('');
                 jQuery("#charge_note").val('');
+                jQuery("#override_card_details").prop('checked', false);;
                 // reload the page anyways to refresh the table
                 window.location.reload(true); 
             </script>
