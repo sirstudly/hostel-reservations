@@ -820,26 +820,19 @@ class LilHotelierDBO {
 	                   MAX(checkin_date) AS checkin_date,
 	                   MAX(last_updated_date) AS last_updated_date
                   FROM (
-                    SELECT j.job_id, jp1.value AS booking_reference, NULL as post_date, NULL AS masked_card_number, CAST(jp2.value AS DECIMAL(10,2)) AS payment_amount, 
-                           NULL as successful, NULL AS help_text, j.status, 
+                    SELECT j.job_id, jp1.value AS booking_reference, p.post_date, p.masked_card_number, 
+                           COALESCE(p.payment_amount, CAST(jp2.value AS DECIMAL(10,2))) AS payment_amount, 
+		                   p.successful, p.help_text, j.status, 
                            (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS data_href,
                            (SELECT MAX(c.checkin_date) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS checkin_date,
                            COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
                       FROM ".$wpdb->prefix."lh_jobs j
                       JOIN ".$wpdb->prefix."lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
                       JOIN ".$wpdb->prefix."lh_job_param jp2 ON j.job_id = jp2.job_id AND jp2.name = 'amount'
-                     WHERE j.classname IN ('com.macbackpackers.jobs.NoShowChargeJob', 'com.macbackpackers.jobs.ManualChargeJob')
-                       AND j.status != 'completed'
-                     UNION ALL
-                    SELECT p.job_id, p.booking_reference, p.post_date, p.masked_card_number, p.payment_amount, p.successful, p.help_text, j.status,
-                           (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = p.booking_reference) AS data_href,
-                           (SELECT MAX(c.checkin_date) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = p.booking_reference) AS checkin_date,
-                           COALESCE(j.last_updated_date, j.created_date, p.last_updated_date, p.created_date) AS last_updated_date
-                      FROM ".$wpdb->prefix."pxpost_transaction p
-                      LEFT OUTER JOIN ".$wpdb->prefix."lh_jobs j ON p.job_id = j.job_id
-                     WHERE p.booking_reference LIKE 'HWL-%'
+                      LEFT OUTER JOIN ".$wpdb->prefix."pxpost_transaction p ON p.job_id = j.job_id
+                     WHERE j.classname IN ('com.macbackpackers.jobs.ManualChargeJob')
                  ) t 
-                 GROUP BY COALESCE(job_id, UUID())
+                 GROUP BY job_id
                  ORDER BY last_updated_date DESC");
 
         if($wpdb->last_error) {

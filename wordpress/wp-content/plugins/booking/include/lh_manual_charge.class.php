@@ -46,7 +46,7 @@ class LHManualCharge extends XslTransform {
        }
 
        LilHotelierDBO::insertJobOfType( self::JOB_TYPE,
-           array( "booking_ref" => strtoupper( $bookingRef ),
+           array( "booking_ref" => trim( strtoupper( $bookingRef ) ),
                   "amount" => $amount,
                   "message" => $note,
                   "use_lh_card_details" => $overrideCardDetails ? "true" : "false" ) );

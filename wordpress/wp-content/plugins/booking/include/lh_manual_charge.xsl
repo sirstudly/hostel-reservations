@@ -78,7 +78,7 @@
                     <tr valign="top">
                         <th scope="row"><label for="override_card_details">Use card details from LH:</label></th>
                         <td><input id="override_card_details" name="override_card_details" type="checkbox"/></td>
-                        <td><span class="hint">Only applicable for HWL/EXP/AGO bookings</span></td>
+                        <td><span class="hint">Only applicable for HWL/EXP/AGO/BDC bookings</span></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><label for="charge_note">Note:</label></th>
