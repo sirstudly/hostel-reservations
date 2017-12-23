@@ -73,6 +73,8 @@ class LHGuestCommentsReportData extends XslTransform {
             $comment = trim( preg_replace( '/Hostel World Booking Ref.*-\d{9}/s', '', $comment ));
             $comment = trim( preg_replace( '/Balance Due:.*\(GBP\)/s', '', $comment ));
             $comment = trim( preg_replace( '/Number of .*: \d/s', '', $comment ));
+            $comment = trim( preg_replace( '/\*\* THIS RESERVATION HAS BEEN PRE-PAID.*The amount the guest prepaid to Booking\.com is GBP \d*\.\d*/s', '', $comment ));
+            $comment = trim( preg_replace( '/You have received a virtual credit card for this reservation.*The amount the guest prepaid to Booking\.com is GBP \d*\.\d*/s', '', $comment ));
 
             // only include if there is something to say...
             if( strlen( $comment ) > 0 ) {
