@@ -56,8 +56,12 @@
 
             <div style="font-style:italic;">
                 <p>This will attempt to charge the card saved against the given booking.<br/>
-                   Note: Hostelworld only keeps card details 7 days after the checkin date for a booking.
+                   <ul>
+                       <li>Agoda/Expedia/Booking.com/Hostelworld - card details taken from their respective website unless "Use card details from LH" is ticked.</li>
+                       <li>All other bookings - card details taken from Little Hotelier reservation page.</li>
+                   </ul>
                 </p>
+                <p>Note: Most sites (including LH) only keep card details for about a week after the checkin date for a booking.</p>
                 <p>FYI, you cannot charge more than what is currently "outstanding" in Little Hotelier. <br/>
                    Please confirm (or update) the total outstanding in Little Hotelier prior to submitting! <br/>
                    As a safety precaution, only one (successful) charge attempt is allowed against each booking.</p>
