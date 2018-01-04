@@ -57,7 +57,7 @@
             <div style="font-style:italic;">
                 <p>This will attempt to charge the card saved against the given booking.<br/>
                    <ul>
-                       <li>Agoda/Expedia/Booking.com/Hostelworld - card details taken from their respective website unless "Use card details from LH" is ticked.</li>
+                       <li>Agoda/Expedia/Hostelworld - card details taken from their respective website unless "Use card details from LH" is ticked.</li>
                        <li>All other bookings - card details taken from Little Hotelier reservation page.</li>
                    </ul>
                 </p>
@@ -82,7 +82,7 @@
                     <tr valign="top">
                         <th scope="row"><label for="override_card_details">Use card details from LH:</label></th>
                         <td><input id="override_card_details" name="override_card_details" type="checkbox"/></td>
-                        <td><span class="hint">Only applicable for HWL/EXP/AGO/BDC bookings</span></td>
+                        <td><span class="hint">Only applicable for HWL/EXP/AGO bookings</span></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><label for="charge_note">Note:</label></th>
