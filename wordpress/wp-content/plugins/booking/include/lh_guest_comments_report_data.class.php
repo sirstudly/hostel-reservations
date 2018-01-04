@@ -12,7 +12,7 @@ class LHGuestCommentsReportData extends XslTransform {
     var $lastJob; // the last job of this type that has run
 
     // this is the job we're interested in
-    const JOB_TYPE = 'com.macbackpackers.jobs.GuestCommentsReportJob';
+    const JOB_TYPE = "com.macbackpackers.jobs.AllocationScraperJob";
 
     // this is the job this report is depended on
     const ALLOC_SCRAPER_JOB_TYPE = "com.macbackpackers.jobs.AllocationScraperJob";

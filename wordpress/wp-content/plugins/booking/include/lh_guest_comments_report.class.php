@@ -16,7 +16,7 @@ class LHGuestCommentsReport extends LHGuestCommentsReportData {
      * Inserts an allocation scraper job into the jobs table.
      */
     function submitReportJob() {
-        LilHotelierDBO::insertGuestCommentsReportJob();
+        LilHotelierDBO::insertAllocationScraperJob();
         LilHotelierDBO::runProcessor();
     }
     

@@ -292,15 +292,6 @@ class LilHotelierDBO {
     }
 
     /**
-     * Inserts a new AllocationScraperJob.
-     * Returns id of inserted job id
-     * Throws DatabaseException on insert error
-     */
-    static function insertGuestCommentsReportJob() {
-        return self::insertJobOfType( 'com.macbackpackers.jobs.GuestCommentsReportJob');
-    }
-
-    /**
      * Inserts a new UpdateLittleHotelierSettingsJob.
      * Returns id of inserted job id
      * Throws DatabaseException on insert error
