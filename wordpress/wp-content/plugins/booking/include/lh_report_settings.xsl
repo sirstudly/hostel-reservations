@@ -153,6 +153,16 @@ jQuery(document).ready( function(){
                             <input type="checkbox" id="lh_pwcheck" /> Show Password</td>
                     </tr>
                     <tr valign="top">
+                        <td scope="row" colspan="2">
+                            <div style="margin-top: 10px;">
+                            Due to some weird scripting on the login page that I haven't been able to figure out, we'll also need a valid session ID from a logged in browser.<br/>
+                            In <strong>Firefox</strong>, press F12, click the Storage tab.<br/>
+                            In <strong>Chrome</strong>, press F12, click the Application tab.<br/>
+                            Under Cookies, https://app.littlehotelier.com, copy the value with the name <code>_littlehotelier_session</code> and paste it here.
+                            </div>
+                        </td>
+                    </tr>
+                    <tr valign="top">
                         <th scope="row"><label for="lilho_session">Session ID:</label></th>
                         <td><input id="lilho_session" name="hbo_lilho_session" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_lilho_session}" /></td>
                     </tr>
