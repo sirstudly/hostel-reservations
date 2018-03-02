@@ -17,7 +17,7 @@ class BedCountsCSV extends AbstractBedCounts {
      * Returns the filename for the stylesheet to use during transform.
      */
     function getXslFilename() {
-        return WPDEV_BK_PLUGIN_DIR. '/include/lh_bedcounts_csv.xsl';
+        return HBO_PLUGIN_DIR. '/include/lh_bedcounts_csv.xsl';
     }
 
     /**

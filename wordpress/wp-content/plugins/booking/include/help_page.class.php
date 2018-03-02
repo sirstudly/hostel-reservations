@@ -16,16 +16,6 @@ class HelpPage extends XslTransform {
     }
 
     /**
-     * Sets the name of this page before generating the HTML and returning it.
-     * $name : name of view (page) to be generated
-     * Returns generated HTML
-     */
-    function toHtml_deprecated($name) {
-        $this->name = $name;
-        return parent::toHtml();
-    }
-
-    /**
      * Fetches this page in the following format:
      * <view>
      *     <name>add-edit-booking</name>
@@ -44,7 +34,7 @@ class HelpPage extends XslTransform {
      * Returns the filename for the stylesheet to use during transform.
      */
     function getXslFilename() {
-        return WPDEV_BK_PLUGIN_DIR. '/include/help_page.xsl';
+        return HBO_PLUGIN_DIR. '/include/help_page.xsl';
     }
 }
 

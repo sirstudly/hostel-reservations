@@ -25,8 +25,8 @@ class HtmlHeaders extends XslTransform {
         $domtree = new DOMDocument('1.0', 'UTF-8');
         // create the root element for this class and append it to the root
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
-        $xmlRoot->appendChild($domtree->createElement('pluginurl', WPDEV_BK_PLUGIN_URL));
-        $xmlRoot->appendChild($domtree->createElement('pluginfilename', WPDEV_BK_PLUGIN_FILENAME));
+        $xmlRoot->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
+        $xmlRoot->appendChild($domtree->createElement('pluginfilename', HBO_PLUGIN_FILENAME));
         $xmlRoot->appendChild($domtree->createElement('locale', 'en_US'));  // hard-coded for now
         return $domtree->saveXML();
     }
@@ -35,7 +35,7 @@ class HtmlHeaders extends XslTransform {
      * Returns the filename for the stylesheet to use during transform.
      */
     function getXslFilename() {
-        return WPDEV_BK_PLUGIN_DIR. '/include/html_headers.xsl';
+        return HBO_PLUGIN_DIR. '/include/html_headers.xsl';
     }
 }
 

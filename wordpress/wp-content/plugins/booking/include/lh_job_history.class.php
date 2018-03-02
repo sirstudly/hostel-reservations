@@ -94,7 +94,7 @@ class LHJobHistory extends XslTransform {
      * Returns the filename for the stylesheet to use during transform.
      */
     function getXslFilename() {
-        return WPDEV_BK_PLUGIN_DIR. '/include/lh_job_history.xsl';
+        return HBO_PLUGIN_DIR. '/include/lh_job_history.xsl';
     }
 
 }

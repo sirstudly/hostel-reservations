@@ -128,7 +128,7 @@ class LHManualCharge extends XslTransform {
      * Returns the filename for the stylesheet to use during transform.
      */
     function getXslFilename() {
-        return WPDEV_BK_PLUGIN_DIR. '/include/lh_manual_charge.xsl';
+        return HBO_PLUGIN_DIR. '/include/lh_manual_charge.xsl';
     }
 
 }
