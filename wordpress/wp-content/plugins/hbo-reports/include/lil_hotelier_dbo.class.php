@@ -30,14 +30,14 @@ class LilHotelierDBO {
                          WHEN IFNULL( c2.checkout_date, c.checkout_date ) > constants.selected_date THEN 'NO CHANGE'
                          ELSE 'EMPTY' END AS bedsheet
                FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
-               JOIN ".$wpdb->prefix."lh_rooms r ON 1 = 1
-               LEFT OUTER JOIN ".$wpdb->prefix."lh_calendar c
+               JOIN wp_lh_rooms r ON 1 = 1
+               LEFT OUTER JOIN wp_lh_calendar c
                  ON r.id = c.room_id
                 AND c.checkout_date >= constants.selected_date
                 AND c.checkin_date < constants.selected_date
                 AND c.job_id = %d
                     -- check if the following reservation is also the same guest
-               LEFT OUTER JOIN ".$wpdb->prefix."lh_calendar c2
+               LEFT OUTER JOIN wp_lh_calendar c2
                  ON c2.room_id = c.room_id
                 AND c2.checkin_date = c.checkout_date
                 AND c2.job_id = c.job_id
@@ -68,10 +68,10 @@ class LilHotelierDBO {
         // first find the job id for the most recent job of the given type
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT MAX(job_id) AS job_id
-               FROM ".$wpdb->prefix."lh_jobs
+               FROM wp_lh_jobs
               WHERE end_date IN (
                     SELECT MAX(end_date) 
-                      FROM ".$wpdb->prefix."lh_jobs t
+                      FROM wp_lh_jobs t
                      WHERE t.classname = %s
                        AND t.status = %s)", $jobName, self::STATUS_COMPLETED));
         
@@ -89,7 +89,7 @@ class LilHotelierDBO {
         // otherwise, retrieve the job details
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT job_id, classname, status, start_date, end_date
-               FROM ".$wpdb->prefix."lh_jobs
+               FROM wp_lh_jobs
               WHERE job_id = %d", $rec->job_id));
         
         if($wpdb->last_error) {
@@ -135,7 +135,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT job_id
-               FROM ".$wpdb->prefix."lh_jobs
+               FROM wp_lh_jobs
               WHERE classname = %s 
                 AND status IN ( %s, %s )", $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
 
@@ -150,8 +150,8 @@ class LilHotelierDBO {
         $resultset = $wpdb->get_results(
             "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, lh_status, 
                     booking_reference, booking_source, booked_date, eta, viewed_yn, notes, created_date
-               FROM ".$wpdb->prefix."lh_rpt_split_rooms
-              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM ".$wpdb->prefix."lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.SplitRoomReservationReportJob' AND status = 'completed'))
+               FROM wp_lh_rpt_split_rooms
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.SplitRoomReservationReportJob' AND status = 'completed'))
               ORDER BY checkin_date");
 
         if($wpdb->last_error) {
@@ -169,8 +169,8 @@ class LilHotelierDBO {
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT reservation_id, guest_name, booking_reference, booking_source, checkin_date, checkout_date, 
                     booked_date, payment_outstanding, num_guests, data_href, notes, viewed_yn 
-               FROM ".$wpdb->prefix."lh_group_bookings
-              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM ".$wpdb->prefix."lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.GroupBookingsReportJob' AND status = 'completed'))
+               FROM wp_lh_group_bookings
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.GroupBookingsReportJob' AND status = 'completed'))
                 AND ( num_guests >= %d " .
                        (get_option('hbo_include_5_guests_in_6bed_dorm') == 'true' ? ' OR num_guests = 5' : '' ) . "
                     )
@@ -191,8 +191,8 @@ class LilHotelierDBO {
         $resultset = $wpdb->get_results(
             "SELECT guest_name, checkin_date, checkout_date, payment_total, data_href, booking_reference, 
                     booking_source, booked_date, notes, viewed_yn, created_date
-               FROM ".$wpdb->prefix."lh_rpt_unpaid_deposit
-              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM ".$wpdb->prefix."lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM ".$wpdb->prefix."lh_jobs WHERE classname = 'com.macbackpackers.jobs.UnpaidDepositReportJob' AND status = 'completed'))
+               FROM wp_lh_rpt_unpaid_deposit
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.UnpaidDepositReportJob' AND status = 'completed'))
               ORDER BY checkin_date");
 
         if($wpdb->last_error) {
@@ -211,13 +211,13 @@ class LilHotelierDBO {
             "SELECT job_id, reservation_id, GROUP_CONCAT(DISTINCT guest_name SEPARATOR ', ') `guest_name`, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, COUNT(num_guests) `num_guests`, notes, viewed_yn, comments, acknowledged_date
                FROM ( -- some duplicates may occur; remove them first
                    SELECT c.job_id, c.room, c.bed_name, c.reservation_id, c.guest_name, c.booking_reference, c.booking_source, c.checkin_date, c.checkout_date, c.booked_date, c.payment_outstanding, c.data_href, c.num_guests, c.notes, c.viewed_yn, g.comments, g.acknowledged_date
-                     FROM ".$wpdb->prefix."lh_calendar c
-			         JOIN ".$wpdb->prefix."lh_rpt_guest_comments g
+                     FROM wp_lh_calendar c
+			         JOIN wp_lh_rpt_guest_comments g
                        ON c.reservation_id = g.reservation_id
                     WHERE c.job_id IN (
 					      -- retrieve the last run allocation scraper job id
 					      SELECT MAX(j.job_id) 
-                            FROM ".$wpdb->prefix."lh_jobs j 
+                            FROM wp_lh_jobs j 
 					   	   WHERE j.status = 'completed' 
 						     AND j.classname = 'com.macbackpackers.jobs.AllocationScraperJob' )
                       AND g.comments IS NOT NULL ) x
@@ -347,7 +347,7 @@ class LilHotelierDBO {
     
         global $wpdb;
         $stmt = $mysqli->prepare(
-            "INSERT INTO ".$wpdb->prefix."lh_job_param(job_id, name, value)
+            "INSERT INTO wp_lh_job_param(job_id, name, value)
              VALUES(?, ?, ?)");
         $stmt->bind_param('iss', 
             $jobId,
@@ -370,7 +370,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT MIN(created_date) `created_date`
-                  FROM ".$wpdb->prefix."lh_jobs 
+                  FROM wp_lh_jobs 
                  WHERE classname IN (
                            'com.macbackpackers.jobs.AllocationScraperJob', 
                            'com.macbackpackers.jobs.AllocationScraperWorkerJob', 
@@ -404,7 +404,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT MAX(end_date) `end_date`
-                  FROM ".$wpdb->prefix."lh_jobs 
+                  FROM wp_lh_jobs 
                  WHERE classname IN (
                            'com.macbackpackers.jobs.AllocationScraperJob', 
                            'com.macbackpackers.jobs.BookingScraperJob', 
@@ -436,7 +436,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT MIN(created_date) `created_date`
-                  FROM ".$wpdb->prefix."lh_jobs 
+                  FROM wp_lh_jobs 
                  WHERE classname = %s
                    AND status IN ( %s, %s )",  
                 $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
@@ -469,10 +469,10 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT job_id, status
-                  FROM ".$wpdb->prefix."lh_jobs
+                  FROM wp_lh_jobs
                  WHERE classname = %s
                    AND job_id = (SELECT MAX(job_id) 
-                                   FROM ".$wpdb->prefix."lh_jobs 
+                                   FROM wp_lh_jobs 
 				                  WHERE classname = %s
                                     AND status NOT IN (%s, %s))",  
                 $jobName, $jobName, self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
@@ -536,8 +536,8 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT j.job_id, j.end_date
-                  FROM ".$wpdb->prefix."lh_jobs j
-                  JOIN ".$wpdb->prefix."lh_job_param p ON j.job_id = p.job_id AND p.name = 'selected_date'
+                  FROM wp_lh_jobs j
+                  JOIN wp_lh_job_param p ON j.job_id = p.job_id AND p.name = 'selected_date'
                   JOIN (SELECT %s `selected_date`) const
                  WHERE j.classname = 'com.macbackpackers.jobs.BedCountJob'
                    AND j.status IN ( %s )
@@ -586,7 +586,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT MAX(end_date) `end_date`
-                  FROM ".$wpdb->prefix."lh_jobs 
+                  FROM wp_lh_jobs 
                  WHERE classname = %s
                    AND status = %s",  
                 $jobName, $status ));
@@ -623,7 +623,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT job_id, classname, status, start_date, end_date
-                  FROM ".$wpdb->prefix."lh_jobs 
+                  FROM wp_lh_jobs 
                  WHERE job_id = %d",  
                 $jobId ));
 
@@ -669,9 +669,9 @@ class LilHotelierDBO {
                       SUM(IF(IFNULL(p.lh_status, '') NOT IN ('checked-in', 'checked-out') AND p.reservation_id > 0, 1, 0)) `num_noshow`
                  FROM (
                    SELECT rm.room, rm.bed_name, rm.capacity, rm.room_type, c.reservation_id, c.payment_outstanding, c.guest_name, c.notes, c.lh_status
-                     FROM ".$wpdb->prefix."lh_rooms rm
+                     FROM wp_lh_rooms rm
                      LEFT OUTER JOIN 
-                       ( SELECT cal.* FROM ".$wpdb->prefix."lh_calendar cal, (select %s AS selection_date) const
+                       ( SELECT cal.* FROM wp_lh_calendar cal, (select %s AS selection_date) const
                           WHERE cal.job_id = %d -- the job_id to use data for
                             AND cal.checkin_date <= const.selection_date
                             AND cal.checkout_date > const.selection_date
@@ -719,8 +719,8 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
                "SELECT j.job_id, j.end_date
-                  FROM ".$wpdb->prefix."lh_jobs j
-                  JOIN ".$wpdb->prefix."lh_job_param p ON j.job_id = p.job_id AND p.name = 'checkin_date'
+                  FROM wp_lh_jobs j
+                  JOIN wp_lh_job_param p ON j.job_id = p.job_id AND p.name = 'checkin_date'
                   JOIN (SELECT %s `selected_date`) const
                  WHERE j.classname = 'com.macbackpackers.jobs.DiffBookingEnginesJob'
                    AND j.status IN ( %s )
@@ -769,20 +769,20 @@ class LilHotelierDBO {
              FROM (
                -- all unique HW records for the given job_id
                SELECT b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons `hw_persons`, b.payment_outstanding, d.persons `hw_person_count`, d.room_type_id, IF(d.room_type_id IS NULL, d.room_type, r.room_type) `room_type`, r.capacity,
-                      (SELECT COUNT(DISTINCT e.room_type_id) FROM ".$wpdb->prefix."hw_booking_dates e WHERE e.hw_booking_id = b.id ) `num_room_types`, -- keep track of bookings that contain more than one room type
+                      (SELECT COUNT(DISTINCT e.room_type_id) FROM wp_hw_booking_dates e WHERE e.hw_booking_id = b.id ) `num_room_types`, -- keep track of bookings that contain more than one room type
 		              MIN(d.booked_date) `checkin_date`, DATE_ADD(MAX(d.booked_date), INTERVAL 1 DAY) `checkout_date`
-                 FROM ".$wpdb->prefix."hw_booking b
-                 JOIN ".$wpdb->prefix."hw_booking_dates d ON b.id = d.hw_booking_id
-                 LEFT OUTER JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = d.room_type_id
+                 FROM wp_hw_booking b
+                 JOIN wp_hw_booking_dates d ON b.id = d.hw_booking_id
+                 LEFT OUTER JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM wp_lh_rooms) r ON r.room_type_id = d.room_type_id
                 GROUP BY b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons, b.payment_outstanding, d.persons, d.room_type_id, d.room_type, r.room_type, r.capacity
                HAVING MIN(d.booked_date) = %s -- checkin date
              ) y
              LEFT OUTER JOIN (
                -- all unique LH records for the given job_id
                SELECT c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity,
-                      IF(c.lh_status = 'cancelled', c.num_guests, SUM(IFNULL((SELECT MAX(r.capacity) FROM ".$wpdb->prefix."lh_rooms r WHERE r.room_type IN ('DBL', 'TWIN', 'TRIPLE', 'QUAD') AND r.room_type_id = c.room_type_id), 1 ))) `lh_persons`
-                 FROM ".$wpdb->prefix."lh_calendar c 
-                 JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM ".$wpdb->prefix."lh_rooms) r ON r.room_type_id = c.room_type_id
+                      IF(c.lh_status = 'cancelled', c.num_guests, SUM(IFNULL((SELECT MAX(r.capacity) FROM wp_lh_rooms r WHERE r.room_type IN ('DBL', 'TWIN', 'TRIPLE', 'QUAD') AND r.room_type_id = c.room_type_id), 1 ))) `lh_persons`
+                 FROM wp_lh_calendar c 
+                 JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM wp_lh_rooms) r ON r.room_type_id = c.room_type_id
                 WHERE c.job_id = %d
                   AND ( c.booking_source = 'Hostelbookers' OR c.booking_source LIKE 'Hostelworld%%' )
                 GROUP BY c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity
@@ -814,13 +814,13 @@ class LilHotelierDBO {
                     SELECT j.job_id, jp1.value AS booking_reference, p.post_date, p.masked_card_number, 
                            COALESCE(p.payment_amount, CAST(jp2.value AS DECIMAL(10,2))) AS payment_amount, 
 		                   p.successful, p.help_text, j.status, 
-                           (SELECT MAX(c.data_href) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS data_href,
-                           (SELECT MAX(c.checkin_date) FROM ".$wpdb->prefix."lh_calendar c WHERE c.booking_reference = jp1.value) AS checkin_date,
+                           (SELECT MAX(c.data_href) FROM wp_lh_calendar c WHERE c.booking_reference = jp1.value) AS data_href,
+                           (SELECT MAX(c.checkin_date) FROM wp_lh_calendar c WHERE c.booking_reference = jp1.value) AS checkin_date,
                            COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
-                      FROM ".$wpdb->prefix."lh_jobs j
-                      JOIN ".$wpdb->prefix."lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
-                      JOIN ".$wpdb->prefix."lh_job_param jp2 ON j.job_id = jp2.job_id AND jp2.name = 'amount'
-                      LEFT OUTER JOIN ".$wpdb->prefix."pxpost_transaction p ON p.job_id = j.job_id
+                      FROM wp_lh_jobs j
+                      JOIN wp_lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
+                      JOIN wp_lh_job_param jp2 ON j.job_id = jp2.job_id AND jp2.name = 'amount'
+                      LEFT OUTER JOIN wp_pxpost_transaction p ON p.job_id = j.job_id
                      WHERE j.classname IN ('com.macbackpackers.jobs.ManualChargeJob')
                  ) t 
                  GROUP BY job_id
@@ -867,7 +867,7 @@ class LilHotelierDBO {
 
         // first check if we have a date overlap
         $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT 1 FROM ".$wpdb->prefix."lh_cleaner_bed_assign
+            "SELECT 1 FROM wp_lh_cleaner_bed_assign
               WHERE lh_cleaner_id = %d
                 AND %s < end_date
                 AND %s > start_date",
@@ -904,7 +904,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results(
            "SELECT id, first_name, last_name, active_yn
-              FROM ".$wpdb->prefix."lh_cleaner
+              FROM wp_lh_cleaner
              ORDER BY id");
 
         if($wpdb->last_error) {
@@ -930,8 +930,8 @@ class LilHotelierDBO {
            "SELECT cba.id, DATE_FORMAT( cba.start_date, '%%Y-%%m-%%d' ) AS start_date, 
                    DATE_FORMAT( cba.end_date, '%%Y-%%m-%%d' ) AS end_date, 
                    cba.room_id, r.room, r.bed_name
-              FROM ".$wpdb->prefix."lh_cleaner_bed_assign cba
-              JOIN ".$wpdb->prefix."lh_rooms r ON cba.room_id = r.id
+              FROM wp_lh_cleaner_bed_assign cba
+              JOIN wp_lh_rooms r ON cba.room_id = r.id
              WHERE cba.lh_cleaner_id = %d
              ORDER BY cba.start_date", $cleaner->id ));
 
@@ -954,7 +954,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results(
            " SELECT id, room, bed_name 
-               FROM ".$wpdb->prefix."lh_rooms
+               FROM wp_lh_rooms
               WHERE active_yn = 'Y'
                 AND room_type NOT IN ( 'DBL', 'QUAD', 'TRIPLE', 'TWIN' )
            ORDER BY room, bed_name");
@@ -981,7 +981,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT job_id, classname, status, start_date, end_date
-               FROM ".$wpdb->prefix."lh_jobs
+               FROM wp_lh_jobs
               WHERE IFNULL(last_updated_date, created_date) > NOW() - INTERVAL %d DAY
               ORDER BY job_id DESC " . 
               ($maxNumRecords != null ? "LIMIT $maxNumRecords" : ""), $numberOfDays));
@@ -1004,7 +1004,7 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT name, value
-               FROM ".$wpdb->prefix."lh_job_param
+               FROM wp_lh_job_param
               WHERE job_id = %d", $jobId));
 
         $jobParams = array();
