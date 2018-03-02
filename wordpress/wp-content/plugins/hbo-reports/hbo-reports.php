@@ -2,7 +2,7 @@
 /*
 Plugin Name: Hostel Backoffice
 Plugin URI: http://demo.hostelbackoffice.net/
-Description: Backoffice reservations and administration services for hostels / B & Bs.
+Description: Backoffice reports for Little Hotelier.
 Version: 0.2
 Author: sir_studly
 Author URI: http://www.hostelbackoffice.net
