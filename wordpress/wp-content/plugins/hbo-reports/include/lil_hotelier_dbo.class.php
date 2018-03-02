@@ -107,7 +107,7 @@ class LilHotelierDBO {
      */
     static function insertJobOfType( $jobName, $jobParams = array() ) {
         global $wpdb;
-        if (false === $wpdb->insert($wpdb->prefix ."lh_jobs", 
+        if (false === $wpdb->insert("wp_lh_jobs", 
                 array( 'classname' => $jobName, 
                        'status' => self::STATUS_SUBMITTED, 
                        'last_updated_date' => current_time('mysql', 1) ), 
@@ -118,7 +118,7 @@ class LilHotelierDBO {
 
         $jobId = $wpdb->insert_id;
         foreach( $jobParams as $jobParamKey => $jobParamValue ) {
-            if (false === $wpdb->insert($wpdb->prefix ."lh_job_param", 
+            if (false === $wpdb->insert("wp_lh_job_param", 
                     array( 'job_id' => $jobId, 'name' => $jobParamKey, 'value' => $jobParamValue ), 
                     array( '%d', '%s', '%s' ))) {
                 error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
@@ -238,7 +238,7 @@ class LilHotelierDBO {
     static function acknowledgeGuestComment( $reservationId ) {
         global $wpdb;
         $returnval = $wpdb->update(
-            $wpdb->prefix."lh_rpt_guest_comments",
+            "wp_lh_rpt_guest_comments",
             array( 'acknowledged_date' => current_time('mysql', 1) ),
             array( 'reservation_id' => $reservationId ) );
         
@@ -260,7 +260,7 @@ class LilHotelierDBO {
         $dblink = new DbTransaction();
         try {
             $stmt = $dblink->mysqli->prepare(
-                    "UPDATE ".$wpdb->prefix ."lh_rpt_guest_comments
+                    "UPDATE wp_lh_rpt_guest_comments
                         SET acknowledged_date = NULL
                       WHERE reservation_id = ?");
             $stmt->bind_param('i', $reservationId);
@@ -842,7 +842,7 @@ class LilHotelierDBO {
      */
     static function addCleaner($firstName, $lastName) {
          global $wpdb;
-        if (false === $wpdb->insert($wpdb->prefix ."lh_cleaner", 
+        if (false === $wpdb->insert("wp_lh_cleaner", 
                 array( 'first_name' => $firstName, 
                        'last_name' => $lastName,
                        'active_yn' => 'Y' ), 
@@ -884,7 +884,7 @@ class LilHotelierDBO {
             throw new ValidationException( "Date overlap detected" );
         }
 
-        if (false === $wpdb->insert($wpdb->prefix ."lh_cleaner_bed_assign", 
+        if (false === $wpdb->insert("wp_lh_cleaner_bed_assign", 
                 array( 'lh_cleaner_id' => $cleanerId, 
                        'room_id' => $roomId,
                        'start_date' => $checkinDate->format('Y-m-d'),
