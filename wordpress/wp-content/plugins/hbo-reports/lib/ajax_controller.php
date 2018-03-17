@@ -69,6 +69,18 @@ class AjaxController {
                 $this->submitManualChargeJob();
                 break;
 
+            case 'ADD_SCHEDULED_JOB':
+                $this->addScheduledJob();
+                break;
+
+            case 'TOGGLE_SCHEDULED_JOB':
+                $this->toggleScheduledJob();
+                break;
+
+            case 'DELETE_SCHEDULED_JOB':
+                $this->deleteScheduledJob();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -348,6 +360,78 @@ class AjaxController {
         }
     }
 
+    /**
+     * Adds a new scheduled job.
+     * Requires POST variables:
+     *   classname : fully qualified name of class to run
+     *   repeat_every_min : number of minutes in between jobs (choose one of these)
+     *   daily_at : run daily at this time in 24 hour clock (choose one of these)
+     */
+    function addScheduledJob() {
+        try {
+            $jobView = new ScheduledJobViewData();
+            $jobView->addScheduledJob( 
+                $_POST['classname'], $_POST['repeat_every_min'], $_POST['daily_at'] );
+            $jobView->doView();
+
+            ?>
+            <script type="text/javascript">
+                jQuery("#job_schedule_table")
+                     .html('<?php echo preg_replace('#\R+#', '', $jobView->toHtml()); ?>');
+                jQuery("#add_job_button").css("visibility", "visible");
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#add_job_button").css("visibility", "visible");
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Enable/Disable scheduled job.
+     * Requires POST variables:
+     *   scheduled_job_id : ID of scheduled job to update
+     */
+    function toggleScheduledJob() {
+        $jobView = new ScheduledJobViewData();
+        $jobView->toggleScheduledJob($_POST['scheduled_job_id']);
+    }
+
+    /**
+     * Deletes a scheduled job.
+     * Requires POST variables:
+     *   scheduled_job_id : ID of scheduled job to update
+     */
+    function deleteScheduledJob() {
+        try {
+            $jobView = new ScheduledJobViewData();
+            $jobView->deleteScheduledJob($_POST['scheduled_job_id']);
+            $jobView->doView();
+
+            ?>
+            <script type="text/javascript">
+                jQuery("#job_schedule_table")
+                     .html('<?php echo preg_replace('#\R+#', '', $jobView->toHtml()); ?>');
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#delete_scheduled_job_" + <?php echo $_POST['scheduled_job_id']; ?> )
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
 }
 
 ?>

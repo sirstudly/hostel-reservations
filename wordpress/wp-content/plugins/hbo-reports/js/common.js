@@ -226,3 +226,81 @@ function submit_manual_charge( bookingRef, amount, note, override_card_details )
     });
 }
 
+// Adds a new scheduled job. Only pass one of the two parameters.
+// classname : name of (job) class to run
+// repeat_every_min : number of minutes to repeat job
+// daily_at : run daily at this time (24 hour clock)
+function add_scheduled_job( classname, repeat_every_min, daily_at ) {
+
+    jQuery('#ajax_loader')
+        .html('<img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif">')
+        .show();
+    jQuery('#add_job_button').hide();
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        success: function (data, textStatus) {
+            if (textStatus == 'success') {
+                // reload table and reset form elements
+                jQuery('#ajax_response').html(data);
+                jQuery('#ajax_loader').hide();
+                jQuery('#add_job_button').show();
+                jQuery('input[type="text"]').val("");
+                jQuery('input[name="schedule_type"]').removeAttr("checked");
+                jQuery('select[name="classname"]')[0].selectedIndex = 0;
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            window.status = 'Ajax sending Error status:' + textStatus;
+            alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+            if (XMLHttpRequest.status == 500) {
+                alert('Oops sorry.. we messed up somewhere...');
+            }
+            jQuery('#ajax_loader').hide();
+            jQuery('#add_job_button').show();
+        },
+        data: {
+            ajax_action: 'ADD_SCHEDULED_JOB',
+            classname: classname,
+            repeat_every_min: repeat_every_min,
+            daily_at: daily_at
+        }
+    });
+}
+
+// enable/disable a scheduled job
+// scheduled_job_id : id of scheduled job to enable/disable
+function toggle_scheduled_job( scheduled_job_id ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){ /* no update to page */ },
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'TOGGLE_SCHEDULED_JOB',
+            scheduled_job_id : scheduled_job_id
+        }
+    });
+}
+
+// deletes a scheduled job
+// scheduled_job_id : id of scheduled job to enable/disable
+function delete_scheduled_job( scheduled_job_id ) {
+
+    jQuery('#delete_scheduled_job_' + scheduled_job_id)
+        .html('<img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif">');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'DELETE_SCHEDULED_JOB',
+            scheduled_job_id : scheduled_job_id
+        }
+    });
+}
+

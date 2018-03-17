@@ -1014,6 +1014,192 @@ class LilHotelierDBO {
         return $jobParams;
     }
 
+   /**
+    * Creates a new scheduled job that repeats every X minutes. Returns the created job ID.
+    * $classname : job to run
+    * $params : array of job parameters
+    * $minutes : whole number of minutes between jobs
+    */
+   static function addScheduledJobRepeatForever( $classname, $params, $minutes ) {
+        global $wpdb;
+        if (false === $wpdb->insert("job_scheduler", 
+                array( 'classname' => $classname, 
+                       'repeat_time_minutes' => $minutes, 
+                       'active_yn' => 'Y'), 
+                array( '%s', '%d', '%s' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        $jobId = $wpdb->insert_id;
+        foreach( $params as $jobParamKey => $jobParamValue ) {
+            if (false === $wpdb->insert("job_scheduler_param", 
+                    array( 'job_id' => $jobId, 'name' => $jobParamKey, 'value' => $jobParamValue ), 
+                    array( '%d', '%s', '%s' ))) {
+                error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+                throw new DatabaseException( $wpdb->last_error );
+            }
+        }
+        return $jobId;
+    }
+
+   /**
+    * Creates a new scheduled job that runs at the same time everyday.
+    * Returns the created job ID
+    * $classname : job to run
+    * $params : array of job parameters
+    * $time : time in 24 hour format. e.g. 23:00:00
+    */
+    static function addDailyScheduledJob( $classname, $params, $time ) {
+        global $wpdb;
+        if (false === $wpdb->insert("job_scheduler", 
+                array( 'classname' => $classname, 
+                       'repeat_daily_at' => $time,
+                       'active_yn' => 'Y' ), 
+                array( '%s', '%s', '%s' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        $jobId = $wpdb->insert_id;
+        foreach( $params as $jobParamKey => $jobParamValue ) {
+            if (false === $wpdb->insert("job_scheduler_param", 
+                    array( 'job_id' => $jobId, 'name' => $jobParamKey, 'value' => $jobParamValue ), 
+                    array( '%d', '%s', '%s' ))) {
+                error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+                throw new DatabaseException( $wpdb->last_error );
+            }
+        }
+        return $jobId;
+    }
+
+    /**
+     * Enables/disables a scheduled job.
+     * $scheduledJobId : primary key of scheduled job to update
+     */
+    static function toggleScheduledJob( $scheduledJobId ) {
+
+        // find existing job
+        $job = self::fetchJobSchedule( $scheduledJobId );
+
+        if( $job ) {
+            global $wpdb;
+            $returnval = $wpdb->update(
+                "job_scheduler",
+                array( 'last_updated_date' => current_time('mysql', 1),
+                       'active_yn' => $job->active_yn == 'Y' ? 'N' : 'Y' ),
+                array( 'job_id' => $scheduledJobId ) );
+        
+            if(false === $returnval) {
+                throw new DatabaseException("Error occurred during UPDATE");
+            }
+        }
+    }
+
+    /**
+     * Deletes a scheduled job.
+     * $scheduledJobId : primary key of scheduled job to delete
+     */
+    static function deleteScheduledJob( $scheduledJobId ) {
+        global $wpdb;
+        if (false === $wpdb->delete("job_scheduler_param", 
+                array( 'job_id' => $scheduledJobId ), 
+                array( '%d' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        if (false === $wpdb->delete("job_scheduler", 
+                array( 'job_id' => $scheduledJobId ), 
+                array( '%d' ))) {
+            error_log($wpdb->last_error." executing sql: ".$wpdb->last_query);
+            throw new DatabaseException( $wpdb->last_error );
+        }
+    }
+
+    /**
+     * Retrieves all schedule jobs.
+     * Returns non-null array of ScheduledJob.
+     */
+    static function fetchJobSchedules() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+           " SELECT job_id, classname, repeat_time_minutes, repeat_daily_at, active_yn, last_run_date 
+               FROM job_scheduler
+           ORDER BY job_id");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        $schedule = array();
+        foreach( $resultset as $record ) {
+            if( false === empty( $record->repeat_time_minutes ) ) {
+                $schedule[] = new ScheduledJobRepeat(
+                    $record->job_id, 
+                    $record->classname, 
+                    $record->repeat_time_minutes, 
+                    $record->active_yn == 'Y',
+                    self::fetchJobScheduleParameters( $record->job_id ));
+            }
+            else if( false === empty( $record->repeat_daily_at ) ) {
+                $schedule[] = new ScheduledJobDaily(
+                    $record->job_id, 
+                    $record->classname, 
+                    $record->repeat_daily_at,
+                    $record->active_yn == 'Y',
+                    self::fetchJobScheduleParameters( $record->job_id ));
+            }
+        }
+        return $schedule;
+    }
+
+    /**
+     * Retrieves the given ScheduledJob.
+     * $jobId : PK of ScheduledJob
+     * Returns null if not found.
+     */
+    static function fetchJobSchedule( $jobId ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT job_id, classname, repeat_time_minutes, repeat_daily_at, active_yn, last_run_date 
+               FROM job_scheduler
+              WHERE job_id = %d", $jobId));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        foreach( $resultset as $record ) {
+            return $record;
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves all parameters for the given ScheduledJob.
+     * $jobId : PK of ScheduledJob
+     * Returns non-null array of parameter values keyed by param name.
+     */
+    static function fetchJobScheduleParameters( $jobId ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT name, value 
+               FROM job_scheduler_param
+              WHERE job_id = %d
+           ORDER BY name", $jobId));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        $jobParams = array();
+        foreach( $resultset as $record ) {
+            $jobParams[$record->name] = $record->value;
+        }
+        return $jobParams;
+    }
+
     /**
      * Executes the processor in the background from the command line.
      */

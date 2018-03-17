@@ -73,6 +73,10 @@
                                         <td><input id="job_history_url"  name="hbo_job_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{job_history_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="job_scheduler_url">Job Scheduler</label></th>
+                                        <td><input id="job_scheduler_url"  name="hbo_job_scheduler_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{job_scheduler_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="log_directory">Log Directory</label></th>
                                         <td><input id="log_directory"  name="hbo_log_directory" class="regular-text code" type="text" style="width:350px;" size="145" value="{log_directory}" /></td>
                                     </tr>  
