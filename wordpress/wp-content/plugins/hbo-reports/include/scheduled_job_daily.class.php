@@ -9,6 +9,7 @@ class ScheduledJobDaily extends ScheduledJob {
     var $classname;
     var $timeToRun;
     var $active;
+    var $lastRunDate;
     var $params;
 
     /**
@@ -17,13 +18,15 @@ class ScheduledJobDaily extends ScheduledJob {
      * $classname : job to run
      * $timeToRun : time to execute job (24 hour clock)
      * $active : is this job active? bool
+     * $lastRunDate : datetime this job was run (optional)
      * $repeatTimeMin : number of minutes between runs
      */
-    function ScheduledJobDaily($jobId, $classname, $timeToRun, $active, $params = array()) {
+    function ScheduledJobDaily($jobId, $classname, $timeToRun, $active, $lastRunDate, $params = array()) {
         $this->jobId = $jobId;
         $this->classname = $classname;
         $this->timeToRun = $timeToRun;
         $this->active = $active;
+        $this->lastRunDate = $lastRunDate;
         $this->params = $params;
     }
 
@@ -49,6 +52,9 @@ class ScheduledJobDaily extends ScheduledJob {
             array_key_exists( $this->classname, $classnameMap ) ? $classnameMap[$this->classname] : $this->classname ));
         $jobRoot->appendChild($domtree->createElement('repeat-daily-at', $this->timeToRun));
         $jobRoot->appendChild($domtree->createElement('active', $this->active ? "yes" : "no" ));
+        if( isset( $this->lastRunDate )) {
+            $jobRoot->appendChild($domtree->createElement('last_run_date', DateTime::createFromFormat('Y-m-d H:i:s', $this->lastRunDate)->format('D, d M Y H:i:s')));
+        }
         foreach( $this->params as $key => $value ) {
             $paramRoot = $jobRoot->appendChild($domtree->createElement('param'));
             $paramRoot->appendChild($domtree->createElement('name', $key));

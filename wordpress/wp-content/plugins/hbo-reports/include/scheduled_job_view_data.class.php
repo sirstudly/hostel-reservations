@@ -30,7 +30,6 @@ class ScheduledJobViewData extends XslTransform {
     * $dailyAt : time to run daily (24 hour clock)
     */
     function addScheduledJob( $classname, $repeatMin, $dailyAt ) {
-error_log("addScheduledJob: $classname, $repeatMin, $dailyAt");
         $params = array();
         if( $classname == 'com.macbackpackers.jobs.ScrapeReservationsBookedOnJob' ) {
             $params = array( 'booked_on_date' => 'TODAY' );
@@ -93,7 +92,7 @@ error_log("addScheduledJob: $classname, $repeatMin, $dailyAt");
     * Creates a new scheduled job that runs at the same time everyday.
     * $classname : job to run
     * $params : array of job parameters
-    * $time : time in 24 hour format. e.g. 23:00:00
+    * $time : time in 24 hour format HH:MM. e.g. 23:00
     */
     function addDailyScheduledJob( $classname, $params, $time ) {
 
@@ -103,8 +102,8 @@ error_log("addScheduledJob: $classname, $repeatMin, $dailyAt");
         if ( empty( $time )) {
             throw new ValidationException( "Time cannot be blank." );
         }
-        if ( ! preg_match("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", $time )) {
-            throw new ValidationException( "Time must be in 24 hour clock. eg. 23:00:00" );
+        if ( ! preg_match("/^([0-1][0-9]|2[0-4]):[0-5][0-9]$/", $time )) {
+            throw new ValidationException( "Time must be in 24 hour clock. eg. 23:00" );
         }
 
         LilHotelierDBO::addDailyScheduledJob( $classname, $params, $time );
@@ -155,7 +154,6 @@ error_log("addScheduledJob: $classname, $repeatMin, $dailyAt");
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
         $this->addSelfToDocument($domtree, $xmlRoot);
         $xml = $domtree->saveXML();
-error_log( $xml );
         return $xml;
     }
     

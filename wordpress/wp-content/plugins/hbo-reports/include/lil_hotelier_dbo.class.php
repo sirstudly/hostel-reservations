@@ -1140,6 +1140,7 @@ class LilHotelierDBO {
                     $record->classname, 
                     $record->repeat_time_minutes, 
                     $record->active_yn == 'Y',
+                    $record->last_run_date,
                     self::fetchJobScheduleParameters( $record->job_id ));
             }
             else if( false === empty( $record->repeat_daily_at ) ) {
@@ -1148,6 +1149,7 @@ class LilHotelierDBO {
                     $record->classname, 
                     $record->repeat_daily_at,
                     $record->active_yn == 'Y',
+                    $record->last_run_date,
                     self::fetchJobScheduleParameters( $record->job_id ));
             }
         }

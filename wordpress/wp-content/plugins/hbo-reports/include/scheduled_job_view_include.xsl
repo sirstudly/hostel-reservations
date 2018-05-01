@@ -58,7 +58,7 @@
                 <xsl:otherwise>Everyday at <xsl:value-of select="repeat-daily-at"/></xsl:otherwise>
             </xsl:choose>
         </td>
-        <td><xsl:comment/></td>
+        <td><xsl:value-of select="last_run_date"/></td>
         <td style="vertical-align: middle;">
             <xsl:attribute name="id">delete_scheduled_job_<xsl:value-of select="id"/></xsl:attribute>
             <a class="btn btn-primary" style="padding: 2px 4px;">

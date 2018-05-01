@@ -44,7 +44,7 @@
                     Minutes<br/>
                     <input id="radio_daily" type="radio" name="schedule_type" value="daily"/> Everyday at:
                     <input id="daily_at" name="daily_at" type="text" autocomplete="false" style="width:80px;" maxlength="8" value="{daily_at}" onkeypress="jQuery('#radio_daily').click();" />
-                    (24 hour clock: e.g. 23:00:00)
+                    (24 hour clock in hours/minutes e.g. 23:00)
                 </div>
 
                 <div style="height:1px;clear:both;margin-top:40px;"><xsl:comment/></div>
