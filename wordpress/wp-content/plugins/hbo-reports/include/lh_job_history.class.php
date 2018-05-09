@@ -58,7 +58,9 @@ class LHJobHistory extends XslTransform {
 
             // only include logfile if it exists
             $jobLogFilename = "job-" . $record->job_id . ".log";
-            if( file_exists( $logDirectory . "/" . $jobLogFilename )) {
+            $jobLogFilenameCompressed = "job-" . $record->job_id . ".gz";
+            if( file_exists( $logDirectory . "/" . $jobLogFilename )
+                    || file_exists( $logDirectory . "/" . $jobLogFilenameCompressed ) ) {
                 $recordRoot->appendChild($domtree->createElement('log_file', $logDirectoryUrl . $record->job_id ));
             }
         }
