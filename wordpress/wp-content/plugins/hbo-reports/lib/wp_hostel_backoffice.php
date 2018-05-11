@@ -65,6 +65,7 @@ class WP_HostelBackoffice {
      * Called once on uninstall.
      */
     function deactivate() {
+        delete_option('hbo_siteicon_url');
         delete_option('hbo_housekeeping_url');
         delete_option('hbo_split_room_report_url');
         delete_option('hbo_unpaid_deposit_report_url');

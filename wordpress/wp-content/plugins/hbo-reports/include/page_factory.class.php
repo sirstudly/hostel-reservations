@@ -72,6 +72,7 @@ class PageFactory {
             if ($admin_id > 0) {
                 $post_id = $this->createReadOnlyPage('report-settings', 'Report Settings', 'template content goes here', $admin_id, 10);
                 $post_id = $this->createReadOnlyPage('job-history', 'Job History', 'template content goes here', $admin_id, 20);
+                $post_id = $this->createReadOnlyPage('job-scheduler', 'Job Scheduler', 'template content goes here', $admin_id, 30);
             }
         }
 
