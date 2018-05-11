@@ -24,6 +24,10 @@
                             <table class="form-table">
                                 <tbody>
                                     <tr valign="top">
+                                        <th scope="row"><label for="siteicon_url">Site Icon URL:</label></th>
+                                        <td><input id="siteicon_url"  name="hbo_siteicon_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{siteicon_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th colspan="2" scope="row"><label for="backoffice_urls">URLs of pages to override when displaying on public site:</label><br/>
                                             <span class="description">Create menus/pages for these URLs and they will be replaced with their associated content</span>
                                         </th>

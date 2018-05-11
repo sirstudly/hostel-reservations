@@ -20,6 +20,7 @@ class Settings extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {    
         // create the root element for this class and append it to our parent
         $xmlRoot = $parentElement->appendChild($domtree->createElement('view'));
+        $xmlRoot->appendChild($domtree->createElement('siteicon_url', get_option('hbo_siteicon_url')));
         $xmlRoot->appendChild($domtree->createElement('housekeepingurl', get_option('hbo_housekeeping_url')));
         $xmlRoot->appendChild($domtree->createElement('split_room_report_url', get_option('hbo_split_room_report_url')));
         $xmlRoot->appendChild($domtree->createElement('unpaid_deposit_report_url', get_option('hbo_unpaid_deposit_report_url')));
@@ -42,6 +43,7 @@ class Settings extends XslTransform {
      * $optionsArray : array of option name => option values
      */
     function updateOptions($optionsArray) {
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_siteicon_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_housekeeping_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_split_room_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_unpaid_deposit_report_url');
