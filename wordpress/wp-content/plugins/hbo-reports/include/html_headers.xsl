@@ -27,6 +27,10 @@
         var wpdev_bk_plugin_filename = '<xsl:value-of select="pluginfilename"/>';
     </script>
 
+    <!-- icon on browser tab -->
+    <xsl:if test="siteicon != ''">
+        <link rel="icon" href="{siteicon}" />
+    </xsl:if>
     <script type="text/javascript" src="{pluginurl}/js/common.js"><xsl:comment/></script>  
 
     <!-- C S S -->
