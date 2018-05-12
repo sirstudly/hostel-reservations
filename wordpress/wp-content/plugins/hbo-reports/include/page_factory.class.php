@@ -52,7 +52,8 @@ class PageFactory {
     function createTemplatePages() {
 
         if (get_page_by_path('reports') == null) {
-            $reports_id = $this->createReadOnlyPage('reports', 'Reports', 'template content goes here', 0, 30);
+            $hp = new HelpPage('help_reports');
+            $reports_id = $this->createReadOnlyPage('reports', 'Reports', $hp->toHtml(), 0, 30);
             if ($reports_id > 0) {
                 $post_id = $this->createReadOnlyPage('reservations-split-across-rooms', 'Reservations Split Across Rooms', 'template content goes here', $reports_id, 10);
                 $post_id = $this->createReadOnlyPage('unpaid-deposit-report', 'Unpaid Deposit Report', 'template content goes here', $reports_id, 20);
@@ -68,7 +69,8 @@ class PageFactory {
         }
 
         if (get_page_by_path('admin') == null) {
-            $admin_id = $this->createReadOnlyPage('admin', 'Admin', 'template content goes here', 0, 80);
+            $hp = new HelpPage('help_admin');
+            $admin_id = $this->createReadOnlyPage('admin', 'Admin', $hp->toHtml(), 0, 80);
             if ($admin_id > 0) {
                 $post_id = $this->createReadOnlyPage('report-settings', 'Report Settings', 'template content goes here', $admin_id, 10);
                 $post_id = $this->createReadOnlyPage('job-history', 'Job History', 'template content goes here', $admin_id, 20);
@@ -78,7 +80,7 @@ class PageFactory {
 
         if (get_page_by_path('help') == null) {
             $hp = new HelpPage();
-            $help_id = $this->createReadOnlyPage('help', 'Help', $hp->toHtml('help'), 0, 100);
+            $help_id = $this->createReadOnlyPage('help', 'Help', $hp->toHtml(), 0, 100);
         }
     }
 

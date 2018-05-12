@@ -10,6 +10,7 @@ class HelpPage extends XslTransform {
     /** 
      * Default constructor.
      * $name : name of view (page) to be generated
+     *         one of: help, help_reports, help_admin
      */
     function HelpPage($name = 'help') {
         $this->name = $name;

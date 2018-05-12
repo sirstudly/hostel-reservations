@@ -21,10 +21,22 @@
             <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/housekeeping</xsl:attribute>Housekeeping</a> - Pretty straightforward. It does not include any long term dormitories - also any room closures ending on the day will be marked as "CHANGE" even if there is another room closure for the next day and a note saying to manually check this - since we use closures to mark cleaning hours.
 
             <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/bedcounts</xsl:attribute>Bed Counts</a> - Includes daily counts of the number of beds which have been filled. The export function will allow you download the data as a CSV file.
+        </xsl:when>
 
-            As well, there is a background job that runs every few hours that ticks the "Confirm Deposit" checkbox for all Hostelworld bookings. This means that HW bookings may no longer appear in <strong>bold</strong> when viewing reservations in table layout view in Little Hotelier.
+        <xsl:when test="name = 'help_reports'">
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/reservations-split-across-rooms</xsl:attribute>Reservations Split Across Rooms</a> - Includes any and all bookings <em>of the same room type</em> which are allocated into different rooms. This may also include group bookings where the same group are spread amongst the same room type. It also includes any bookings which are "unallocated", ie. no room assignment.
 
-            Any issues or problems, just leave a note on the home page and I'll take a look when I get a chance. Ta!
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/unpaid-deposit-report</xsl:attribute>Unpaid Deposit Report</a> - These are all active bookings for Expedia or Booking.com where the amount due is the same as the total amount (ie. nothing has been paid). These bookings will need to be manually charged a deposit amount.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/group-bookings</xsl:attribute>Group Bookings</a> - Shows any bookings with X or more persons (configurable on the Reports Settings admin page).
+        </xsl:when>
+
+        <xsl:when test="name = 'help_admin'">
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/admin/report-settings</xsl:attribute>Report Settings</a> - Logins for all dependent sites and hostel-specific report settings.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/admin/job-history</xsl:attribute>Job History</a> - A list of jobs that have recently run.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/admin/job-scheduler</xsl:attribute>Job Scheduler</a> - Automated scheduled jobs.
         </xsl:when>
 
         <xsl:otherwise>
