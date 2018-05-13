@@ -55,7 +55,6 @@ class WP_HostelBackoffice {
         add_option('hbo_log_directory_url', 'logs');
         add_option('hbo_job_history_url', 'admin/job-history');
         add_option('hbo_job_scheduler_url', 'admin/job-scheduler');
-        add_option('hbo_run_processor_cmd', '~/java2/run_processor_mini.sh');
         add_option('hbo_group_booking_size', '6');
         add_option('hbo_include_5_guests_in_6bed_dorm', 'true');
         self::insert_site_pages();
