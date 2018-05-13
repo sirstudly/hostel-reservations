@@ -245,7 +245,7 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-    <xsl:if test="starts-with(hbo_lilho_username, 'castlerock')">
+    <xsl:if test="starts-with(hbo_lilho_username, '__DISABLED__castlerock')">
         <div class="shadow hw-container" style="width: 600px;">
             <h3>Checked-out Guest Response Email (Template)</h3> 
             <p>If present, the following will be replaced in the subject/body: <br/>
