@@ -52,7 +52,7 @@ class WP_HostelBackoffice {
         add_option('hbo_redirect_to_url', 'redirect-to');
         add_option('hbo_view_log_url', 'view-log');
         add_option('hbo_log_directory', 'logs');
-        add_option('hbo_log_directory_url', 'logs');
+        add_option('hbo_log_directory_url', '/__SITENAME__/view-log/?job_id=');
         add_option('hbo_job_history_url', 'admin/job-history');
         add_option('hbo_job_scheduler_url', 'admin/job-scheduler');
         add_option('hbo_group_booking_size', '6');
