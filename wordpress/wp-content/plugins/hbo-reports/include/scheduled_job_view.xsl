@@ -27,6 +27,10 @@
         <h2>Job Scheduler</h2>
         <div style="height:1px;clear:both;margin-top:10px;"><xsl:comment/></div>
 
+        <div style="margin-left:50px;">
+            <p>Job times are approximate and are run on a best-effort basis.</p>
+        </div>
+
         <div id="job_schedule_table">
             <xsl:call-template name="job_schedule_table"/>
         </div>
