@@ -37,6 +37,28 @@ td.border_bottom {
                     </div>
                     <!-- show the last /completed/ job -->
                     <!-- also, if one is currently pending/submitted - disable the refresh button -->
+                    <p class="help-block" style="float:left;padding-left:5px;font-style: italic;">
+                        <xsl:choose>
+                            <xsl:when test="job">
+                                This report was last updated on: <xsl:value-of select="job/end_date"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                This report has never been updated for this date.
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <xsl:if test="last_job_status = 'failed'">
+                            <div style="color: red;">The last update of this report failed to run.
+                                <xsl:choose>
+                                    <xsl:when test="check_credentials = 'true'">
+                                        Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </div>
+                        </xsl:if>
+                    </p>
                     <div class="control-group" style="float: right;">
                         <div class="inline controls">
                             <div class="btn-group">
@@ -50,29 +72,6 @@ td.border_bottom {
                                     </xsl:otherwise>
                                 </xsl:choose>
                             </div>
-                            <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
-                            <xsl:choose>
-                                <xsl:when test="job">
-                                    This report was last updated on: <xsl:value-of select="job/end_date"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    This report has never been updated for this date.
-                                </xsl:otherwise>
-                            </xsl:choose>
-                            <xsl:if test="last_job_status = 'failed'">
-                                <div style="color: red;">The last update of this report failed to run.
-                                    <xsl:choose>
-                                        <xsl:when test="check_credentials = 'true'">
-                                            Has the LittleHotelier password changed recently? If so, update it on the admin page.
-                                        </xsl:when>
-                                        <xsl:otherwise>
-                                            Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
-                                        </xsl:otherwise>
-                                    </xsl:choose>
-                                </div>
-                            </xsl:if>
-                            <br/>It is re-run daily at 6:30am and 10:00am.
-                            </p>
                         </div>
                     </div>
                 </form>

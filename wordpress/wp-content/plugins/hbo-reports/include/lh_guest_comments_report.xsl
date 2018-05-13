@@ -110,19 +110,6 @@
     
         <div class="btn-group" style="float:right;">
             <div class="inline controls">
-                <div class="btn-group">
-                    <xsl:choose>
-                        <xsl:when test="last_submitted_job">
-                            <a class="btn btn-primary disabled" style="float: right; margin-right: 15px;">Update in Progress <span class="icon-refresh icon-white"></span></a>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <form name="report_form" action="" method="post" id="report_form" class="form-inline">
-                                <input type="hidden" name="reload_data" id="reload_data" value="true" />
-                                <a class="btn btn-primary" style="float: right; margin-right: 15px;" onclick="javascript:report_form.submit();">Reload Data <span class="icon-refresh icon-white"></span></a>
-                            </form>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </div>
             <p class="help-block" style="float:left;padding-left:5px;padding-right:15px;font-style:italic;">
                 <xsl:if test="last_submitted_job">
                     Come back to this page in a few minutes.

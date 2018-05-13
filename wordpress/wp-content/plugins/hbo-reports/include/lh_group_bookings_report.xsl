@@ -85,8 +85,7 @@ tr.unread {
             <div class="control-group" style="float:left;">
                 <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
                     <xsl:if test="last_completed_job">
-                        This report was last run on <xsl:value-of select="last_completed_job"/>.<br/>
-                        It is automatically run daily at 10:50pm.<br/>
+                        This report was last run on <xsl:value-of select="last_completed_job"/>.
                     </xsl:if>
                     <xsl:if test="last_job_status = 'failed'">
                         <div style="color: red;">The last update of this report failed to run.

@@ -29,7 +29,7 @@
 </style>
 
     <div id="wpdev-booking-bedcounts" class="wrap bookingpage">
-        <div class="icon32" style="margin:10px 25px 10px 10px;"><img src="{homeurl}/wp-content/plugins/booking/img/bunkbed-48x48.png"/><br /></div>
+        <div class="icon32" style="margin:10px 25px 10px 10px;"><img src="{homeurl}/wp-content/plugins/hbo-reports/img/bunkbed-48x48.png"/><br /></div>
         <h2>Bed Counts - <xsl:value-of select="selectiondate_long"/></h2>
         <div class="wpdevbk">
     
@@ -90,7 +90,6 @@
                     <xsl:if test="last_completed_job">
                         This report aggregates data as it appeared on <xsl:value-of select="last_completed_job"/>.<br/>
                     </xsl:if>
-                    This report is automatically run daily at 4:00am.
 
                     <xsl:if test="last_job_status = 'failed'">
                         <div style="color: red;">The last update of this report failed to run.
