@@ -55,6 +55,8 @@ class LHSplitRoomReport extends XslTransform {
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedAllocScraperJob)->format('D, d M Y H:i:s')));
         }
 
+        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
+
         // did the last job fail to run?
         if( $this->lastJob ) {
             $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));
@@ -75,7 +77,7 @@ class LHSplitRoomReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
                 $recordRoot->appendChild($domtree->createElement('status', $record->lh_status));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
-                $recordRoot->appendChild($domtree->createElement('booking_source', $record->booking_source));
+                $recordRoot->appendChild($domtree->createElement('booking_source', htmlspecialchars(html_entity_decode($record->booking_source, ENT_COMPAT, "UTF-8" ))));
                 if( $record->booked_date ) {
                     $recordRoot->appendChild($domtree->createElement('booked_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
                 }

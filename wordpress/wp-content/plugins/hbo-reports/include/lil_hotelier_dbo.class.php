@@ -374,6 +374,7 @@ class LilHotelierDBO {
                  WHERE classname IN (
                            'com.macbackpackers.jobs.AllocationScraperJob', 
                            'com.macbackpackers.jobs.AllocationScraperWorkerJob', 
+                           'com.macbackpackers.jobs.CloudbedsAllocationScraperWorkerJob', 
                            'com.macbackpackers.jobs.CreateAllocationScraperReportsJob', 
                            'com.macbackpackers.jobs.BookingScraperJob', 
                            'com.macbackpackers.jobs.SplitRoomReservationReportJob',

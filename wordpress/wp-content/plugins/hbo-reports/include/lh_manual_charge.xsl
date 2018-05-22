@@ -141,7 +141,14 @@
             <xsl:choose>
                 <xsl:when test="data-href">
                     <a target="_blank">
-                       <xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="data-href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking-ref"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin-date"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin-date"/></xsl:attribute>
+                       <xsl:choose>
+                         <xsl:when test="../property_manager = 'cloudbeds'">
+                           <xsl:attribute name="href">https://hotels.cloudbeds.com<xsl:value-of select="data_href"/></xsl:attribute>
+                         </xsl:when>
+                         <xsl:otherwise>
+                           <xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="data-href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking-ref"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin-date"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin-date"/></xsl:attribute>
+                         </xsl:otherwise>  
+                       </xsl:choose>
                        <xsl:value-of select="booking-ref"/>
                     </a>
                 </xsl:when>

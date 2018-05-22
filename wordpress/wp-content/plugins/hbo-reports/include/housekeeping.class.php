@@ -172,7 +172,7 @@ class HouseKeeping extends XslTransform {
             foreach( $this->bedsheetView as $bed ) {
                 $bedRoot = $parentElement->appendChild($domtree->createElement('bed'));
                 $bedRoot->appendChild($domtree->createElement('room', $bed->room));
-                $bedRoot->appendChild($domtree->createElement('bed_name', htmlspecialchars($bed->bed_name)));
+                $bedRoot->appendChild($domtree->createElement('bed_name', htmlspecialchars(html_entity_decode($bed->bed_name, ENT_COMPAT, "UTF-8" ))));
                 $bedRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($bed->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date));
                 $bedRoot->appendChild($domtree->createElement('checkout_date', $bed->checkout_date));

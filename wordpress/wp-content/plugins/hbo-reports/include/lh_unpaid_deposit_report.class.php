@@ -55,6 +55,8 @@ class LHUnpaidDepositReport extends XslTransform {
                 DateTime::createFromFormat('Y-m-d H:i:s', $this->lastCompletedAllocScraperJob)->format('D, d M Y H:i:s')));
         }
 
+        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
+
         // did the last job fail to run?
         if( $this->lastJob ) {
             $parentElement->appendChild($domtree->createElement('last_job_id', $this->lastJob['jobId'] ));

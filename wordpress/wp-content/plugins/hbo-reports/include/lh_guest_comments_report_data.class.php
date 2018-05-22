@@ -131,6 +131,7 @@ class LHGuestCommentsReportData extends XslTransform {
         }
 
         $parentElement->appendChild($domtree->createElement('show_acknowledged', $this->includeAcknowledged ? 'true' : 'false' ));
+        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
 
         if ( $this->guestCommentsReport ) {
             foreach( $this->guestCommentsReport as $record ) {
@@ -151,7 +152,8 @@ class LHGuestCommentsReportData extends XslTransform {
                 if( $record->notes ) {
                     $recordRoot->appendChild($domtree->createElement('notes', htmlspecialchars($record->notes)));
                 }
-                $recordRoot->appendChild($domtree->createElement('comments', htmlspecialchars($record->comments, ENT_XML1, 'UTF-8')));
+                $recordRoot->appendChild($domtree->createElement('comments', htmlspecialchars(preg_replace( '/<br *\/>/si', ' ', $record->comments ), ENT_XML1, "UTF-8" )));
+
                 if( $record->acknowledged_date ) {
                     $recordRoot->appendChild($domtree->createElement('acknowledged_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
                 }

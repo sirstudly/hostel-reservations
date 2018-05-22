@@ -56,6 +56,7 @@ class LHGroupBookingsReport extends XslTransform {
         }
 
         $parentElement->appendChild($domtree->createElement('group_size', get_option('hbo_group_booking_size') ));
+        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
 
         // did the last job fail to run?
         if( $this->lastJob ) {
@@ -72,7 +73,7 @@ class LHGroupBookingsReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('reservation_id', $record->reservation_id));
                 $recordRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
-                $recordRoot->appendChild($domtree->createElement('booking_source', $record->booking_source));
+                $recordRoot->appendChild($domtree->createElement('booking_source', htmlspecialchars(html_entity_decode($record->booking_source, ENT_COMPAT, "UTF-8" ))));
                 $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('checkin_date_yyyymmdd', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('Y-m-d')));
                 $recordRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->format('D, d M Y')));

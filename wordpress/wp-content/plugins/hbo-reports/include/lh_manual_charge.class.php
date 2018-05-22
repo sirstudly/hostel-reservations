@@ -61,6 +61,8 @@ class LHManualCharge extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
 
+        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
+
         if ( $this->lastTransactions ) {
             $logDirectory = get_option( 'hbo_log_directory' );
             $logDirectoryUrl = get_option( 'hbo_log_directory_url' );

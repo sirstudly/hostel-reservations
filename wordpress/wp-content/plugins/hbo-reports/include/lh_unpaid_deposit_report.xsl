@@ -139,7 +139,14 @@ tr.unread {
             <xsl:if test="viewed_yn = 'N'">unread</xsl:if>
         </xsl:attribute>
         <td><a target="_blank">
-               <xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="data_href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking_reference"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin_date_yyyymmdd"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin_date_yyyymmdd"/></xsl:attribute>
+               <xsl:choose>
+                 <xsl:when test="../property_manager = 'cloudbeds'">
+                   <xsl:attribute name="href">https://hotels.cloudbeds.com<xsl:value-of select="data_href"/></xsl:attribute>
+                 </xsl:when>
+                 <xsl:otherwise>
+                   <xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="data_href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking_reference"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin_date_yyyymmdd"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin_date_yyyymmdd"/></xsl:attribute>
+                 </xsl:otherwise>  
+               </xsl:choose>
                <xsl:value-of select="guest_name"/>
             </a>
         </td>
