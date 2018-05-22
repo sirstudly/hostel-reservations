@@ -54,6 +54,12 @@
 
             <h3>Process a Manual Charge</h3> 
 
+            <xsl:choose>
+                <xsl:when test="property_manager = 'cloudbeds'">
+                    <p>This page is currently undergoing a rewrite. Stay tuned. -RONBOT</p>
+                </xsl:when>
+
+                <xsl:otherwise>
             <div style="font-style:italic;">
                 <p>This will attempt to charge the card saved against the given booking.<br/>
                    <ul>
@@ -98,6 +104,9 @@
                     </tr>
                 </tbody>
             </table>
+
+                </xsl:otherwise>
+            </xsl:choose>
         </form>
 
         <xsl:apply-templates select="transactions" />
@@ -141,14 +150,7 @@
             <xsl:choose>
                 <xsl:when test="data-href">
                     <a target="_blank">
-                       <xsl:choose>
-                         <xsl:when test="../property_manager = 'cloudbeds'">
-                           <xsl:attribute name="href">https://hotels.cloudbeds.com<xsl:value-of select="data_href"/></xsl:attribute>
-                         </xsl:when>
-                         <xsl:otherwise>
-                           <xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="data-href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking-ref"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin-date"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin-date"/></xsl:attribute>
-                         </xsl:otherwise>  
-                       </xsl:choose>
+                       <xsl:attribute name="href">https://app.littlehotelier.com<xsl:value-of select="data-href"/>?reservation_filter%5Bbooking_reference_id%5D=<xsl:value-of select="booking-ref"/>&amp;reservation_filter%5Bdate_from%5D=<xsl:value-of select="checkin-date"/>&amp;reservation_filter%5Bdate_to%5D=<xsl:value-of select="checkin-date"/></xsl:attribute>
                        <xsl:value-of select="booking-ref"/>
                     </a>
                 </xsl:when>
