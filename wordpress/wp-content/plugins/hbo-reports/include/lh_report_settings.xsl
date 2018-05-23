@@ -45,6 +45,11 @@
     margin-bottom: 30px;
 }
 
+.cloudbeds-container {
+    width: 400px;
+    margin-bottom: 30px;
+}
+
 .hw-container {
     width: 400px;
     margin-bottom: 30px;
@@ -95,6 +100,21 @@ jQuery(document).ready( function(){
         }
     });
 
+    jQuery("#cb_pwcheck").click(function(){
+        if (jQuery("#cb_pwcheck").is(":checked"))
+        {
+            jQuery("#cloudbeds_password").clone()
+                .attr("type", "text").insertAfter("#cloudbeds_password")
+                .prev().remove();
+        }
+        else
+        {
+            jQuery("#cloudbeds_password").clone()
+                .attr("type","password").insertAfter("#cloudbeds_password")
+                .prev().remove();
+        }
+    });
+
     jQuery("#hw_pwcheck").click(function(){
         if (jQuery("#hw_pwcheck").is(":checked"))
         {
@@ -137,8 +157,7 @@ jQuery(document).ready( function(){
 
         <h2>Report Settings</h2> 
 
-        <div style="font-style:italic;">Note: It may take up to a minute to verify when saving the settings below.</div>
-
+        <xsl:if test="../property_manager != 'cloudbeds'">
         <div class="shadow lilho-container">
             <h3>Little Hotelier</h3> 
             <table class="form-table">
@@ -174,6 +193,31 @@ jQuery(document).ready( function(){
                 <a id="btn_save_lilho" class="btn btn-primary" style="float: right;" onclick="save_little_hotelier_settings(document.post_option.lilho_username.value, document.post_option.lilho_password.value, document.post_option.lilho_session.value); this.disabled=true;">Save</a>
             </div>
         </div>
+        </xsl:if>
+
+        <xsl:if test="../property_manager = 'cloudbeds'">
+        <div class="shadow cloudbeds-container">
+            <h3>Cloudbeds</h3> 
+            <table class="form-table">
+                <tbody>
+                    <tr valign="top">
+                        <th scope="row"><label for="cloudbeds_username">Username:</label></th>
+                        <td><input id="cloudbeds_username" name="hbo_cloudbeds_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_cloudbeds_username}"/></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="cloudbeds_password">Password:</label></th>
+                        <td><input id="cloudbeds_password" name="hbo_cloudbeds_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_cloudbeds_password}" /><br/>
+                            <input type="checkbox" id="cb_pwcheck" /> Show Password</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="btn-container">
+                <div style="float: left;" id="ajax_respond_cb"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_cloudbeds" class="btn btn-primary" style="float: right;" onclick="save_cloudbeds_settings(document.post_option.cloudbeds_username.value, document.post_option.cloudbeds_password.value); this.disabled=true;">Save</a>
+            </div>
+        </div>
+        </xsl:if>
 
         <div class="shadow hw-container">
             <h3>Hostelworld</h3> 

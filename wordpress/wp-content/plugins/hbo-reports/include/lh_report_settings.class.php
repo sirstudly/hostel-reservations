@@ -22,6 +22,8 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_lilho_username'] = get_option('hbo_lilho_username');
         $this->reportSettings['hbo_lilho_password'] = get_option('hbo_lilho_password');
         $this->reportSettings['hbo_lilho_session'] = get_option('hbo_lilho_session');
+        $this->reportSettings['hbo_cloudbeds_username'] = get_option('hbo_cloudbeds_username');
+        $this->reportSettings['hbo_cloudbeds_password'] = get_option('hbo_cloudbeds_password');
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
@@ -67,6 +69,22 @@ class LHReportSettings extends XslTransform {
        update_option( "hbo_lilho_username", $username );
        update_option( "hbo_lilho_password", $password );
 */
+   }
+
+   /**
+    * Updates details for Cloudbeds.
+    */
+   function saveCloudbedsSettings( $username, $password ) {
+
+       if( empty( $username )) {
+           throw new ValidationException( "Username cannot be blank" );
+       }
+       if( empty( $password )) {
+           throw new ValidationException( "Password cannot be blank" );
+       }
+
+       update_option( "hbo_cloudbeds_username", $username );
+       update_option( "hbo_cloudbeds_password", $password );
    }
 
    /**
@@ -180,6 +198,7 @@ class LHReportSettings extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
 
+        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
         if ( $this->reportSettings ) {
             $settingsRoot = $parentElement->appendChild($domtree->createElement('settings'));
             foreach( $this->reportSettings as $key => $value ) {

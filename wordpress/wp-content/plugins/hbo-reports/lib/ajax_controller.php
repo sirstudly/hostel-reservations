@@ -45,6 +45,10 @@ class AjaxController {
                 $this->saveLittleHotelierSettings();
                 break;
 
+            case 'SAVE_CLOUDBEDS_SETTINGS':
+                $this->saveCloudbedsSettings();
+                break;
+
             case 'SAVE_HOSTELWORLD_SETTINGS':
                 $this->saveHostelworldSettings();
                 break;
@@ -159,6 +163,39 @@ class AjaxController {
                      .html('<?php echo $e->getMessage(); ?>')
                      .css({ 'color': 'red' });
                 jQuery("#btn_save_lilho").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Updates the username, password for Cloudbeds.
+     * Requires POST variables:
+     *   username : username
+     *   password : password
+     */
+    function saveCloudbedsSettings() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->saveCloudbedsSettings( 
+                $_POST['username'], $_POST['password'] );
+
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_cb")
+                     .html('Settings saved successfully.')
+                     .css({ 'color': 'green' });
+                jQuery("#btn_save_cloudbeds").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_cb")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_cloudbeds").prop( "disabled", false );
             </script>
             <?php
         }

@@ -66,7 +66,7 @@ abstract class AbstractBedCounts extends XslTransform {
             $parentElement->appendChild($domtree->createElement('last_job_status', $this->lastJob['status'] ));
             $parentElement->appendChild($domtree->createElement('check_credentials', $this->lastJob['lastJobFailedDueToCredentials'] ? 'true' : 'false' ));
             $parentElement->appendChild($domtree->createElement('last_job_error_log', 
-                get_option('hbo_log_directory_url') . "/job-" . $this->lastJob['jobId'] . ".txt" ));
+                get_option('hbo_log_directory_url') . $this->lastJob['jobId'] ));
         }
 
         $xmlRoot = $parentElement->appendChild($domtree->createElement('bedcounts'));
