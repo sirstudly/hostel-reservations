@@ -666,8 +666,8 @@ class LilHotelierDBO {
                SELECT IF(p.room_type = 'OVERFLOW', '30', p.room) `room`, IF(p.room_type = 'OVERFLOW', 7, p.capacity) `capacity`, p.room_type,
                       SUM(IF(p.reservation_id IS NULL AND p.room_type != 'OVERFLOW', 1, 0)) `num_empty`,
                       SUM(IF(p.reservation_id = 0, 1, 0)) `num_staff`, 
-                      SUM(IF(p.lh_status IN ('checked-in', 'checked-out') AND p.reservation_id > 0, 1, 0)) `num_paid`, 
-                      SUM(IF(IFNULL(p.lh_status, '') NOT IN ('checked-in', 'checked-out') AND p.reservation_id > 0, 1, 0)) `num_noshow`
+                      SUM(IF(p.lh_status IN ('checked-in', 'checked-out', 'checked_in', 'checked_out') AND p.reservation_id > 0, 1, 0)) `num_paid`, 
+                      SUM(IF(IFNULL(p.lh_status, '') NOT IN ('checked-in', 'checked-out', 'checked_in', 'checked_out') AND p.reservation_id > 0, 1, 0)) `num_noshow`
                  FROM (
                    SELECT rm.room, rm.bed_name, rm.capacity, rm.room_type, c.reservation_id, c.payment_outstanding, c.guest_name, c.notes, c.lh_status
                      FROM wp_lh_rooms rm
