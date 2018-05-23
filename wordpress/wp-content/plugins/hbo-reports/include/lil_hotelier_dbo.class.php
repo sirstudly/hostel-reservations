@@ -689,13 +689,13 @@ class LilHotelierDBO {
          ORDER BY room";
 
         // HSH bedcounts are actually by room type
-        if( strpos(get_option('hbo_lilho_username'), 'highstreet') === 0 ) {
+        if( get_option('blogname') == 'High Street Hostel Bookings' ) {
             $sql = "SELECT GROUP_CONCAT(room ORDER BY room SEPARATOR ', ') AS room,
                            hsh_room_type AS room_type, 
                            SUM(capacity) AS capacity,
 		                   SUM(num_empty) AS num_empty, SUM(num_staff) AS num_staff, SUM(num_paid) AS num_paid, SUM(num_noshow) AS num_noshow
                       FROM ( $sql ) hsh
-                     GROUP BY hsh_room_type
+                     GROUP BY CRC32(hsh_room_type) -- some weirdness with MariaDB here
                      ORDER BY capacity";
         }
          
