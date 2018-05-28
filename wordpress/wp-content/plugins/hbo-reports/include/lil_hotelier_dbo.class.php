@@ -296,10 +296,8 @@ class LilHotelierDBO {
      * Returns id of inserted job id
      * Throws DatabaseException on insert error
      */
-    static function insertUpdateLittleHotelierSettingsJob( $username, $password ) {
-        return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateLittleHotelierSettingsJob',
-            array( "username" => $username,
-                   "password" => $password ) );
+    static function insertUpdateLittleHotelierSettingsJob() {
+        return self::insertJobOfType( 'com.macbackpackers.jobs.UpdateLittleHotelierSettingsJob' );
     }
 
     /**
