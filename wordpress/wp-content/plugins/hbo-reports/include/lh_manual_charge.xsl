@@ -56,7 +56,7 @@
 
             <xsl:choose>
                 <xsl:when test="property_manager = 'cloudbeds'">
-                    <p>This page is currently undergoing a rewrite. Stay tuned. -RONBOT</p>
+                    <p>You can do this from Cloudbeds now! Add the credit card onto the Credit Cards tab on the booking if it's not already there. Click AUTHORIZE, then CAPTURE. -RONBOT</p>
                 </xsl:when>
 
                 <xsl:otherwise>

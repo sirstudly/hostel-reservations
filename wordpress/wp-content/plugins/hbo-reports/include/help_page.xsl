@@ -21,6 +21,10 @@
             <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/housekeeping</xsl:attribute>Housekeeping</a> - Pretty straightforward. It does not include any long term dormitories - also any room closures ending on the day will be marked as "CHANGE" even if there is another room closure for the next day and a note saying to manually check this - since we use closures to mark cleaning hours.
 
             <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/bedcounts</xsl:attribute>Bed Counts</a> - Includes daily counts of the number of beds which have been filled. The export function will allow you download the data as a CSV file.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/guest-comments</xsl:attribute>Guest Comments</a> - Shows comments made by guests at the time of booking; may also contain additional fluff. If there are any guest requests, you can action them and tick it off once you're done.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/manual-charges</xsl:attribute>Manual Charges</a> - Charge late cancellations/no shows using the card details on the booking - avoids having to pickup the PoS terminal and ringing it through.
         </xsl:when>
 
         <xsl:when test="name = 'help_reports'">
@@ -29,6 +33,13 @@
             <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/unpaid-deposit-report</xsl:attribute>Unpaid Deposit Report</a> - These are all active bookings for Expedia or Booking.com where the amount due is the same as the total amount (ie. nothing has been paid). These bookings will need to be manually charged a deposit amount.
 
             <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/group-bookings</xsl:attribute>Group Bookings</a> - Shows any bookings with X or more persons (configurable on the Reports Settings admin page).
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/bedcounts</xsl:attribute>Bed Counts</a> - Includes daily counts of the number of beds which have been filled. The export function will allow you download the data as a CSV file.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/guest-comments</xsl:attribute>Guest Comments</a> - Shows comments made by guests at the time of booking; may also contain additional fluff. If there are any guest requests, you can action them and tick it off once you're done.
+
+            <a><xsl:attribute name="href"><xsl:value-of select="homeurl"/>/reports/manual-charges</xsl:attribute>Manual Charges</a> - Charge late cancellations/no shows using the card details on the booking - avoids having to pickup the PoS terminal and ringing it through.
+
         </xsl:when>
 
         <xsl:when test="name = 'help_admin'">
