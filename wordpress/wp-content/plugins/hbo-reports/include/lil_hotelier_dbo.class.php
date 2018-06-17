@@ -683,7 +683,8 @@ class LilHotelierDBO {
           ) t
           -- only include OVERFLOW or Unallocated if we have something to report
          WHERE (room_type != 'OVERFLOW' AND room != 'Unallocated')
-            OR ((room_type = 'OVERFLOW' OR room = 'Unallocated') AND (num_staff > 0 OR num_paid > 0 OR num_noshow > 0))
+          -- 2018-06-17: don't include unallocated anymore; throws off count in cloudbeds
+          --  OR ((room_type = 'OVERFLOW' OR room = 'Unallocated') AND (num_staff > 0 OR num_paid > 0 OR num_noshow > 0))
          ORDER BY room";
 
         // HSH bedcounts are actually by room type
