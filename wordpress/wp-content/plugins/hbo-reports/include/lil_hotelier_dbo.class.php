@@ -46,7 +46,7 @@ class LilHotelierDBO {
                 AND r.active_yn = 'Y'
               GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, constants.selected_date,
                        c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
-              ORDER BY r.room, r.bed_name",
+              ORDER BY IF(r.room = 'TMNT', 'T3MNT', r.room), r.bed_name",
               $selectedDate->format('Y-m-d'), $jobId));
 
         if($wpdb->last_error) {
