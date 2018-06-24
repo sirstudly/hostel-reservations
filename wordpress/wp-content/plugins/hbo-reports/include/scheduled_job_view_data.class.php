@@ -58,6 +58,9 @@ class ScheduledJobViewData extends XslTransform {
         elseif( $classname == 'com.macbackpackers.jobs.CreateCopyCardDetailsToCloudbedsJob' ) {
             $params = array( 'booking_date' => 'TODAY-1', 'days_ahead' => 1 );
         }
+        elseif( $classname == 'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' ) {
+            $params = array( 'booking_date' => 'TODAY-1', 'days_ahead' => 1 );
+        }
         else {
             throw new ValidationException( "Unsupported job type: $classname" );
         }
