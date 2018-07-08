@@ -16,8 +16,8 @@ abstract class ScheduledJob {
             'com.macbackpackers.jobs.BedCountJob' => 'Update Bed Counts',
             'com.macbackpackers.jobs.DbPurgeJob' => 'Purge Old Database Entries',
 //            'com.macbackpackers.jobs.CreateDepositChargeJob' => 'Charge Deposits',
-//            'com.macbackpackers.jobs.CreatePrepaidChargeJob' => 'Charge Pre-Paid Bookings',
-//            'com.macbackpackers.jobs.CreateAgodaChargeJob' => 'Charge Past Agoda Bookings',
+            'com.macbackpackers.jobs.CreatePrepaidChargeJob' => 'Charge Pre-Paid Bookings',
+            'com.macbackpackers.jobs.CreateAgodaChargeJob' => 'Charge Past Agoda Bookings',
             'com.macbackpackers.jobs.CreateCopyCardDetailsToCloudbedsJob' => 'Copy Card Details from Hostelworld',
             'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' => 'Charge Non-Refundable Bookings'
         );
