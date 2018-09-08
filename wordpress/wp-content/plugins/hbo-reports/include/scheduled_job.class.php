@@ -18,6 +18,7 @@ abstract class ScheduledJob {
 //            'com.macbackpackers.jobs.CreateDepositChargeJob' => 'Charge Deposits',
             'com.macbackpackers.jobs.CreatePrepaidChargeJob' => 'Charge Pre-Paid Bookings',
             'com.macbackpackers.jobs.CreateAgodaChargeJob' => 'Charge Past Agoda Bookings',
+            'com.macbackpackers.jobs.CreateChargeHostelworldLateCancellationJob' => 'Charge HWL Late Cancellations',
             'com.macbackpackers.jobs.CreateCopyCardDetailsToCloudbedsJob' => 'Copy Card Details from Hostelworld',
             'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' => 'Charge Non-Refundable Bookings'
         );
