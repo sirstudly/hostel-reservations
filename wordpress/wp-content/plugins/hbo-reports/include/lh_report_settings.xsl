@@ -100,21 +100,6 @@ jQuery(document).ready( function(){
         }
     });
 
-    jQuery("#cb_pwcheck").click(function(){
-        if (jQuery("#cb_pwcheck").is(":checked"))
-        {
-            jQuery("#cloudbeds_password").clone()
-                .attr("type", "text").insertAfter("#cloudbeds_password")
-                .prev().remove();
-        }
-        else
-        {
-            jQuery("#cloudbeds_password").clone()
-                .attr("type","password").insertAfter("#cloudbeds_password")
-                .prev().remove();
-        }
-    });
-
     jQuery("#hw_pwcheck").click(function(){
         if (jQuery("#hw_pwcheck").is(":checked"))
         {
