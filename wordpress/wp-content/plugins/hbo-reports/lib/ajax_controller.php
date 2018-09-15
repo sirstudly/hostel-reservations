@@ -177,8 +177,7 @@ class AjaxController {
     function saveCloudbedsSettings() {
         try {
             $settingsPage = new LHReportSettings();
-            $settingsPage->saveCloudbedsSettings( 
-                $_POST['username'], $_POST['password'] );
+            $settingsPage->saveCloudbedsSettings( $_POST['req_headers'] );
 
             ?> 
             <script type="text/javascript">

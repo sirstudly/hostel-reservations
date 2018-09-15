@@ -22,8 +22,6 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_lilho_username'] = get_option('hbo_lilho_username');
         $this->reportSettings['hbo_lilho_password'] = get_option('hbo_lilho_password');
         $this->reportSettings['hbo_lilho_session'] = get_option('hbo_lilho_session');
-        $this->reportSettings['hbo_cloudbeds_username'] = get_option('hbo_cloudbeds_username');
-        $this->reportSettings['hbo_cloudbeds_password'] = get_option('hbo_cloudbeds_password');
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
@@ -74,17 +72,38 @@ class LHReportSettings extends XslTransform {
    /**
     * Updates details for Cloudbeds.
     */
-   function saveCloudbedsSettings( $username, $password ) {
+   function saveCloudbedsSettings( $reqHeaders ) {
 
-       if( empty( $username )) {
-           throw new ValidationException( "Username cannot be blank" );
-       }
-       if( empty( $password )) {
-           throw new ValidationException( "Password cannot be blank" );
+       if( empty( $reqHeaders )) {
+           throw new ValidationException( "Headers cannot be blank" );
        }
 
-       update_option( "hbo_cloudbeds_username", $username );
-       update_option( "hbo_cloudbeds_password", $password );
+       $match_ua = array();
+       $match_cookie = array();
+
+       if( preg_match( '/Firefox/m', $reqHeaders ) ) {
+           if( ! preg_match_all('/^User-Agent: (.*)$/m', $reqHeaders, $match_ua ) ) {
+               throw new ValidationException( "Unable to retrieve user agent" );
+           }
+           if( ! preg_match_all('/^Cookie: (.*)$/m', $reqHeaders, $match_cookie ) ) {
+               throw new ValidationException( "Unable to retrieve cookies" );
+           }
+       }
+       elseif( preg_match( '/Chrome/m', $reqHeaders ) ) {
+           // don't know why i need to double escape the terminating single quote...
+           if( ! preg_match_all("/'user-agent: (.*?)\\\\'/m", $reqHeaders, $match_ua ) ) {
+               throw new ValidationException( "Unable to retrieve user agent" );
+           }
+           if( ! preg_match_all("/'cookie: (.*?)\\\\'/m", $reqHeaders, $match_cookie ) ) {
+               throw new ValidationException( "Unable to retrieve cookies" );
+           }
+       }
+       else {
+            throw new ValidationException( "Unable to determine browser from header format." );
+       }
+
+       update_option( "hbo_cloudbeds_useragent", $match_ua[1][0] );
+       update_option( "hbo_cloudbeds_cookies", $match_cookie[1][0] );
    }
 
    /**

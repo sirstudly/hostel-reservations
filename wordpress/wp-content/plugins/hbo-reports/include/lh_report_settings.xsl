@@ -201,20 +201,29 @@ jQuery(document).ready( function(){
             <table class="form-table">
                 <tbody>
                     <tr valign="top">
-                        <th scope="row"><label for="cloudbeds_username">Username:</label></th>
-                        <td><input id="cloudbeds_username" name="hbo_cloudbeds_username" class="regular-text code" type="text" autocomplete="false" style="width:200px;" size="75" value="{hbo_cloudbeds_username}"/></td>
+                        <td scope="row" colspan="2">
+                            <p><em>Note: You shouldn't have to update this as I have a special <code>#ronbot</code> user account dedicated for this purpose.</em></p>
+                            We'll need to hijack a currently logged-in session that is not currently being used.
+                            Start by opening a new "Private Browsing" window and login with the user you want the reports to run under.<br/>
+                            Press F12 to open "Developer Tools" in either Chrome/Firefox. In Cloudbeds, click on "My User Profile" (top-right corner).<br/>
+                            In the Developer Tools frame, on the Network tab, find the <code>user_have_ccp_view_permission</code> request.<br/>
+                            In <strong>Firefox</strong>, right-click the row, Copy, Copy Request Headers.<br/>
+                            In <strong>Chrome</strong>, right-click the row, Copy, Copy as cURL (bash).<br/>
+                            Now paste the contents here and close the (Cloudbeds) browser window without logging out.
+                        </td>
                     </tr>
                     <tr valign="top">
-                        <th scope="row"><label for="cloudbeds_password">Password:</label></th>
-                        <td><input id="cloudbeds_password" name="hbo_cloudbeds_password" class="regular-text code" type="password" autocomplete="new-password" style="width:200px;" size="75" value="{hbo_cloudbeds_password}" /><br/>
-                            <input type="checkbox" id="cb_pwcheck" /> Show Password</td>
+                        <th colspan="2" scope="row"><label for="cloudbeds_req_headers">Request Headers:</label></th>
+                    </tr>
+                    <tr valign="top">
+                        <td colspan="2" scope="row"><textarea id="cloudbeds_req_headers" name="hbo_cloudbeds_req_headers" class="regular-text code" style="width: 97%;"><xsl:comment/></textarea></td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="btn-container">
                 <div style="float: left;" id="ajax_respond_cb"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_cloudbeds" class="btn btn-primary" style="float: right;" onclick="save_cloudbeds_settings(document.post_option.cloudbeds_username.value, document.post_option.cloudbeds_password.value); this.disabled=true;">Save</a>
+                <a id="btn_save_cloudbeds" class="btn btn-primary" style="float: right;" onclick="save_cloudbeds_settings(document.post_option.cloudbeds_req_headers.value); this.disabled=true;">Save</a>
             </div>
         </div>
         </xsl:if>

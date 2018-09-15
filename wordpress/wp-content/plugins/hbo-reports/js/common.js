@@ -102,10 +102,9 @@ function save_little_hotelier_settings( username, password, lh_session ) {
     });
 }
 
-// saves the login details for cloudbeds
-// username : username
-// password : password
-function save_cloudbeds_settings( username, password ) {
+// saves the session details for cloudbeds
+// req_headers : request headers either from cURL (Chrome) or line delimitted (Firefox)
+function save_cloudbeds_settings( req_headers ) {
 
     jQuery('#ajax_respond_cb').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
 
@@ -116,8 +115,7 @@ function save_cloudbeds_settings( username, password ) {
         error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
             ajax_action : 'SAVE_CLOUDBEDS_SETTINGS',
-            username : username,
-            password : password
+            req_headers : req_headers
         }
     });
 }
