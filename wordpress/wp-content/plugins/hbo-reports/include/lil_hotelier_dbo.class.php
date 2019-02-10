@@ -252,7 +252,6 @@ class LilHotelierDBO {
      * $reservationId : ID of LH reservation
      */
     static function unacknowledgeGuestComment( $reservationId ) {
-        global $wpdb;
 
         // attempting to use $wpdb directly to update timestamp to null
         // results in it being set to "0000-00-00 00:00:00"
@@ -279,6 +278,21 @@ class LilHotelierDBO {
         $dblink->mysqli->close();
     }
 
+    /**
+     * Inserts a lookup key for a given booking.
+     * $reservationId : ID of reservation
+     */
+    static function insertLookupKeyForBooking( $reservationId, $lookupKey ) {
+        global $wpdb;
+        if (false === $wpdb->insert("wp_booking_lookup_key",
+                array( 'reservation_id' => $reservationId, 'lookup_key' => $lookupKey ),
+                array( '%s', '%s'))) {
+            error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+            throw new DatabaseException($wpdb->last_error);
+        }
+        return $wpdb->insert_id;
+    }
+    
     /**
      * Inserts a new AllocationScraperJob.
      * Returns id of inserted job id

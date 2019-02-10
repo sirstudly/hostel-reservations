@@ -86,7 +86,7 @@ function update_guest_comments_report_view( include_acknowledged ) {
 // password : LH password
 function save_little_hotelier_settings( username, password, lh_session ) {
 
-    jQuery('#ajax_respond_lh').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_lh').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -106,7 +106,7 @@ function save_little_hotelier_settings( username, password, lh_session ) {
 // req_headers : request headers either from cURL (Chrome) or line delimitted (Firefox)
 function save_cloudbeds_settings( req_headers ) {
 
-    jQuery('#ajax_respond_cb').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_cb').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -125,7 +125,7 @@ function save_cloudbeds_settings( req_headers ) {
 // password : HW password
 function save_hostelworld_settings( username, password ) {
 
-    jQuery('#ajax_respond_hw').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_hw').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -145,7 +145,7 @@ function save_hostelworld_settings( username, password ) {
 // password : agoda password
 function save_agoda_settings( username, password ) {
 
-    jQuery('#ajax_respond_agoda').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_agoda').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -165,7 +165,7 @@ function save_agoda_settings( username, password ) {
 // include_5_guests_in_6bed_dorm : checkbox value to include 5 guests in 6 bed dorm
 function save_group_bookings_report_settings( group_booking_size, include_5_guests_in_6bed_dorm ) {
 
-    jQuery('#ajax_respond_group_bookings_rpt').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_group_bookings_rpt').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -185,7 +185,7 @@ function save_group_bookings_report_settings( group_booking_size, include_5_gues
 // email_template : raw (HTML) email template
 function save_guest_checkout_template( email_subject, email_template ) {
 
-    jQuery('#ajax_respond_guest_email_template').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_respond_guest_email_template').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -227,7 +227,7 @@ function send_test_response_email( first_name, last_name, recipient_email ) {
 // override_card_details : true to use LH card details
 function submit_manual_charge( bookingRef, amount, note, override_card_details ) {
 
-    jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"><//div>');
+    jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -242,6 +242,24 @@ function submit_manual_charge( bookingRef, amount, note, override_card_details )
             override_card_details : override_card_details ? 1 : 0
         }
     });
+}
+
+//Looks up a booking and generates a new payment link
+//booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
+function generate_payment_link( booking_ref ) {
+
+ jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+ jQuery.ajax({                                           // Start Ajax Sending
+     url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+     type:'POST',
+     success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
+     error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+     data:{
+         ajax_action : 'GENERATE_PAYMENT_LINK',
+         booking_ref : booking_ref
+     }
+ });
 }
 
 // Adds a new scheduled job. Only pass one of the two parameters.

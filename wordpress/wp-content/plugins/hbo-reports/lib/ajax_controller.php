@@ -73,6 +73,10 @@ class AjaxController {
                 $this->submitManualChargeJob();
                 break;
 
+            case 'GENERATE_PAYMENT_LINK':
+                $this->generatePaymentLink();
+                break;
+                
             case 'ADD_SCHEDULED_JOB':
                 $this->addScheduledJob();
                 break;
@@ -391,6 +395,33 @@ class AjaxController {
                      .html('<?php echo $e->getMessage(); ?>')
                      .css({ 'color': 'red' });
                 jQuery("#charge_button").css("visibility", "visible");
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Looks up an existing booking and generates a new payment link.
+     * Requires POST variables:
+     *   booking_ref : cloudbeds "identifier"
+     */
+    function generatePaymentLink() {
+        try {
+            $paymentLinkPage = new GeneratePaymentLinkController();
+            $paymentLinkPage->generatePaymentLink($_POST['booking_ref']);
+            ?>
+            <script type="text/javascript">
+                document.getElementById('ajax_response').innerHTML = <?php echo json_encode($paymentLinkPage->toHtml()); ?>;
+                jQuery("#ajax_response").css({ 'color': 'black' });
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
             </script>
             <?php
         }

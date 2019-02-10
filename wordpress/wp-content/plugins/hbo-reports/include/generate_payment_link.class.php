@@ -1,0 +1,196 @@
+<?php
+
+/**
+ * Display controller for generating payment links.
+ */
+class GeneratePaymentLinkController extends XslTransform {
+
+    // all allowable characters for lookup key
+    const LOOKUPKEY_CHARSET = "2345678ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+    // currently loaded booking
+    var $booking;
+
+    /**
+     * Default constructor.
+     */
+    function GeneratePaymentLinkController() {
+        
+    }
+
+    /**
+     * Reloads the view details.
+     */
+    function doView() {
+    }
+   
+    /**
+     * Looks up the cloudbeds booking ("identifier") and generates:
+     *   - the booking details (name, checkin-date, checkout-date, number of guests, total, amount due)
+     *   - a generated link to the payment portal for this booking
+     * or
+     *   - an error message if booking doesn't exist
+     */
+    function generatePaymentLink($booking_ref) {
+        $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
+        $headers = array(
+            "Accept: application/json, text/javascript, */*; q=0.01",
+            "Content-Type: application/x-www-form-urlencoded; charset=UTF-8",
+            "Referer: https://hotels.cloudbeds.com/connect/" . $PROPERTY_ID,
+            "Accept-Language: en-GB,en-US;q=0.9,en;q=0.8",
+            "Accept-Encoding: gzip, deflate, br",
+            "X-Requested-With: XMLHttpRequest",
+            "X-Used-Method: common.ajax",
+            "Cache-Control: max-age=0",
+            "Origin: https://hotels.cloudbeds.com",
+            "User-Agent: " . get_option('hbo_cloudbeds_useragent'),
+            "Cookie: " . get_option('hbo_cloudbeds_cookies'),
+        );
+        
+        $data = array(
+            "id" => $booking_ref,
+            "is_identifier" => "1",
+            "property_id" => $PROPERTY_ID,
+            "group_id" => $PROPERTY_ID,
+            "version" => get_option('hbo_cloudbeds_version'),
+        );
+        
+        try {
+            $start_ms = time();
+            $make_call = $this->callAPI('POST', "https://hotels.cloudbeds.com/connect/reservations/get_reservation", $headers, $data);
+            error_log("Cloudbeds request took " . (time() - $start_ms) . "ms.");
+//            error_log("Booking::curl result: " . $make_call);
+            $response = json_decode($make_call, true);
+        }
+        catch (Exception $ex) {
+            error_log($ex->getMessage());
+            throw new RuntimeException('Error attempting to retrieve booking. Please try again later.');
+        }
+        
+        if( $response['success'] != 'true' ) {
+            error_log('Unexpected error looking up booking.');
+            error_log('request: ' . json_encode($data));
+            error_log('response: ' . $make_call);
+            throw new RuntimeException('Unable to find this booking.');
+        }
+        $this->booking = $response;
+
+        // this is used for generating a short URL
+        $this->booking['lookup_key'] = $this->generateRandomLookupKey(7);
+        LilHotelierDBO::insertLookupKeyForBooking($response['reservation_id'], $this->booking['lookup_key']);
+    }
+    
+    /**
+     * Returns a random lookup key with the given length.
+     * @param int $keylen length of lookup key
+     * @return string generated key
+     */
+    function generateRandomLookupKey($keylen) {
+        $end_index = strlen(self::LOOKUPKEY_CHARSET) - 1;
+        $result = "";
+        for ($i = 0; $i < $keylen; $i ++) {
+            $result .= substr(self::LOOKUPKEY_CHARSET, mt_rand(0, $end_index), 1);
+        }
+        return $result;
+    }
+
+    /**
+     * Adds this object to the DOMDocument/XMLElement specified.
+     * See toXml() for details.
+     * $domtree : DOM document root
+     * $parentElement : DOM element where this object will be added
+     */
+    function addSelfToDocument($domtree, $parentElement) {
+        $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
+        if($this->booking) {
+            $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
+            $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
+            $bookingRoot->appendChild($domtree->createElement('third_party_identifier', $this->booking['third_party_identifier']));
+            $bookingRoot->appendChild($domtree->createElement('name', $this->booking['name']));
+            $bookingRoot->appendChild($domtree->createElement('email', $this->booking['email']));
+            $bookingRoot->appendChild($domtree->createElement('booking_date_server_time', $this->booking['booking_date_server_time']));
+            $bookingRoot->appendChild($domtree->createElement('checkin_date', $this->booking['checkin_date']));
+            $bookingRoot->appendChild($domtree->createElement('checkout_date', $this->booking['checkout_date']));
+            $bookingRoot->appendChild($domtree->createElement('status', $this->booking['status']));
+            $bookingRoot->appendChild($domtree->createElement('num_guests', intval($this->booking['adults_number']) + intval($this->booking['kids_number'])));
+            $bookingRoot->appendChild($domtree->createElement('grand_total', $this->booking['grand_total']));
+            $bookingRoot->appendChild($domtree->createElement('balance_due', $this->booking['balance_due']));
+            $bookingRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_payments_url") . $this->booking['lookup_key']));
+            $parentElement->appendChild($bookingRoot);
+        }
+    }
+    
+    /** 
+      Generates the following xml:
+        <view>
+           <booking>
+               ...
+           </booking>
+        </view>
+     */
+    function toXml() {
+        // create a dom document with encoding utf8
+        $domtree = new DOMDocument('1.0', 'UTF-8');
+        $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
+        $this->addSelfToDocument($domtree, $xmlRoot);
+        $xml = $domtree->saveXML();
+        return $xml;
+    }
+    
+    /**
+     * Returns the filename for the stylesheet to use during transform.
+     */
+    function getXslFilename() {
+        return HBO_PLUGIN_DIR. '/include/generate_payment_link.xsl';
+    }
+
+    function callAPI($method, $url, $headers, $data = NULL)
+    {
+        error_log('callAPI');
+        error_log("method: $method");
+        error_log("url: $url");
+        error_log("headers: " . json_encode($headers));
+        error_log("data: " . var_export($data, TRUE));
+        $curl = curl_init($url);
+        
+        switch ($method){
+            case "POST":
+                curl_setopt($curl, CURLOPT_POST, 1);
+                if ($data)
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+                    break;
+            case "PUT":
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+                if ($data)
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+                    break;
+            default:
+                if ($data)
+                    $url = sprintf("%s?%s", $url, http_build_query($data));
+        }
+        
+        // OPTIONS:
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($curl, CURLOPT_ENCODING, "");
+        
+        // EXECUTE:
+        $result = curl_exec($curl);
+        if (curl_error($curl)) {
+            $error_msg = "Connection Failure: " . curl_error($curl);
+        }
+        
+        $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        error_log('callAPI HTTP status ' . $http_status);
+        curl_close($curl);
+        
+        if (isset($error_msg)) {
+            throw new RuntimeException($error_msg);
+        }
+        return $result;
+    }
+}
+
+?>
