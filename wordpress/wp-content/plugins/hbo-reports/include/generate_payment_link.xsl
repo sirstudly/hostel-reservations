@@ -155,7 +155,7 @@ function copyToClipboard() {
 
     <div class="matched_booking">
         Booking Ref: <xsl:value-of select="identifier"/><br/>
-        Source Reservation ID: <xsl:value-of select="third_party_identifier"/><br/>
+        <xsl:if test="third_party_identifier != ''">Source Reservation ID: <xsl:value-of select="third_party_identifier"/><br/></xsl:if>
         Guest Name: <xsl:value-of select="name"/><br/>
         Email: <xsl:value-of select="email"/><br/>
         Booking Date: <xsl:value-of select="booking_date_server_time"/><br/>
