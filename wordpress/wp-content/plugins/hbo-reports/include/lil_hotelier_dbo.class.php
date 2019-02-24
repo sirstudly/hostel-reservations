@@ -271,7 +271,7 @@ class LilHotelierDBO {
         } catch(Exception $ex) {
             $dblink->mysqli->rollback();
             $dblink->mysqli->close();
-            throw $e;
+            throw $ex;
         }
 
         $dblink->mysqli->commit();
@@ -357,7 +357,6 @@ class LilHotelierDBO {
      */
     static function insertJobParameter($mysqli, $jobId, $paramName, $paramValue) {
     
-        global $wpdb;
         $stmt = $mysqli->prepare(
             "INSERT INTO wp_lh_job_param(job_id, name, value)
              VALUES(?, ?, ?)");
@@ -847,6 +846,24 @@ class LilHotelierDBO {
         // if empty, then no jobs exists
         if(empty($resultset)) {
             return null;
+        }
+        return $resultset;
+    }
+
+    /**
+     * Returns previous payments made to Sagepay.
+     */
+    static function getSagepayPaymentHistory() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT t.reservation_id, t.booking_reference, t.email, t.vendor_tx_code, t.payment_amount, a.auth_status, a.auth_status_detail, a.card_type, a.last_4_digits, a.processed_date
+               FROM wp_sagepay_transaction t
+              INNER JOIN wp_sagepay_tx_auth a ON t.vendor_tx_code = a.vendor_tx_code
+              ORDER BY t.id, a.id
+              LIMIT 100" );
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
         }
         return $resultset;
     }
