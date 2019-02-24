@@ -859,7 +859,7 @@ class LilHotelierDBO {
             "SELECT t.reservation_id, t.booking_reference, t.email, t.vendor_tx_code, t.payment_amount, a.auth_status, a.auth_status_detail, a.card_type, a.last_4_digits, a.processed_date
                FROM wp_sagepay_transaction t
               INNER JOIN wp_sagepay_tx_auth a ON t.vendor_tx_code = a.vendor_tx_code
-              ORDER BY t.id, a.id
+              ORDER BY t.id DESC, a.id DESC
               LIMIT 100" );
 
         if($wpdb->last_error) {
