@@ -294,6 +294,37 @@ class LilHotelierDBO {
     }
     
     /**
+     * Create a new payment invoice.
+     * $name : recipient name
+     * $email : recipient email
+     * $amount : amount to be paid
+     * $description : payment description
+     * $notes : staff notes
+     * $lookup_key : unique lookup key
+     */
+    static function insertPaymentInvoice($name, $email, $amount, $description, $notes, $lookupKey) {
+        global $wpdb;
+        if (false === $wpdb->insert("wp_invoice", array(
+                    'recipient_name' => $name,
+                    'email' => $email,
+                    'payment_amount' => $amount,
+                    'payment_description' => $description,
+                    'lookup_key' => $lookupKey),
+                array( '%s', '%s', '%f', '%s', '%s'))) {
+            error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        $inv_id = $wpdb->insert_id;
+        if (false === $wpdb->insert("wp_invoice_notes",
+                array('invoice_id' => $inv_id, 'notes' => $notes),
+                array( '%d', '%s'))) {
+            error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+            throw new DatabaseException($wpdb->last_error);
+        }
+    }
+    
+    /**
      * Inserts a new AllocationScraperJob.
      * Returns id of inserted job id
      * Throws DatabaseException on insert error

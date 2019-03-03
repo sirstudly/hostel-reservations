@@ -77,6 +77,10 @@ class AjaxController {
                 $this->generatePaymentLink();
                 break;
                 
+            case 'GENERATE_INVOICE_LINK':
+                $this->generateInvoiceLink();
+                break;
+
             case 'ADD_SCHEDULED_JOB':
                 $this->addScheduledJob();
                 break;
@@ -420,6 +424,42 @@ class AjaxController {
             ?> 
             <script type="text/javascript">
                 jQuery("#ajax_response")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Inserts a record in the wp_sagepay_invoice table and generates a new payment link.
+     * Requires POST variables:
+     *   invoice_name : email recipient
+     *   invoice_email : email address
+     *   invoice_amount : default amount to be charged
+     *   invoice_description : payment description
+     *   invoice_notes : internal notes
+     */
+    function generateInvoiceLink() {
+        try {
+            $paymentLinkPage = new GeneratePaymentLinkController();
+            $paymentLinkPage->generateInvoiceLink(
+                $_POST['invoice_name'],
+                $_POST['invoice_email'],
+                $_POST['invoice_amount'],
+                $_POST['invoice_description'],
+                $_POST['invoice_notes']);
+            ?>
+            <script type="text/javascript">
+                document.getElementById('ajax_response_inv').innerHTML = <?php echo json_encode($paymentLinkPage->toHtml()); ?>;
+                jQuery("#ajax_response_inv").css({ 'color': 'black' });
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_response_inv")
                      .html('<?php echo $e->getMessage(); ?>')
                      .css({ 'color': 'red' });
             </script>

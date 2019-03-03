@@ -262,6 +262,32 @@ function generate_payment_link( booking_ref ) {
  });
 }
 
+//Creates a new invoice payment link
+//name : recipient name
+//email : recipient email
+//amount : amount of payment
+//description : transaction description
+//notes : staff notes
+function generate_invoice_link( name, email, amount, description, notes ) {
+
+jQuery('#ajax_response_inv').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+jQuery.ajax({                                           // Start Ajax Sending
+   url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+   type:'POST',
+   success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response_inv').html( data ); },
+   error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+   data:{
+       ajax_action : 'GENERATE_INVOICE_LINK',
+       invoice_name : name,
+       invoice_email : email,
+       invoice_amount : amount,
+       invoice_description : description,
+       invoice_notes : notes
+   }
+});
+}
+
 // Adds a new scheduled job. Only pass one of the two parameters.
 // classname : name of (job) class to run
 // repeat_every_min : number of minutes to repeat job

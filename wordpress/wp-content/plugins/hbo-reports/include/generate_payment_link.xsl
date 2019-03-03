@@ -15,7 +15,10 @@
     <xsl:if test="booking">
         <xsl:apply-templates select="booking"/>
     </xsl:if>
-    <xsl:if test="not(booking)">
+    <xsl:if test="invoice">
+        <xsl:apply-templates select="invoice"/>
+    </xsl:if>
+    <xsl:if test="not(booking) and not(invoice)">
 
 <style media="screen" type="text/css">
 .body-content {
@@ -78,21 +81,26 @@
 .wpdevbk input[readonly] {
   cursor: text;
 }
+
+.invoice_label {
+  display: inline-block;
+  width: 80px;
+  font-weight: bold;
+}
 </style>
 
 <script>
-function copyToClipboard() {
-  /* Get the text field */
-  var copyText = document.getElementById("paymentUrl");
-
+// copies the value in inputElem to the clipboard
+// and sets infoMsgElem visible
+function copyToClipboard(inputElem, infoMsgElem) {
   /* Select the text field */
-  copyText.select();
+  inputElem.select();
 
   /* Copy the text inside the text field */
   document.execCommand("copy");
 
   /* Display the info message */
-  document.getElementById("copied_to_clipboard").style.display = "block";
+  infoMsgElem.style.display = "block";
 }
 </script>
 
@@ -146,6 +154,39 @@ function copyToClipboard() {
                     </p>
                     <div style="float: left;" id="ajax_response"><xsl:comment/><!-- ajax response here--></div>
                 </form>
+                <div style="margin-left: 200px; padding: 20px 0 10px 0; clear: both;"><h3>OR Generate an Invoice Link</h3></div>
+                <p>You may want to request payment from a guest (or ex-guest) but it may not be tied to a booking.
+                   The most common example is to request for postage to be paid before sending a lost item.
+                </p>
+                <p>Enter the details below. This will generate a link that you can email the recipient (this page won't do this for you!). 
+                   Once they navigate to the link you send them below and provide their card details, they will receive a confirmation 
+                   email (if payment is successful) and the reception email account will also be CC'd in. You can also view any pending/completed 
+                   payments in the <a href="/payments/payment-history">Payment History</a> page.
+                </p>
+                <form name="post_invoice" action="" method="post" id="post_invoice">
+                    <p>
+                        <div>
+                            <span class="invoice_label">Name:</span>
+                            <input id="invoice_name" name="invoice_name" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_name}" />
+                        </div>
+                        <div>
+                            <span class="invoice_label">Email:</span>
+                            <input id="invoice_email" name="invoice_email" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_email}" />
+                            <span style="margin-left: 25px;" class="invoice_label">Amount (£):</span>
+                            <input id="invoice_amount" name="invoice_amount" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_amount}" />
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span class="invoice_label">Description (appears on transaction):</span>
+                            <textarea id="invoice_description" name="invoice_description" class="regular-text code" style="margin-left: 25px; width: 440px;" maxlength="{payment_description_max_length}"><xsl:comment/></textarea>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span class="invoice_label">Staff Notes (not sent to recipient):</span>
+                            <textarea id="invoice_notes" name="invoice_notes" class="regular-text code" style="margin-left: 25px; width: 440px;"><xsl:comment/></textarea>
+                            <a class="btn btn-primary" style="margin-left: 10px; vertical-align: bottom; font-weight: bold;" onclick="generate_invoice_link(document.post_invoice.invoice_name.value, document.post_invoice.invoice_email.value, document.post_invoice.invoice_amount.value, document.post_invoice.invoice_description.value, document.post_invoice.invoice_notes.value);">Submit</a>
+                        </div>
+                    </p>
+                    <div style="float: left;" id="ajax_response_inv"><xsl:comment/><!-- ajax response here--></div>
+                </form>
             </div>
         </div>
     </xsl:if>
@@ -168,8 +209,16 @@ function copyToClipboard() {
     </div>
     <div style="margin-top: 20px; margin-left: 100px;">
         <h4>Help spread the word:</h4>
-        <input id="paymentUrl" type="text" class="regular-text all-copy" readonly="readonly" onclick="copyToClipboard()" style="width:400px;" value="{payment_url}"/>
+        <input id="paymentUrl" type="text" class="regular-text all-copy" readonly="readonly" onclick="copyToClipboard(this, document.getElementById('copied_to_clipboard'))" style="width:400px;" value="{payment_url}"/>
         <p id="copied_to_clipboard" style="display: none; color: red;">Copied to clipboard!</p>
+    </div>
+</xsl:template>
+
+<xsl:template match="invoice">
+    <div style="margin-top: 20px; margin-left: 100px;">
+        <h4>Help spread the word:</h4>
+        <input id="invPaymentUrl" type="text" class="regular-text all-copy" readonly="readonly" onclick="copyToClipboard(this, document.getElementById('inv_copied_to_clipboard'))" style="width:400px;" value="{payment_url}"/>
+        <p id="inv_copied_to_clipboard" style="display: none; color: red;">Copied to clipboard!</p>
     </div>
 </xsl:template>
 

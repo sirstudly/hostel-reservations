@@ -63,6 +63,9 @@
             </p>
         </div>
         <xsl:apply-templates select="payments" />
+	    <xsl:if test="not(payments)">
+	        <div style="margin: 20px 0 20px 50px; font-style: italic;"><h4>No data available.</h4></div>
+	    </xsl:if>
     </div>
 </xsl:template>
 

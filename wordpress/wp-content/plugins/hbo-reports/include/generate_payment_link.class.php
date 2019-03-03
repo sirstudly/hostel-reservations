@@ -7,9 +7,14 @@ class GeneratePaymentLinkController extends XslTransform {
 
     // all allowable characters for lookup key
     const LOOKUPKEY_CHARSET = "2345678ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const LOOKUPKEY_LENGTH = 7; // lookup key length for bookings
+    const LOOKUPKEY_LENGTH_INV = 10; // lookup key length for invoices
 
     // currently loaded booking
     var $booking;
+
+    // generated invoice key
+    var $invoice_lookup_key;
 
     /**
      * Default constructor.
@@ -71,15 +76,33 @@ class GeneratePaymentLinkController extends XslTransform {
             error_log('Unexpected error looking up booking.');
             error_log('request: ' . json_encode($data));
             error_log('response: ' . $make_call);
+            if( strlen($response['message']) && strpos($response['message'], 'you are not using the latest version') !== false) {
+                throw new RuntimeException("Cloudbeds version sync error. Please try again later.");
+            }
             throw new RuntimeException('Unable to find this booking.');
         }
         $this->booking = $response;
 
         // this is used for generating a short URL
-        $this->booking['lookup_key'] = $this->generateRandomLookupKey(7);
+        $this->booking['lookup_key'] = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH);
         LilHotelierDBO::insertLookupKeyForBooking($response['reservation_id'], $this->booking['lookup_key']);
     }
-    
+
+    /**
+     * Records the invoice details and generates a payment link.
+     * $name : recipient name
+     * $email : recipient email
+     * $amount : amount to be paid
+     * $description : payment description
+     * $notes : staff notes
+     */
+    function generateInvoiceLink($name, $email, $amount, $description, $notes) {
+        $lookup_key = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH_INV);
+        LilHotelierDBO::insertPaymentInvoice($name, $email, $amount, $description,
+            $notes, $lookup_key);
+        $this->invoice_lookup_key = $lookup_key;
+    }
+
     /**
      * Returns a random lookup key with the given length.
      * @param int $keylen length of lookup key
@@ -102,6 +125,8 @@ class GeneratePaymentLinkController extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
+        // payment description is 100 characters max
+        $parentElement->appendChild($domtree->createElement('payment_description_max_length', 100 - (strlen(get_option("hbo_sagepay_transaction_description")) + self::LOOKUPKEY_LENGTH_INV + 1)));
         if($this->booking) {
             $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
             $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
@@ -118,6 +143,10 @@ class GeneratePaymentLinkController extends XslTransform {
             $bookingRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_payments_url") . $this->booking['lookup_key']));
             $parentElement->appendChild($bookingRoot);
         }
+        if($this->invoice_lookup_key) {
+            $invoiceRoot = $parentElement->appendChild($domtree->createElement('invoice'));
+            $invoiceRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_payments_url") . $this->invoice_lookup_key));
+        }
     }
     
     /** 
@@ -126,6 +155,9 @@ class GeneratePaymentLinkController extends XslTransform {
            <booking>
                ...
            </booking>
+           <invoice_lookup_key>
+               ...
+           </invoice_lookup_key>
         </view>
      */
     function toXml() {
