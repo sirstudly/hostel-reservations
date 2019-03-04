@@ -97,6 +97,25 @@ class GeneratePaymentLinkController extends XslTransform {
      * $notes : staff notes
      */
     function generateInvoiceLink($name, $email, $amount, $description, $notes) {
+        if (empty($name)) {
+            throw new ValidationException("Name cannot be blank.");
+        }
+        if (empty($email)) {
+            throw new ValidationException("Email cannot be blank.");
+        }
+        if (empty($amount)) {
+            throw new ValidationException("Amount cannot be blank.");
+        }
+        if (empty($description)) {
+            throw new ValidationException("Description cannot be blank.");
+        }
+        if (empty($notes)) {
+            throw new ValidationException("Staff notes cannot be blank.");
+        }
+        if (! preg_match('/^\s*(\d+)(\.\d{2})?\s*$/', $amount)) {
+            throw new ValidationException("Invalid amount.");
+        }
+
         $lookup_key = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH_INV);
         LilHotelierDBO::insertPaymentInvoice($name, $email, $amount, $description,
             $notes, $lookup_key);
@@ -140,12 +159,12 @@ class GeneratePaymentLinkController extends XslTransform {
             $bookingRoot->appendChild($domtree->createElement('num_guests', intval($this->booking['adults_number']) + intval($this->booking['kids_number'])));
             $bookingRoot->appendChild($domtree->createElement('grand_total', $this->booking['grand_total']));
             $bookingRoot->appendChild($domtree->createElement('balance_due', $this->booking['balance_due']));
-            $bookingRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_payments_url") . $this->booking['lookup_key']));
+            $bookingRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_booking_payments_url") . $this->booking['lookup_key']));
             $parentElement->appendChild($bookingRoot);
         }
         if($this->invoice_lookup_key) {
             $invoiceRoot = $parentElement->appendChild($domtree->createElement('invoice'));
-            $invoiceRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_payments_url") . $this->invoice_lookup_key));
+            $invoiceRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_invoice_payments_url") . $this->invoice_lookup_key));
         }
     }
     
