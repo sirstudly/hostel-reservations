@@ -7,8 +7,7 @@ class GeneratePaymentLinkController extends XslTransform {
 
     // all allowable characters for lookup key
     const LOOKUPKEY_CHARSET = "2345678ABCDEFGHJKLMNPQRSTUVWXYZ";
-    const LOOKUPKEY_LENGTH = 7; // lookup key length for bookings
-    const LOOKUPKEY_LENGTH_INV = 10; // lookup key length for invoices
+    const LOOKUPKEY_LENGTH = 7;
 
     // currently loaded booking
     var $booking;
@@ -116,7 +115,7 @@ class GeneratePaymentLinkController extends XslTransform {
             throw new ValidationException("Invalid amount.");
         }
 
-        $lookup_key = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH_INV);
+        $lookup_key = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH);
         LilHotelierDBO::insertPaymentInvoice($name, $email, $amount, $description,
             $notes, $lookup_key);
         $this->invoice_lookup_key = $lookup_key;
@@ -145,7 +144,7 @@ class GeneratePaymentLinkController extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         // payment description is 100 characters max
-        $parentElement->appendChild($domtree->createElement('payment_description_max_length', 100 - (strlen(get_option("hbo_sagepay_transaction_description")) + self::LOOKUPKEY_LENGTH_INV + 1)));
+        $parentElement->appendChild($domtree->createElement('payment_description_max_length', 100 - (strlen(get_option("hbo_sagepay_transaction_description")) + self::LOOKUPKEY_LENGTH + 1)));
         if($this->booking) {
             $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
             $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
