@@ -270,22 +270,89 @@ function generate_payment_link( booking_ref ) {
 //notes : staff notes
 function generate_invoice_link( name, email, amount, description, notes ) {
 
-jQuery('#ajax_response_inv').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+	jQuery('#ajax_response_inv').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+	
+	jQuery.ajax({                                           // Start Ajax Sending
+	   url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+	   type:'POST',
+	   success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response_inv').html( data ); },
+	   error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+	   data:{
+	       ajax_action : 'GENERATE_INVOICE_LINK',
+	       invoice_name : name,
+	       invoice_email : email,
+	       invoice_amount : amount,
+	       invoice_description : description,
+	       invoice_notes : notes
+	   }
+	});
+}
 
-jQuery.ajax({                                           // Start Ajax Sending
-   url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
-   type:'POST',
-   success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response_inv').html( data ); },
-   error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
-   data:{
-       ajax_action : 'GENERATE_INVOICE_LINK',
-       invoice_name : name,
-       invoice_email : email,
-       invoice_amount : amount,
-       invoice_description : description,
-       invoice_notes : notes
-   }
-});
+//Update the invoice detail dialog after adding a note.
+//invoice_id : PK of wp_invoice
+//note_text : new note to insert
+function add_invoice_note( invoice_id, note_text ) {
+
+	jQuery('#ajax_response-' + invoice_id).html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+	
+	jQuery.ajax({                                           // Start Ajax Sending
+		 url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+		 type:'POST',
+		 success: function (data, textStatus){if( textStatus == 'success') jQuery('#inv-detail-' + invoice_id).html( data ); },
+		 error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+		 data:{
+		     ajax_action : 'ADD_INVOICE_NOTE',
+		     invoice_id : invoice_id,
+		     note_text : note_text
+	 }
+	});
+}
+
+//update the invoice table on the invoice payments page
+//include_acknowledged : true to include all records
+function update_invoice_payment_view(include_acknowledged) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#invoice_view').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'UPDATE_INVOICE_PAYMENT_VIEW',
+            include_acknowledged : include_acknowledged
+        }
+    });
+	
+}
+
+//hide invoice payment
+//invoice_id : id of invoice to hide
+function acknowledge_invoice_payment( invoice_id ) {
+	 jQuery.ajax({                                           // Start Ajax Sending
+	     url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+	     type:'POST',
+	     success: function (data, textStatus){ /* no update to page */ },
+	     error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+	     data:{
+	         ajax_action : 'ACKNOWLEDGE_INVOICE_PAYMENT',
+	         invoice_id : invoice_id
+	     }
+	 });
+}
+
+//show invoice payment
+//invoice_id : id of invoice to show
+function unacknowledge_invoice_payment( invoice_id ) {
+	jQuery.ajax({                                           // Start Ajax Sending
+		   url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+		   type:'POST',
+		   success: function (data, textStatus){ /* no update to page */ },
+		   error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+		   data:{
+		       ajax_action : 'UNACKNOWLEDGE_INVOICE_PAYMENT',
+		       invoice_id : invoice_id
+		   }
+		});
 }
 
 // Adds a new scheduled job. Only pass one of the two parameters.

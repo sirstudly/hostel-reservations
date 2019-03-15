@@ -81,6 +81,22 @@ class AjaxController {
                 $this->generateInvoiceLink();
                 break;
 
+            case 'ADD_INVOICE_NOTE':
+                $this->addInvoiceNote();
+                break;
+                
+            case 'UPDATE_INVOICE_PAYMENT_VIEW':
+                $this->updateInvoicePaymentView();
+                break;
+
+            case  'ACKNOWLEDGE_INVOICE_PAYMENT':
+                $this->acknowledge_invoice_payment();
+                break;
+                
+            case  'UNACKNOWLEDGE_INVOICE_PAYMENT':
+                $this->unacknowledge_invoice_payment();
+                break;
+                
             case 'ADD_SCHEDULED_JOB':
                 $this->addScheduledJob();
                 break;
@@ -432,7 +448,7 @@ class AjaxController {
     }
 
     /**
-     * Inserts a record in the wp_sagepay_invoice table and generates a new payment link.
+     * Inserts a record in the wp_invoice table and generates a new payment link.
      * Requires POST variables:
      *   invoice_name : email recipient
      *   invoice_email : email address
@@ -467,6 +483,62 @@ class AjaxController {
         }
     }
 
+    /**
+     * Inserts a record in the wp_invoice_note table and regenerates the invoice detail dialog.
+     * Requires POST variables:
+     *   invoice_id : PK of invoice
+     *   note_text : note to add
+     */
+    function addInvoiceNote() {
+        try {
+            $invPage = $_SESSION['PAYMENT_HISTORY_INV_CONTROLLER'];
+            $invPage->addInvoiceNote($_POST['invoice_id'], $_POST['note_text']);
+            $invPage->doView($_POST['invoice_id'], $invPage->show_acknowledged);
+            echo $invPage->toHtml();
+        }
+        catch( ValidationException $e ) {
+            $invPage->doView($_POST['invoice_id'], $invPage->show_acknowledged);
+            echo $invPage->toHtml();
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_response-<?=$_POST['invoice_id']?>")
+                     .html('<span style="color:red"><?=$e->getMessage()?></span>');
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Acknowledges an invoice payment.
+     * Requires POST variables:
+     *   invoice_id : ID of invoice
+     */
+    function acknowledge_invoice_payment() {
+        $invPage = $_SESSION['PAYMENT_HISTORY_INV_CONTROLLER'];
+        $invPage->acknowledgeInvoice($_POST['invoice_id']);
+    }
+    
+    /**
+     * Unacknowledges an invoice payment.
+     * Requires POST variables:
+     *   invoice_id : ID of invoice
+     */
+    function unacknowledge_invoice_payment() {
+        $invPage = $_SESSION['PAYMENT_HISTORY_INV_CONTROLLER'];
+        $invPage->unacknowledgeInvoice($_POST['invoice_id']);
+    }
+    
+    /**
+     * Reloads the invoice payment table on the invoice payments page.
+     * Requires POST variables:
+     *    include_acknowledged : true to show all records, false to hide ack'd records
+     */
+    function updateInvoicePaymentView() {
+        $invPage = $_SESSION['PAYMENT_HISTORY_INV_CONTROLLER'];
+        $invPage->doViewReloadTable($_POST['include_acknowledged'] == 'true');
+        echo $invPage->toHtml();
+    }
+    
     /**
      * Adds a new scheduled job.
      * Requires POST variables:

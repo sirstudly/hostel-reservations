@@ -69,8 +69,12 @@
                                         <td><input id="generate_payment_link_url"  name="hbo_generate_payment_link_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{generate_payment_link_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
-                                        <th scope="row"><label for="payment_history_url">Payment History Link</label></th>
+                                        <th scope="row"><label for="payment_history_url">Booking Payment History Link</label></th>
                                         <td><input id="payment_history_url"  name="hbo_payment_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{payment_history_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
+                                        <th scope="row"><label for="payment_history_inv_url">Invoice Payment History Link</label></th>
+                                        <td><input id="payment_history_inv_url"  name="hbo_payment_history_inv_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{payment_history_inv_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
                                         <th scope="row"><label for="report_settings_url">Report Settings</label></th>

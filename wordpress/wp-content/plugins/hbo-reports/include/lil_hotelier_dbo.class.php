@@ -286,7 +286,7 @@ class LilHotelierDBO {
         global $wpdb;
         if (false === $wpdb->insert("wp_booking_lookup_key",
                 array( 'reservation_id' => $reservationId, 'lookup_key' => $lookupKey ),
-                array( '%s', '%s'))) {
+                array( '%s', '%s' ))) {
             error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
             throw new DatabaseException($wpdb->last_error);
         }
@@ -882,14 +882,15 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns previous payments made to Sagepay.
+     * Returns previous payments made for bookings to Sagepay.
      */
-    static function getSagepayPaymentHistory() {
+    static function getSagepayPaymentBookingHistory() {
         global $wpdb;
         $resultset = $wpdb->get_results(
             "SELECT t.reservation_id, t.booking_reference, t.email, t.vendor_tx_code, t.payment_amount, a.auth_status, a.auth_status_detail, a.card_type, a.last_4_digits, a.processed_date
                FROM wp_sagepay_transaction t
               INNER JOIN wp_sagepay_tx_auth a ON t.vendor_tx_code = a.vendor_tx_code
+              WHERE t.reservation_id IS NOT NULL
               ORDER BY t.id DESC, a.id DESC
               LIMIT 100" );
 
@@ -899,6 +900,138 @@ class LilHotelierDBO {
         return $resultset;
     }
 
+    /**
+     * Returns previous invoice payments made to Sagepay.
+     * @param int $invoice_id (optional) PK of invoice
+     * @param boolean $show_acknowledged (optional) show acknowledged records
+     */
+    static function getSagepayPaymentInvoiceHistory($invoice_id = null, $show_acknowledged = FALSE) {
+        global $wpdb;
+        if($invoice_id != null && !is_numeric($invoice_id)) {
+            // probably not the cleanest way to avoid SQL injection...
+            throw new DatabaseException("Ha! Nice try. Stop passing me junk. INV ID: " . $invoice_id);
+        }
+        $where_clause = $invoice_id == null ? "WHERE 1 = 1" : "WHERE id = $invoice_id";
+        $where_clause .= $show_acknowledged ? "" : " AND acknowledged_date IS NULL";
+        $invoice_rs = $wpdb->get_results(
+            "SELECT i.id AS `invoice_id`, i.txn_id, i.recipient_name, i.email AS `recipient_email`, i.payment_description, i.payment_amount AS `payment_requested`, i.acknowledged_date
+               FROM wp_invoice i 
+             $where_clause
+              ORDER BY i.id DESC
+              LIMIT 100" );
+        
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // all transactions for those invoices matched above
+        $transaction_rs = $wpdb->get_results(
+            "SELECT tx.id AS `txn_id`, tx.first_name, tx.last_name, tx.email, tx.vendor_tx_code, tx.payment_amount,
+                    txa.id AS `txn_auth_id`, txa.auth_status, txa.auth_status_detail, txa.card_type, txa.last_4_digits, txa.processed_date
+               FROM wp_sagepay_transaction tx
+              INNER JOIN (SELECT txn_id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.txn_id = tx.id) 
+               LEFT OUTER JOIN wp_sagepay_tx_auth txa ON txa.vendor_tx_code = tx.vendor_tx_code
+              ORDER BY tx.id DESC, txa.id DESC" );
+        
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        $notes_rs = $wpdb->get_results(
+            "SELECT n.invoice_id, n.notes AS `note_text`, n.created_date
+               FROM wp_invoice_notes n
+              INNER JOIN (SELECT id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.id = n.invoice_id) 
+              ORDER BY n.id" );
+        
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+        
+        foreach( $invoice_rs as $inv ) {
+            foreach( $transaction_rs as $txn ) {
+                // push transaction onto invoice if matched
+                if( $txn->txn_id === $inv->txn_id ) {
+                    if( ! isset( $inv->transactions )) {
+                        $inv->transactions = array();
+                    }
+                    $inv->transactions[] = $txn;
+                }
+            }
+            foreach( $notes_rs as $note ) {
+                if( $inv->invoice_id === $note->invoice_id ) {
+                    if( ! isset( $inv->notes )) {
+                        $inv->notes = array();
+                    }
+                    $inv->notes[] = $note;
+                }
+            }
+        }
+        return $invoice_rs;
+    }
+    
+    /**
+     * Inserts a note on the given invoice.
+     * @param int $invoice_id PK on invoice table
+     * @param string $note_text note to add
+     */
+    static function addInvoiceNote($invoice_id, $note_text) {
+        global $wpdb;
+        if (false === $wpdb->insert("wp_invoice_notes",
+                array( 'invoice_id' => $invoice_id, 'notes' => $note_text ),
+                array( '%d', '%s'))) {
+            error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+            throw new DatabaseException($wpdb->last_error);
+        }
+        return $wpdb->insert_id;
+    }
+
+    /**
+     * Sets the acknowledge date on the given invoice
+     * @param integer $invoice_id PK of invoice
+     */
+    static function acknowledgeInvoice($invoice_id) {
+        global $wpdb;
+        $returnval = $wpdb->update(
+            "wp_invoice",
+            array( 'acknowledged_date' => current_time('mysql', 1) ),
+            array( 'id' => $invoice_id ) );
+        
+        if(false === $returnval) {
+            throw new DatabaseException("Error occurred during UPDATE");
+        }
+    }
+
+    /**
+     * Unsets the acknowledge date on the given invoice
+     * @param integer $invoice_id PK of invoice
+     */
+    function unacknowledgeInvoice($invoice_id) {
+
+        // attempting to use $wpdb directly to update timestamp to null
+        // results in it being set to "0000-00-00 00:00:00"
+        // so using direct SQL instead
+        $dblink = new DbTransaction();
+        try {
+            $stmt = $dblink->mysqli->prepare(
+                "UPDATE wp_invoice
+                        SET acknowledged_date = NULL
+                      WHERE id = ?");
+            $stmt->bind_param('i', $invoice_id);
+            if(false === $stmt->execute()) {
+                throw new DatabaseException("Error occurred updating wp_invoice: ".$dblink->mysqli->error);
+            }
+            $stmt->close();
+            
+        } catch(Exception $ex) {
+            $dblink->mysqli->rollback();
+            $dblink->mysqli->close();
+            throw $ex;
+        }
+        
+        $dblink->mysqli->commit();
+        $dblink->mysqli->close();
+    }
+        
     /**
      * Returns the wp_lh_jobs records for the past number of days in reverse chrono order.
      * $numberOfDays : number of days to include in the past
