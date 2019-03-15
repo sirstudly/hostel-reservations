@@ -79,18 +79,6 @@
     font-weight: bold;
 }
 
-/* Fix Close Dialog Cross Weirdness */
-.ui-dialog-titlebar-close::before {
-    content: ' ' !important;
-}
-.ui-dialog .ui-dialog-titlebar-close span {
-    margin: 0 !important;
-}
-.ui-button-icon-only .ui-icon {
-    left: 0% !important;
-    top: 0% !important;
-}
-
 </style>
 <script type="text/javascript">
 function initDialogs() {

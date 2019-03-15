@@ -113,7 +113,7 @@ class WP_HostelBackoffice {
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('jquery-ui-dialog');
         wp_enqueue_style('wp-jquery-ui-dialog');
-        wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+// warning: mixed content        wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
         if (strpos($_SERVER['REQUEST_URI'], 'wpdev-booking.phpwpdev-booking') !== false) {
             if (defined('WP_ADMIN') && WP_ADMIN === true) { 
                 wp_enqueue_script('jquery-ui-dialog'); 

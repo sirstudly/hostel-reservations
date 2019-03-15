@@ -51,7 +51,7 @@
 
     <div id="report-container" class="wrap bookingpage wpdevbk">
 
-        <h3>Payment History</h3> 
+        <h3>Booking Payment History</h3> 
 
         <div style="font-style:italic;">
             <p>This lists all booking payments made to our payment gateway (Sagepay) <b>outside</b> of Cloudbeds.<br/>
