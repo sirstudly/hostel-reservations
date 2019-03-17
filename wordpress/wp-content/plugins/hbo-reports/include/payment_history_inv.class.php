@@ -102,11 +102,15 @@ class PaymentHistoryInvoiceController extends XslTransform {
                     foreach( $invoice->transactions as $txn ) {
                         $txnRoot = $parentElement->appendChild($domtree->createElement('transaction'));
                         foreach( array("txn_id", "first_name", "last_name", "email", "vendor_tx_code",
-                                    "txn_auth_id", "auth_status", "auth_status_detail", "card_type", "last_4_digits", "processed_date") as &$fieldname ) {
+                                    "txn_auth_id", "auth_status", "auth_status_detail", "card_type", "last_4_digits") as &$fieldname ) {
                             if( !empty($txn->$fieldname)) {
                                 $txnRoot->appendChild($domtree->createElement($fieldname, htmlspecialchars($txn->$fieldname)));
                             }
                         }
+                        // processed_date is actually the date the processor sends out the email
+                        // we want to display the date the transaction was made
+                        $txnRoot->appendChild($domtree->createElement("processed_date", $txn->created_date));
+                            
                         if( !empty($txn->payment_amount)) {
                             $txnRoot->appendChild($domtree->createElement("payment_amount", number_format($txn->payment_amount, 2)));
                         }

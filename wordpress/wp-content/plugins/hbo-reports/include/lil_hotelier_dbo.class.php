@@ -928,7 +928,7 @@ class LilHotelierDBO {
         // all transactions for those invoices matched above
         $transaction_rs = $wpdb->get_results(
             "SELECT tx.id AS `txn_id`, tx.invoice_id, tx.first_name, tx.last_name, tx.email, tx.vendor_tx_code, tx.payment_amount,
-                    txa.id AS `txn_auth_id`, txa.auth_status, txa.auth_status_detail, txa.card_type, txa.last_4_digits, txa.processed_date
+                    txa.id AS `txn_auth_id`, txa.auth_status, txa.auth_status_detail, txa.card_type, txa.last_4_digits, txa.processed_date, txa.created_date
                FROM wp_sagepay_transaction tx
               INNER JOIN (SELECT id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.id = tx.invoice_id) 
                LEFT OUTER JOIN wp_sagepay_tx_auth txa ON txa.vendor_tx_code = tx.vendor_tx_code
