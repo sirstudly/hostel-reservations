@@ -161,7 +161,7 @@ function copyToClipboard(inputElem, infoMsgElem) {
                 <p>Enter the details below. This will generate a link that you can email the recipient (this page won't do this for you!). 
                    Once they navigate to the link you send them below and provide their card details, they will receive a confirmation 
                    email (if payment is successful) and the reception email account will also be CC'd in. You can also view any pending/completed 
-                   payments in the <a href="/payments/payment-history">Payment History</a> page.
+                   payments in the <a href="{payment_history_inv_url}">Invoice Payment History</a> page.
                 </p>
                 <form name="post_invoice" action="" method="post" id="post_invoice">
                     <p>

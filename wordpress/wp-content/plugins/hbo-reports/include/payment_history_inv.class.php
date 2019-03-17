@@ -95,21 +95,27 @@ class PaymentHistoryInvoiceController extends XslTransform {
                         $invoiceRoot->appendChild($domtree->createElement($fieldname, htmlspecialchars($invoice->$fieldname)));
                     }
                 }
+                $invoiceRoot->appendChild($domtree->createElement('invoice_url', get_option("hbo_invoice_payments_url") . $invoice->lookup_key));
                 if(isset($invoice->transactions)) {
                     $txnsRoot = $parentElement->appendChild($domtree->createElement('transactions'));
                     $total_paid = 0;
                     foreach( $invoice->transactions as $txn ) {
                         $txnRoot = $parentElement->appendChild($domtree->createElement('transaction'));
-                        foreach( array("txn_id", "first_name", "last_name", "email", "vendor_tx_code", "payment_amount",
-                                "txn_auth_id", "auth_status", "auth_status_detail", "card_type", "last_4_digits", "processed_date") as &$fieldname ) {
-                            $txnRoot->appendChild($domtree->createElement($fieldname, htmlspecialchars($txn->$fieldname)));
+                        foreach( array("txn_id", "first_name", "last_name", "email", "vendor_tx_code",
+                                    "txn_auth_id", "auth_status", "auth_status_detail", "card_type", "last_4_digits", "processed_date") as &$fieldname ) {
+                            if( !empty($txn->$fieldname)) {
+                                $txnRoot->appendChild($domtree->createElement($fieldname, htmlspecialchars($txn->$fieldname)));
+                            }
+                        }
+                        if( !empty($txn->payment_amount)) {
+                            $txnRoot->appendChild($domtree->createElement("payment_amount", number_format($txn->payment_amount, 2)));
                         }
                         if($txn->auth_status == 'OK') {
                             $total_paid += $txn->payment_amount;
                         }
                         $txnsRoot->appendChild($txnRoot);
                     }
-                    $invoiceRoot->appendChild($domtree->createElement('total_paid', $total_paid));
+                    $invoiceRoot->appendChild($domtree->createElement('total_paid', number_format($total_paid, 2)));
                     $invoiceRoot->appendChild($txnsRoot);
                 }
                 if(isset($invoice->notes)) {
@@ -156,7 +162,6 @@ class PaymentHistoryInvoiceController extends XslTransform {
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
         $this->addSelfToDocument($domtree, $xmlRoot);
         $xml = $domtree->saveXML();
-error_log($xml);
         return $xml;
     }
     

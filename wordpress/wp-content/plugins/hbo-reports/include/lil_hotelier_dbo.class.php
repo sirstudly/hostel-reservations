@@ -914,7 +914,8 @@ class LilHotelierDBO {
         $where_clause = $invoice_id == null ? "WHERE 1 = 1" : "WHERE id = $invoice_id";
         $where_clause .= $show_acknowledged ? "" : " AND acknowledged_date IS NULL";
         $invoice_rs = $wpdb->get_results(
-            "SELECT i.id AS `invoice_id`, i.txn_id, i.recipient_name, i.email AS `recipient_email`, i.payment_description, i.payment_amount AS `payment_requested`, i.acknowledged_date
+            "SELECT i.id AS `invoice_id`, i.recipient_name, i.email AS `recipient_email`, 
+                    i.payment_description, i.payment_amount AS `payment_requested`, i.lookup_key, i.acknowledged_date
                FROM wp_invoice i 
              $where_clause
               ORDER BY i.id DESC
@@ -926,10 +927,10 @@ class LilHotelierDBO {
 
         // all transactions for those invoices matched above
         $transaction_rs = $wpdb->get_results(
-            "SELECT tx.id AS `txn_id`, tx.first_name, tx.last_name, tx.email, tx.vendor_tx_code, tx.payment_amount,
+            "SELECT tx.id AS `txn_id`, tx.invoice_id, tx.first_name, tx.last_name, tx.email, tx.vendor_tx_code, tx.payment_amount,
                     txa.id AS `txn_auth_id`, txa.auth_status, txa.auth_status_detail, txa.card_type, txa.last_4_digits, txa.processed_date
                FROM wp_sagepay_transaction tx
-              INNER JOIN (SELECT txn_id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.txn_id = tx.id) 
+              INNER JOIN (SELECT id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.id = tx.invoice_id) 
                LEFT OUTER JOIN wp_sagepay_tx_auth txa ON txa.vendor_tx_code = tx.vendor_tx_code
               ORDER BY tx.id DESC, txa.id DESC" );
         
@@ -950,7 +951,7 @@ class LilHotelierDBO {
         foreach( $invoice_rs as $inv ) {
             foreach( $transaction_rs as $txn ) {
                 // push transaction onto invoice if matched
-                if( $txn->txn_id === $inv->txn_id ) {
+                if( $txn->invoice_id === $inv->invoice_id ) {
                     if( ! isset( $inv->transactions )) {
                         $inv->transactions = array();
                     }

@@ -164,6 +164,10 @@ jQuery(document).ready(function(){
     <div class="visibility_container inv-detail" title="Invoice/Payment Details">
         <xsl:attribute name="id">inv-detail-<xsl:value-of select="invoice_id"/></xsl:attribute>
         <div style="width:100%; clear:both;">
+            <label style="width: 200px; float: left;">Payment Link</label>
+            <div><a><xsl:attribute name="href"><xsl:value-of select="invoice_url"/></xsl:attribute><xsl:value-of select="invoice_url"/></a></div>
+        </div>
+        <div style="width:100%; clear:both;">
 	        <label style="width: 200px; float: left;">Contact</label>
 	        <div><xsl:value-of select="recipient_name"/> (<xsl:value-of select="recipient_email"/>)</div>
         </div>
