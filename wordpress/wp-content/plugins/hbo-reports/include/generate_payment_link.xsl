@@ -113,7 +113,7 @@ function copyToClipboard(inputElem, infoMsgElem) {
             <div class="wpdevbk body-content booking_form_div">
                 <h3>What's this? A new page? What is it for?</h3>
                 <p>
-                    We're currently testing an online payment portal for guests
+                    We now have an online payment portal for guests
                     to pay for their booking (e.g. for group bookings, unpaid deposits, etc..) without
                     resorting to calling us or (gasp!) emailing their card details to us!
                 </p>
@@ -129,18 +129,6 @@ function copyToClipboard(inputElem, infoMsgElem) {
                 </p>
                 <p>Successful payments will be automatically added to their "Folio" page in Cloudbeds.
                    Multiple guests (in a group) can use the same link to pay separately if they wish.
-                </p>
-                <p style="border-style: dotted; border-width: 1px; padding: 5px;">Note: This is currently pointing to the test payment gateway, but it's using our real
-                   Cloudbeds account so if you're testing, use it against a test booking you've created with <i>your</i>
-                   email address as any confirmation emails will be sent there!
-                </p>
-                <p>Here are some test cards you can use:
-                   <div style="padding-left: 50px;">
-                       VISA: 4929000005559<br/>
-                       Mastercard: 5404000000000043<br/>
-                       Expiry: any<br/>
-                       Security Code: 123
-                   </div>
                 </p>
                 <form name="post_option" action="" method="post" id="post_option">
                     <p>
