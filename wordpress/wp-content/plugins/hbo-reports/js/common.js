@@ -246,7 +246,8 @@ function submit_manual_charge( bookingRef, amount, note, override_card_details )
 
 //Looks up a booking and generates a new payment link
 //booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
-function generate_payment_link( booking_ref ) {
+//deposit_only : boolean (true to pre-populate just the deposit amount, false for total outstanding)
+function generate_payment_link( booking_ref, deposit_only ) {
 
  jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
@@ -257,7 +258,8 @@ function generate_payment_link( booking_ref ) {
      error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
      data:{
          ajax_action : 'GENERATE_PAYMENT_LINK',
-         booking_ref : booking_ref
+         booking_ref : booking_ref,
+         deposit_only : deposit_only
      }
  });
 }

@@ -281,12 +281,14 @@ class LilHotelierDBO {
     /**
      * Inserts a lookup key for a given booking.
      * $reservationId : ID of reservation
+     * $lookupKey : unique key for this reservation
+     * $payment_requested : (optional) amount to pre-populate payment form
      */
-    static function insertLookupKeyForBooking( $reservationId, $lookupKey ) {
+    static function insertLookupKeyForBooking( $reservationId, $lookupKey, $payment_requested ) {
         global $wpdb;
         if (false === $wpdb->insert("wp_booking_lookup_key",
-                array( 'reservation_id' => $reservationId, 'lookup_key' => $lookupKey ),
-                array( '%s', '%s' ))) {
+            array( 'reservation_id' => $reservationId, 'lookup_key' => $lookupKey, 'payment_requested' => $payment_requested ),
+                array( '%s', '%s', '%f' ))) {
             error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
             throw new DatabaseException($wpdb->last_error);
         }

@@ -424,11 +424,12 @@ class AjaxController {
      * Looks up an existing booking and generates a new payment link.
      * Requires POST variables:
      *   booking_ref : cloudbeds "identifier"
+     *   deposit_only : true to prepopulate deposit amount, false for total outstanding
      */
     function generatePaymentLink() {
         try {
             $paymentLinkPage = new GeneratePaymentLinkController();
-            $paymentLinkPage->generatePaymentLink($_POST['booking_ref']);
+            $paymentLinkPage->generatePaymentLink($_POST['booking_ref'], $_POST['deposit_only'] == 'true' ? true : false);
             ?>
             <script type="text/javascript">
                 document.getElementById('ajax_response').innerHTML = <?php echo json_encode($paymentLinkPage->toHtml()); ?>;

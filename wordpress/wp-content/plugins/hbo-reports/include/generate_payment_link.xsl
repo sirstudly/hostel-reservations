@@ -137,8 +137,11 @@ function copyToClipboard(inputElem, infoMsgElem) {
                                 <span class="tooltiptext"><img src="{homeurl}/wp-content/plugins/hbo-reports/img/cloudbeds-reservation.png"/></span>
                             </div>                       
                             <input id="booking_ref" name="booking_ref" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="20" value="{booking_ref}" />
-                            <a class="btn btn-primary" style="margin-left: 15px;" onclick="generate_payment_link(document.post_option.booking_ref.value);">Submit</a>
-                       </div>
+                            <a class="btn btn-primary" style="margin-left: 15px;" onclick="generate_payment_link(document.post_option.booking_ref.value, document.post_option.deposit_chk.checked);">Submit</a>
+                        </div>
+                        <div class="form_label">Request Deposit Only (first night):
+                            <input id="deposit_chk" name="deposit_chk" type="checkbox" style="margin-left: 25px;"/>
+                        </div>
                     </p>
                     <div style="float: left;" id="ajax_response"><xsl:comment/><!-- ajax response here--></div>
                 </form>
@@ -192,6 +195,7 @@ function copyToClipboard(inputElem, infoMsgElem) {
         Checkin Date: <xsl:value-of select="checkin_date"/><br/>
         Checkout Date: <xsl:value-of select="checkout_date"/><br/>
         Number of Guests: <xsl:value-of select="num_guests"/><br/>
+        First Night: £<xsl:value-of select="amount_first_night"/><br/>
         Grand Total: £<xsl:value-of select="grand_total"/><br/>
         Balance Due: £<xsl:value-of select="balance_due"/><br/>
     </div>
