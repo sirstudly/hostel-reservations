@@ -33,7 +33,7 @@ class PaymentHistoryController extends XslTransform {
             $paymentsRoot = $parentElement->appendChild($domtree->createElement('payments'));
             foreach( $this->payments as $payment ) {
                 $paymentRoot = $parentElement->appendChild($domtree->createElement('payment'));
-                foreach( array("reservation_id", "booking_reference", "email", "vendor_tx_code", "payment_amount", "auth_status", "auth_status_detail", "card_type", "last_4_digits", "processed_date") as &$fieldname ) {
+                foreach( array("reservation_id", "booking_reference", "first_name", "last_name", "email", "vendor_tx_code", "payment_amount", "auth_status", "auth_status_detail", "card_type", "last_4_digits", "processed_date") as &$fieldname ) {
                     if( !empty($payment->$fieldname) ) {
                         $paymentRoot->appendChild($domtree->createElement($fieldname, $payment->$fieldname));
                     }

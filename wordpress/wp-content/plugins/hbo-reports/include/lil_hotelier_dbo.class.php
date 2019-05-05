@@ -889,7 +889,7 @@ class LilHotelierDBO {
     static function getSagepayPaymentBookingHistory() {
         global $wpdb;
         $resultset = $wpdb->get_results(
-            "SELECT t.reservation_id, t.booking_reference, t.email, t.vendor_tx_code, t.payment_amount, a.auth_status, a.auth_status_detail, a.card_type, a.last_4_digits, a.processed_date
+            "SELECT t.reservation_id, t.booking_reference, t.first_name, t.last_name, t.email, t.vendor_tx_code, t.payment_amount, a.auth_status, a.auth_status_detail, a.card_type, a.last_4_digits, a.processed_date
                FROM wp_sagepay_transaction t
               INNER JOIN wp_sagepay_tx_auth a ON t.vendor_tx_code = a.vendor_tx_code
               WHERE t.reservation_id IS NOT NULL

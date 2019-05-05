@@ -75,8 +75,7 @@
             <xsl:when test="payment">
                 <table id="transaction-report" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
                     <thead>
-                        <th>Booking Reference</th>
-                        <th>Email</th>
+                        <th>Booking</th>
                         <th>Vendor Tx Code</th>
                         <th>Payment Amount</th>
                         <th>Authorisation Status</th>
@@ -101,10 +100,10 @@
         <td>
             <a target="_blank">
                <xsl:attribute name="href"><xsl:value-of select="data-href"/></xsl:attribute>
-               <xsl:value-of select="booking_reference"/>
-            </a>
+               <xsl:value-of select="first_name"/><xsl:text> </xsl:text><xsl:value-of select="last_name"/>
+            </a><br/>
+            <xsl:value-of select="email"/>
         </td>
-        <td><xsl:value-of select="email"/></td>
         <td><xsl:value-of select="vendor_tx_code"/></td>
         <td><xsl:value-of select="payment_amount"/></td>
         <td><xsl:value-of select="auth_status"/></td>
