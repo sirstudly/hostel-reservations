@@ -5,3 +5,4 @@ cp -p $PROJECT_ROOT/common/wordpress/wp-content/plugins/hbo-reports/hbo-reports.
 cp -p $PROJECT_ROOT/common/wordpress/wp-content/plugins/hbo-reports/hbo-reports.php $PROJECT_ROOT/highstreethostel/wp-content/plugins/hbo-reports/
 cp -p $PROJECT_ROOT/common/wordpress/wp-content/plugins/hbo-reports/hbo-reports.php $PROJECT_ROOT/royalmile/wp-content/plugins/hbo-reports/
 cp -p $PROJECT_ROOT/common/wordpress/wp-content/plugins/hbo-reports/hbo-reports.php $PROJECT_ROOT/fortwilly/wp-content/plugins/hbo-reports/
+cp -p $PROJECT_ROOT/common/wordpress/wp-content/plugins/hbo-reports/hbo-reports.php $PROJECT_ROOT/lochside/wp-content/plugins/hbo-reports/
