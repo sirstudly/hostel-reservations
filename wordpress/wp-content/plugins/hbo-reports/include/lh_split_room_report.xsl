@@ -126,6 +126,14 @@
             <xsl:apply-templates select="record"/>
         </tbody>
     </table>
+
+<script type="text/javascript">
+  jQuery('#split_room_rpt').DataTable({
+    "paging": false,
+    "searching": false,
+    "order": [[3, 'asc']]
+  });
+</script>
 </xsl:template>
 
 
@@ -145,9 +153,9 @@
         </td>
         <td><xsl:value-of select="booking_reference"/></td>
         <td><xsl:value-of select="booking_source"/></td>
-        <td><xsl:value-of select="checkin_date"/></td>
-        <td><xsl:value-of select="checkout_date"/></td>
-        <td><xsl:value-of select="booked_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
         <td><xsl:value-of select="notes"/></td>
     </tr>
 </xsl:template>

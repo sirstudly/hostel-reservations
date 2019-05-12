@@ -87,6 +87,14 @@
                         <xsl:apply-templates select="payment"/>
                     </tbody>
                 </table>
+
+<script type="text/javascript">
+   jQuery('#transaction-report').DataTable({
+    "paging": false,
+    "searching": false,
+    "order": [[6, 'desc']]
+  });
+</script>
             </xsl:when>
             <xsl:otherwise>
                 <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
@@ -109,7 +117,7 @@
         <td><xsl:value-of select="auth_status"/></td>
         <td><xsl:value-of select="auth_status_detail"/></td>
         <td><xsl:if test="card_type and last_4_digits"><xsl:value-of select="card_type"/> **** **** **** <xsl:value-of select="last_4_digits"/></xsl:if></td>
-        <td><xsl:value-of select="processed_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="processed_datetime"/></xsl:attribute><xsl:value-of select="processed_date"/></td>
     </tr>
 </xsl:template>
 

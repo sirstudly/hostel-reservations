@@ -14,12 +14,26 @@
 
 <style media="screen" type="text/css">
 
-#split_room_rpt tbody tr:nth-child(odd) td {
+#unpaid_dep_rpt tbody tr:nth-child(odd) td {
 	background-color: #e3e3e3
 }
 
 tr.unread {
     font-weight: bold;
+}
+
+#tooltip {
+  position: absolute;
+  z-index: 1001;
+  display: none;
+  border: 2px solid #ebebeb;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #fff;
+}
+
+#report_data_view {
+  margin-bottom: 100px;
 }
 
 </style>
@@ -117,7 +131,8 @@ tr.unread {
 
 <xsl:template name="report_data">
     <p style="padding-left: 20px;"><strong>BOLD</strong> entries have not been viewed before in Little Hotelier.</p>
-    <table id="split_room_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
+    <div id="tooltip"></div>
+    <table id="unpaid_dep_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
             <th>Guest Name(s)</th>
             <th>Booking Reference</th>
@@ -125,12 +140,33 @@ tr.unread {
             <th>Checkin Date</th>
             <th>Checkout Date</th>
             <th>Booked Date</th>
-            <th>Notes</th>
+            <th data-visible="false">Notes</th>
         </thead>
         <tbody>
             <xsl:apply-templates select="record"/>
         </tbody>
     </table>
+
+<script type="text/javascript">
+  var unpaid_dep_rpt_table = jQuery('#unpaid_dep_rpt').DataTable({
+    "paging": false,
+    "searching": false,
+    "order": [[3, 'asc']]
+  });
+  
+  jQuery('#unpaid_dep_rpt').on('mousemove', 'tr', function(e) {
+    var rowData = unpaid_dep_rpt_table.row(this).data();
+    if(rowData) {
+      var rowNotes = jQuery('&lt;div&gt;').html(rowData[6]).text(); // html decode
+      jQuery("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
+      if (!jQuery("#tooltip").is(':visible')) jQuery("#tooltip").show();
+    }
+  });
+
+  jQuery('#unpaid_dep_rpt').on('mouseleave', function(e) {
+    jQuery("#tooltip").hide();
+  });  
+</script>
 </xsl:template>
 
 <xsl:template match="record">
@@ -152,9 +188,9 @@ tr.unread {
         </td>
         <td><xsl:value-of select="booking_reference"/></td>
         <td><xsl:value-of select="booking_source"/></td>
-        <td><xsl:value-of select="checkin_date"/></td>
-        <td><xsl:value-of select="checkout_date"/></td>
-        <td><xsl:value-of select="booked_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
         <td><xsl:value-of select="notes"/></td>
     </tr>
 </xsl:template>

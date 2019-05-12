@@ -14,31 +14,28 @@
 
 <style media="screen" type="text/css">
 
-#group_bookings_rpt tbody tr:nth-child(4n+1) td {
-	background-color: #e3e3e3
-}
-
-#group_bookings_rpt tbody tr:nth-child(4n+2) td {
-	background-color: #e3e3e3
+#group_bookings_rpt tr:nth-child(odd) td {
+	background-color: #e3e3e3;
 }
 
 tr.unread {
     font-weight: bold;
 }
 
-.comment_header {
-    float: left; 
-    margin: 5px 0 0 0; 
-    width: 100px;
-    font: 12px/1.5 Arial,Helvetica,sans-serif; 
-    font-weight: 700; 
-    color: rgb(31,74,146);
+#tooltip {
+  position: absolute;
+  z-index: 1001;
+  display: none;
+  border: 2px solid #ebebeb;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #fff;
 }
 
-.comment_text {
-    float: left; 
-    margin: 5px 20px 0 20px;
+#report_data_view {
+  margin-bottom: 100px;
 }
+
 </style>
 
     <div id="report-container" class="wrap bookingpage">
@@ -133,8 +130,11 @@ tr.unread {
 
 
 <xsl:template name="report_data">
-    <p style="padding-left: 20px;"><strong>BOLD</strong> entries have not been viewed before in Little Hotelier.</p>
+    <xsl:if test="../property_manager != 'cloudbeds'">
+        <p style="padding-left: 20px;"><strong>BOLD</strong> entries have not been viewed before in Little Hotelier.</p>
+    </xsl:if>
 
+    <div id="tooltip"></div>
     <table id="group_bookings_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
             <th>Guest Name(s)</th>
@@ -145,11 +145,33 @@ tr.unread {
             <th>Booked Date</th>
             <th>Payment<br/>Outstanding</th>
             <th>Number of<br/>Guests</th>
+            <th data-visible="false">Notes</th>
         </thead>
         <tbody>
             <xsl:apply-templates select="record"/>
         </tbody>
     </table>
+
+<script type="text/javascript">
+  var group_bookings_rpt_table = jQuery('#group_bookings_rpt').DataTable({
+    "paging": false,
+    "searching": false,
+    "order": [[3, 'asc']]
+  });
+  
+  jQuery('#group_bookings_rpt').on('mousemove', 'tr', function(e) {
+    var rowData = group_bookings_rpt_table.row(this).data();
+    if(rowData) {
+      var rowNotes = jQuery('&lt;div&gt;').html(rowData[8]).text(); // html decode
+      jQuery("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
+      if (!jQuery("#tooltip").is(':visible')) jQuery("#tooltip").show();
+    }
+  });
+
+  jQuery('#group_bookings_rpt').on('mouseleave', function(e) {
+    jQuery("#tooltip").hide();
+  });  
+</script>
 
 </xsl:template>
 
@@ -173,19 +195,12 @@ tr.unread {
         </td>
         <td><xsl:value-of select="booking_reference"/></td>
         <td><xsl:value-of select="booking_source"/></td>
-        <td><xsl:value-of select="checkin_date"/></td>
-        <td><xsl:value-of select="checkout_date"/></td>
-        <td><xsl:value-of select="booked_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
+        <td><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
         <td style="padding-left: 50px;"><xsl:value-of select="payment_outstanding"/></td>
         <td style="padding-left: 50px;"><xsl:value-of select="num_guests"/></td>
-    </tr>
-    <tr>
-        <td colspan="8">
-            <xsl:if test="string-length(notes) != 0">
-                <div class="comment_header">Notes: </div>
-                <div class="comment_text"><xsl:value-of select="notes"/></div>
-            </xsl:if>
-        </td>
+        <td><xsl:value-of select="notes"/></td>
     </tr>
 </xsl:template>
 

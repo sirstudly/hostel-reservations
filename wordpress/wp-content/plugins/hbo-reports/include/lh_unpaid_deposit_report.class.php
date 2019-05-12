@@ -72,15 +72,18 @@ class LHUnpaidDepositReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));
                 $recordRoot->appendChild($domtree->createElement('checkin_date_yyyymmdd', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('Y-m-d')));
+                $recordRoot->appendChild($domtree->createElement('checkin_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->getTimestamp()));
                 $recordRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->format('D, d M Y')));
+                $recordRoot->appendChild($domtree->createElement('checkout_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->getTimestamp()));
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
                 $recordRoot->appendChild($domtree->createElement('booking_source', htmlspecialchars($record->booking_source)));
                 if( $record->booked_date ) {
                     $recordRoot->appendChild($domtree->createElement('booked_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
+                    $recordRoot->appendChild($domtree->createElement('booked_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->getTimestamp()));
                 }
                 $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
-                $recordRoot->appendChild($domtree->createElement('notes', htmlspecialchars($record->notes)));
+                $recordRoot->appendChild($domtree->createElement('notes', str_replace(array("\r\n", "\n", "\r"), "<br/>", htmlspecialchars($record->notes))));
                 $recordRoot->appendChild($domtree->createElement('created_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->created_date)->format('D, d M Y H:i:s')));
             }
         }
