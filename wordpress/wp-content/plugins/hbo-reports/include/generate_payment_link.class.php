@@ -165,8 +165,8 @@ class GeneratePaymentLinkController extends XslTransform {
         if( null !== get_page_by_path( get_option("hbo_payment_history_inv_url"), OBJECT ) ) {
             $parentElement->appendChild($domtree->createElement('payment_history_inv_url', home_url() . '/' . get_option("hbo_payment_history_inv_url")));
         }
-        // payment description is 100 characters max
-        $parentElement->appendChild($domtree->createElement('payment_description_max_length', 100 - (strlen(get_option("hbo_sagepay_transaction_description")) + self::LOOKUPKEY_LENGTH + 1)));
+        // payment description is 80 characters max
+        $parentElement->appendChild($domtree->createElement('payment_description_max_length', 80 - (strlen(get_option("hbo_sagepay_transaction_description")) + self::LOOKUPKEY_LENGTH + 1)));
         if($this->booking) {
             $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
             $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
