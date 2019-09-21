@@ -47,7 +47,7 @@ class ScheduledJobViewData extends XslTransform {
             $params = array( 'days' => '90' );
         }
         elseif( $classname == 'com.macbackpackers.jobs.CreateDepositChargeJob' ) {
-            $params = array( 'days_back' => '2' );
+            $params = array( 'days_back' => '3' );
         }
         elseif( $classname == 'com.macbackpackers.jobs.CreatePrepaidChargeJob' ) {
             $params = array();
