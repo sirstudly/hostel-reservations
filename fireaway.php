@@ -1,4 +1,4 @@
-<!-- deployed to EC2 instance running processor -->
+<!-- deployed to EC2 instance running processor; save to /var/www/html/ -->
 <h3>Torpedo's away!</h3>
 <?php
 if( $_GET['target'] == 'CRH' ) {

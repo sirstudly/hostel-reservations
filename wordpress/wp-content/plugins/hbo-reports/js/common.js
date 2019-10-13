@@ -120,6 +120,33 @@ function save_cloudbeds_settings( req_headers ) {
     });
 }
 
+//reset the session details for cloudbeds
+function reset_cloudbeds_login() {
+ jQuery.ajax({                                           // Start Ajax Sending
+     url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+     type:'POST',
+     error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+     data:{
+         ajax_action : 'RESET_CLOUDBEDS_LOGIN'
+     }
+ });
+}
+
+//saves the 2FA code for cloudbeds
+//cb_2facode : 6 digit 2FA code for cloudbeds
+function update_cloudbeds_2facode( cb_2facode ) {
+ jQuery.ajax({                                           // Start Ajax Sending
+     url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+     type:'POST',
+     success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_cb').html( data ); },
+     error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+     data:{
+         ajax_action : 'UPDATE_CLOUDBEDS_2FACODE',
+         cb_2fa_code : cb_2facode
+     }
+ });
+}
+
 // saves the login details for hostelworld
 // username : HW username
 // password : HW password

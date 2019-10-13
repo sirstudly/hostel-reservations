@@ -49,6 +49,14 @@ class AjaxController {
                 $this->saveCloudbedsSettings();
                 break;
 
+            case 'RESET_CLOUDBEDS_LOGIN':
+                $this->resetCloudbedsLogin();
+                break;
+
+            case 'UPDATE_CLOUDBEDS_2FACODE':
+                $this->updateCloudbeds2FACode();
+                break;
+                
             case 'SAVE_HOSTELWORLD_SETTINGS':
                 $this->saveHostelworldSettings();
                 break;
@@ -219,6 +227,58 @@ class AjaxController {
                      .html('<?php echo $e->getMessage(); ?>')
                      .css({ 'color': 'red' });
                 jQuery("#btn_save_cloudbeds").prop( "disabled", false );
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Attempts to login to Cloudbeds again and save the session.
+     */
+    function resetCloudbedsLogin() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->resetCloudbedsLogin();
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_cb")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Saves the 2FA code for Cloudbeds.
+     * Requires POST variables:
+     *   cb_2fa_code : 2FA code
+     */
+    function updateCloudbeds2FACode() {
+        try {
+            $settingsPage = new LHReportSettings();
+            $settingsPage->updateCloudbeds2FACode( $_POST['cb_2fa_code'] );
+            
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_cb")
+                     .html('2FA code updated.')
+                     .css({ 'color': 'green' });
+                jQuery('#cloudbeds_2facode').hide();
+                jQuery('#btn_reset_cloudbeds').show();
+                jQuery("#btn_save_cb_2facode").prop( "disabled", false );
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_respond_cb")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+                jQuery("#btn_save_cb_2facode").prop( "disabled", false );
             </script>
             <?php
         }

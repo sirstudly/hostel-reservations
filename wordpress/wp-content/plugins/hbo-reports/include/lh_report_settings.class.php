@@ -105,6 +105,20 @@ class LHReportSettings extends XslTransform {
        update_option( "hbo_cloudbeds_useragent", $match_ua[1][0] );
        update_option( "hbo_cloudbeds_cookies", $match_cookie[1][0] );
    }
+   
+   /**
+    * Creates a Cloudbeds Login job.
+    */
+   function resetCloudbedsLogin() {
+       LilHotelierDBO::insertJobOfType( "com.macbackpackers.jobs.ResetCloudbedsSessionJob" );
+   }
+
+   /**
+    * After calling resetCloudbedsLogin(), call this with the 2FA code within the timeout period.
+    */
+   function updateCloudbeds2FACode( $scaCode ) {
+       update_option( "hbo_cloudbeds_2facode", $scaCode );
+   }
 
    /**
     * Updates details for hostelworld.

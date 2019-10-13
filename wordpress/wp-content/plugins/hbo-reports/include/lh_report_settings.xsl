@@ -78,6 +78,14 @@
 .mail_response_select input[type="checkbox"] {
     margin: 0 10px;
 }
+
+#cloudbeds_2facode label {
+    font-size: 12px;
+    font-weight: bold;
+    font-style: normal;
+    line-height: 25px;
+}
+
 </style>
 
 <script type="text/javascript">
@@ -209,6 +217,19 @@ jQuery(document).ready( function(){
             <div class="btn-container">
                 <div style="float: left;" id="ajax_respond_cb"><xsl:comment/><!-- ajax response here--></div>
                 <a id="btn_save_cloudbeds" class="btn btn-primary" style="float: right;" onclick="save_cloudbeds_settings(document.post_option.cloudbeds_req_headers.value); this.disabled=true;">Save</a>
+            </div>
+            <h4>Alternatively:</h4>
+            <div class="btn-container">
+                <a id="btn_reset_cloudbeds" class="btn btn-primary" style="float: right;" onclick="reset_cloudbeds_login(); jQuery(this).hide(); jQuery('#cloudbeds_2facode').show();">Reset Session</a>
+                <div id="cloudbeds_2facode" style="display:none;"> 
+	                <div style="float:left;">
+	                    <label for="cb_2fa_code">2FA Code:</label>
+	                </div>
+	                <div style="float: right;">
+	                    <input id="cb_2fa_code" name="hbo_cloudbeds_2facode" class="regular-text code" type="text" autocomplete="false" style="width:100px; margin-right: 10px; vertical-align: top;" size="10" value=""/>
+	                    <a id="btn_save_cb_2facode" class="btn btn-primary" onclick="update_cloudbeds_2facode(document.post_option.hbo_cloudbeds_2facode.value); this.disabled=true;">Confirm</a>
+	                </div>
+	            </div>
             </div>
         </div>
         </xsl:if>
