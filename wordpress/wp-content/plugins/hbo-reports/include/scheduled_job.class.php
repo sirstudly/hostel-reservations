@@ -10,9 +10,12 @@ abstract class ScheduledJob {
      */
     static function getClassnameMap() {
         $result = array();
-        if( 'cloudbeds' != get_option('hbo_property_manager')) {
-            // little hotelier specific
+        if ('cloudbeds' != get_option('hbo_property_manager')) {
+            // little hotelier specificc
             $result['com.macbackpackers.jobs.ScrapeReservationsBookedOnJob'] = 'Confirm Hostelworld Deposits';
+        }
+        if (strpos(get_option('siteurl'), 'castlerock') !== false) {
+            $result['com.macbackpackers.jobs.CreateSendHogmanayEmailJob'] = 'Send Hogmanay Emails';
         }
         $result = array_merge( $result, array(
             'com.macbackpackers.jobs.HousekeepingJob' => 'Update Housekeeping Report',
