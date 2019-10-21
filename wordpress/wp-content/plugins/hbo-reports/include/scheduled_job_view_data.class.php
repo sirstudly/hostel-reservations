@@ -58,6 +58,12 @@ class ScheduledJobViewData extends XslTransform {
         elseif( $classname == 'com.macbackpackers.jobs.CreateSendHogmanayEmailJob' ) {
             $params = array();
         }
+        elseif( $classname == 'com.macbackpackers.jobs.CreateSendChristmasArrivalEmailJob' ) {
+            $params = array();
+        }
+        elseif( $classname == 'com.macbackpackers.jobs.CreateSendChristmasLunchEmailJob' ) {
+            $params = array();
+        }
         elseif( $classname == 'com.macbackpackers.jobs.CreateAgodaChargeJob' ) {
             $params = array( 'days_back' => '7' );
         }

@@ -14,9 +14,6 @@ abstract class ScheduledJob {
             // little hotelier specificc
             $result['com.macbackpackers.jobs.ScrapeReservationsBookedOnJob'] = 'Confirm Hostelworld Deposits';
         }
-        if (strpos(get_option('siteurl'), 'castlerock') !== false) {
-            $result['com.macbackpackers.jobs.CreateSendHogmanayEmailJob'] = 'Send Hogmanay Emails';
-        }
         $result = array_merge( $result, array(
             'com.macbackpackers.jobs.HousekeepingJob' => 'Update Housekeeping Report',
             'com.macbackpackers.jobs.AllocationScraperJob' => 'Update Booking Reports',
@@ -29,6 +26,11 @@ abstract class ScheduledJob {
             'com.macbackpackers.jobs.CreateCopyCardDetailsToCloudbedsJob' => 'Copy Card Details from Hostelworld',
             'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' => 'Charge Non-Refundable Bookings'
         ));
+        if (strpos(get_option('siteurl'), 'castlerock') !== false) {
+            $result['com.macbackpackers.jobs.CreateSendHogmanayEmailJob'] = 'Send Hogmanay Emails';
+            $result['com.macbackpackers.jobs.CreateSendChristmasArrivalEmailJob'] = 'Send Christmas Arrival Emails';
+            $result['com.macbackpackers.jobs.CreateSendChristmasLunchEmailJob'] = 'Send Christmas Lunch Emails';
+        }
         return $result;
     }
 
