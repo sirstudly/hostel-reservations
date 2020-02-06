@@ -147,23 +147,23 @@ tr.unread {
     </table>
 
 <script type="text/javascript">
-  var unpaid_dep_rpt_table = jQuery('#unpaid_dep_rpt').DataTable({
+  var unpaid_dep_rpt_table = $('#unpaid_dep_rpt').DataTable({
     "paging": false,
     "searching": false,
     "order": [[3, 'asc']]
   });
   
-  jQuery('#unpaid_dep_rpt').on('mousemove', 'tr', function(e) {
+  $('#unpaid_dep_rpt').on('mousemove', 'tr', function(e) {
     var rowData = unpaid_dep_rpt_table.row(this).data();
     if(rowData) {
-      var rowNotes = jQuery('&lt;div&gt;').html(rowData[6]).text(); // html decode
-      jQuery("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
-      if (!jQuery("#tooltip").is(':visible')) jQuery("#tooltip").show();
+      var rowNotes = $('&lt;div&gt;').html(rowData[6]).text(); // html decode
+      $("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
+      if (!$("#tooltip").is(':visible')) $("#tooltip").show();
     }
   });
 
-  jQuery('#unpaid_dep_rpt').on('mouseleave', function(e) {
-    jQuery("#tooltip").hide();
+  $('#unpaid_dep_rpt').on('mouseleave', function(e) {
+    $("#tooltip").hide();
   });  
 </script>
 </xsl:template>

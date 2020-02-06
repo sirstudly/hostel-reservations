@@ -29,6 +29,11 @@ class WP_HostelBackoffice {
         add_action('wp_head', array(&$this, 'enqueue_scripts'));
         add_action('wp_head', array(&$this, 'print_js_css' ));
 
+        // Updated JQuery on client-side (required for responsive DataTables)
+        add_action( 'wp_enqueue_scripts', array(&$this, 'wp_jquery_manager_plugin_front_end_scripts'));
+        add_filter( 'script_loader_tag', array(&$this, 'add_jquery_attributes'), 10, 2 );
+        
+        
         // Template fallback: this gets called when not on admin page
         // TODO: can we create a template file the user references when creating a new page?
         add_action("template_redirect", array(&$this, 'my_template_redirect'));
@@ -109,7 +114,7 @@ class WP_HostelBackoffice {
      * Safely enqueues any scripts/css to be run.
      */
     function enqueue_scripts() {
-        wp_enqueue_script('jquery');
+//        wp_enqueue_script('jquery');
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('jquery-ui-dialog');
         wp_enqueue_style('wp-jquery-ui-dialog');
@@ -121,6 +126,50 @@ class WP_HostelBackoffice {
         }
     }
 
+    // Front-end not excuted in the wp admin and the wp customizer (for compatibility reasons)
+    // See: https://core.trac.wordpress.org/ticket/45130 and https://core.trac.wordpress.org/ticket/37110
+    function wp_jquery_manager_plugin_front_end_scripts() {
+        $wp_admin = is_admin();
+        $wp_customizer = is_customize_preview();
+        
+        // jQuery
+        if ( $wp_admin || $wp_customizer ) {
+            // echo 'We are in the WP Admin or in the WP Customizer';
+            return;
+        }
+        else {
+            // Deregister WP core jQuery, see https://github.com/Remzi1993/wp-jquery-manager/issues/2 and https://github.com/WordPress/WordPress/blob/91da29d9afaa664eb84e1261ebb916b18a362aa9/wp-includes/script-loader.php#L226
+            wp_deregister_script( 'jquery' ); // the jquery handle is just an alias to load jquery-core with jquery-migrate
+            // Deregister WP jQuery
+            wp_deregister_script( 'jquery-core' );
+            // Deregister WP jQuery Migrate
+            wp_deregister_script( 'jquery-migrate' );
+            
+            // Register jQuery in the head
+            wp_register_script( 'jquery-core', 'https://code.jquery.com/jquery-3.4.1.min.js', array(), null, false );
+            wp_register_script( 'jquery-migrate', 'https://code.jquery.com/jquery-migrate-3.1.0.min.js', array(), null, false );
+
+            /**
+             * Register jquery using jquery-core as a dependency, so other scripts could use the jquery handle
+             * see https://wordpress.stackexchange.com/questions/283828/wp-register-script-multiple-identifiers
+             * We first register the script and after that we enqueue it, see why:
+             * https://wordpress.stackexchange.com/questions/82490/when-should-i-use-wp-register-script-with-wp-enqueue-script-vs-just-wp-enque
+             * https://stackoverflow.com/questions/39653993/what-is-diffrence-between-wp-enqueue-script-and-wp-register-script
+             */
+            wp_register_script( 'jquery', false, array( 'jquery-core', 'jquery-migrate' ), null, false );
+            wp_enqueue_script( 'jquery' );
+        }
+    }
+    
+    
+    function add_jquery_attributes( $tag, $handle ) {
+        if ( 'jquery-core' === $handle ) {
+            // SHA-384 generated from https://www.srihash.org/ for corresponding jQuery JS file
+            return str_replace( "type='text/javascript'", "type='text/javascript' integrity='sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh' crossorigin='anonymous'", $tag );
+        }
+        return $tag;
+    }
+    
     /**
      * Add hook for printing scripts only when displaying pages for this plugin.
      */

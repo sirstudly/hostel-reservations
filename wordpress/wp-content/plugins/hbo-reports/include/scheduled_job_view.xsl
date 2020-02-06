@@ -44,10 +44,10 @@
                 </select>
                 <div style="margin-left: 20px; float:left;">
                     <input id="radio_repeat_every" type="radio" name="schedule_type" value="repeat_every"/> Repeat Every 
-                    <input id="repeat_minutes" name="repeat_minutes" type="text" autocomplete="false" style="width:40px;" maxlength="4" value="{repeat_minutes}" onkeypress="jQuery('#radio_repeat_every').click();" />
+                    <input id="repeat_minutes" name="repeat_minutes" type="text" autocomplete="false" style="width:40px;" maxlength="4" value="{repeat_minutes}" onkeypress="$('#radio_repeat_every').click();" />
                     Minutes<br/>
                     <input id="radio_daily" type="radio" name="schedule_type" value="daily"/> Everyday at:
-                    <input id="daily_at" name="daily_at" type="text" autocomplete="false" style="width:80px;" maxlength="8" value="{daily_at}" onkeypress="jQuery('#radio_daily').click();" />
+                    <input id="daily_at" name="daily_at" type="text" autocomplete="false" style="width:80px;" maxlength="8" value="{daily_at}" onkeypress="$('#radio_daily').click();" />
                     (24 hour clock in hours/minutes e.g. 23:00)
                 </div>
 

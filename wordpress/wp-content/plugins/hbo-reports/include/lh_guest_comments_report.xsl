@@ -47,9 +47,9 @@
 
 </style>
 <script type="text/javascript">
-jQuery(document).ready(function(){
+$(document).ready(function(){
     // reset all the checkboxes
-    jQuery('input[type="checkbox"]').prop('checked', false);
+    $('input[type="checkbox"]').prop('checked', false);
 });
 </script>
 

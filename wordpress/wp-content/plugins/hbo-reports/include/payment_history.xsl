@@ -89,7 +89,7 @@
                 </table>
 
 <script type="text/javascript">
-   jQuery('#transaction-report').DataTable({
+   $('#transaction-report').DataTable({
     "paging": false,
     "searching": false,
     "order": [[6, 'desc']]

@@ -19,7 +19,7 @@
         </xsl:if>
 
 <script type="text/javascript">
-    jQuery( ".inv-detail" ).dialog({
+    $( ".inv-detail" ).dialog({
         autoOpen: false,
         modal: true,
         width:'80%' });
@@ -84,14 +84,14 @@
 function initDialogs() {
 }
 
-jQuery(document).ready(function(){
-    jQuery( ".inv-detail" ).dialog({
+$(document).ready(function(){
+    $( ".inv-detail" ).dialog({
         autoOpen: false,
         modal: true,
         width:'80%' });
 
     // reset all the checkboxes
-    jQuery('input[type="checkbox"]').prop('checked', false);
+    $('input[type="checkbox"]').prop('checked', false);
 });
 </script>
 
@@ -149,7 +149,7 @@ jQuery(document).ready(function(){
         <td><xsl:value-of select="total_paid"/><xsl:comment/></td>
         <td><xsl:apply-templates select="notes/note" mode="invoice_form"/></td>
         <td><xsl:apply-templates select="." mode="inv-detail-dialog"/>
-            <a href="javascript:void(0);"><xsl:attribute name="onclick">jQuery('#inv-detail-<xsl:value-of select="invoice_id"/>').dialog('open');</xsl:attribute>View Details</a>
+            <a href="javascript:void(0);"><xsl:attribute name="onclick">$('#inv-detail-<xsl:value-of select="invoice_id"/>').dialog('open');</xsl:attribute>View Details</a>
         </td>
         <td style="text-align: center;">
             <input type="checkbox" name="ack_checkbox">
@@ -244,7 +244,7 @@ jQuery(document).ready(function(){
 	    </div>
 	    <div style="width: 610px;">
             <div style="float: left;"><xsl:attribute name="id">ajax_response-<xsl:value-of select="../invoice_id"/></xsl:attribute><xsl:comment/><!-- ajax response here--></div>
-	        <a class="btn btn-primary" style="float: right;"><xsl:attribute name="onclick">add_invoice_note(<xsl:value-of select="../invoice_id"/>, jQuery('#invoice_note-<xsl:value-of select="../invoice_id"/>').val());jQuery('#invoice_note-<xsl:value-of select="../invoice_id"/>').val("");</xsl:attribute>Add Note</a>
+	        <a class="btn btn-primary" style="float: right;"><xsl:attribute name="onclick">add_invoice_note(<xsl:value-of select="../invoice_id"/>, $('#invoice_note-<xsl:value-of select="../invoice_id"/>').val());$('#invoice_note-<xsl:value-of select="../invoice_id"/>').val("");</xsl:attribute>Add Note</a>
 	    </div>
     </form>
 </xsl:template>

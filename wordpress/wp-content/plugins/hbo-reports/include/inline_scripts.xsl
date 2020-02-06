@@ -4,8 +4,8 @@
 <xsl:template name="write_inline_js">
 
     <script type="text/javascript">
-        jQuery(document).ready( function(){
-            jQuery('input.wpdevbk-filters-section-calendar').datepicker(
+        $(document).ready( function(){
+            $('input.wpdevbk-filters-section-calendar').datepicker(
                 {   showOn: 'focus',
                     multiSelect: 0,
                     numberOfMonths: 1,
@@ -30,7 +30,7 @@
 
         TODO: FIX TOOLTIPS 
 
-            jQuery('.tooltip_right').tooltip( {
+            $('.tooltip_right').tooltip( {
                 animation: true
                 , delay: { show: 500, hide: 100 }
                 , selector: false
@@ -40,7 +40,7 @@
                 , template: '<div class="wpdevbk tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
             });
 
-            jQuery('.tooltip_left').tooltip( {
+            $('.tooltip_left').tooltip( {
                 animation: true
                 , delay: { show: 500, hide: 100 }
                 , selector: false
@@ -50,7 +50,7 @@
                 , template: '<div class="wpdevbk tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
             });
 
-            jQuery('.tooltip_top').tooltip( {
+            $('.tooltip_top').tooltip( {
                 animation: true
                 , delay: { show: 500, hide: 100 }
                 , selector: false
@@ -60,7 +60,7 @@
                 , template: '<div class="wpdevbk tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
             });
     
-            jQuery('.tooltip_bottom').tooltip( {
+            $('.tooltip_bottom').tooltip( {
                 animation: true
                 , delay: { show: 500, hide: 100 }
                 , selector: false

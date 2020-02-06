@@ -128,7 +128,7 @@
     </table>
 
 <script type="text/javascript">
-  jQuery('#split_room_rpt').DataTable({
+  $('#split_room_rpt').DataTable({
     "paging": false,
     "searching": false,
     "order": [[3, 'asc']]

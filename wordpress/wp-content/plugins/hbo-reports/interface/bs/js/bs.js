@@ -1,3 +1,5 @@
+/* BOOTSTRAP - how is this used */
+
 /* ===================================================
  * bootstrap-transition.js v2.0.0
  * http://twitter.github.com/bootstrap/javascript.html#transitions

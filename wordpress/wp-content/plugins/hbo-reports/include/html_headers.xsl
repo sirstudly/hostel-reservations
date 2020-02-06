@@ -32,7 +32,8 @@
         <link rel="icon" href="{siteicon}" />
     </xsl:if>
     <script type="text/javascript" src="{pluginurl}/js/common.js"><xsl:comment/></script>  
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"><xsl:comment/></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"><xsl:comment/></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"><xsl:comment/></script>
 
 
     <!-- C S S -->
@@ -40,10 +41,11 @@
     <link href="{pluginurl}/interface/bs/css/bs.min.css" rel="stylesheet" type="text/css" />
     <link href="{pluginurl}/interface/chosen/chosen.css" rel="stylesheet" type="text/css" />
     <link href="{pluginurl}/css/admin.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="{pluginurl}/interface/bs/js/bs.js"><xsl:comment/></script>  
+    <!-- script type="text/javascript" src="{pluginurl}/interface/bs/js/bs.js"><xsl:comment/></script -->  
     <script type="text/javascript" src="{pluginurl}/interface/chosen/chosen.jquery.min.js"><xsl:comment/></script>
     <link href="{pluginurl}/css/client.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" />
 </xsl:template>
 
 </xsl:stylesheet>

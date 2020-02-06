@@ -89,50 +89,50 @@
 </style>
 
 <script type="text/javascript">
-jQuery(document).ready( function(){
+$(document).ready( function(){
 
     // allow user to show/hide passwords
     // http://www.experts-exchange.com/articles/19779/Passwords-in-HTML-Forms-Allow-the-Client-to-Show-or-Hide.html
-    jQuery("#lh_pwcheck").click(function(){
-        if (jQuery("#lh_pwcheck").is(":checked"))
+    $("#lh_pwcheck").click(function(){
+        if ($("#lh_pwcheck").is(":checked"))
         {
-            jQuery("#lilho_password").clone()
+            $("#lilho_password").clone()
                 .attr("type", "text").insertAfter("#lilho_password")
                 .prev().remove();
         }
         else
         {
-            jQuery("#lilho_password").clone()
+            $("#lilho_password").clone()
                 .attr("type","password").insertAfter("#lilho_password")
                 .prev().remove();
         }
     });
 
-    jQuery("#hw_pwcheck").click(function(){
-        if (jQuery("#hw_pwcheck").is(":checked"))
+    $("#hw_pwcheck").click(function(){
+        if ($("#hw_pwcheck").is(":checked"))
         {
-            jQuery("#hw_password").clone()
+            $("#hw_password").clone()
                 .attr("type", "text").insertAfter("#hw_password")
                 .prev().remove();
         }
         else
         {
-            jQuery("#hw_password").clone()
+            $("#hw_password").clone()
                 .attr("type","password").insertAfter("#hw_password")
                 .prev().remove();
         }
     });
 
-    jQuery("#agoda_pwcheck").click(function(){
-        if (jQuery("#agoda_pwcheck").is(":checked"))
+    $("#agoda_pwcheck").click(function(){
+        if ($("#agoda_pwcheck").is(":checked"))
         {
-            jQuery("#agoda_password").clone()
+            $("#agoda_password").clone()
                 .attr("type", "text").insertAfter("#agoda_password")
                 .prev().remove();
         }
         else
         {
-            jQuery("#agoda_password").clone()
+            $("#agoda_password").clone()
                 .attr("type","password").insertAfter("#agoda_password")
                 .prev().remove();
         }
@@ -220,7 +220,7 @@ jQuery(document).ready( function(){
             </div>
             <h4>Alternatively:</h4>
             <div class="btn-container">
-                <a id="btn_reset_cloudbeds" class="btn btn-primary" style="float: right;" onclick="reset_cloudbeds_login(); jQuery(this).hide(); jQuery('#cloudbeds_2facode').show();">Reset Session</a>
+                <a id="btn_reset_cloudbeds" class="btn btn-primary" style="float: right;" onclick="reset_cloudbeds_login(); $(this).hide(); $('#cloudbeds_2facode').show();">Reset Session</a>
                 <div id="cloudbeds_2facode" style="display:none;"> 
 	                <div style="float:left;">
 	                    <label for="cb_2fa_code">2FA Code:</label>
@@ -336,7 +336,7 @@ jQuery(document).ready( function(){
                 <div style="float: left;" id="ajax_respond_guest_email_template"><xsl:comment/><!-- ajax response here--></div>
                 <div style="float:right;">
                     <a id="btn_save_guest_email_template" class="btn btn-primary" onclick="save_guest_checkout_template(document.post_option.guest_email_subject.value, document.post_option.guest_email_template.value); this.disabled=true;">Save</a>
-                    <a class="btn btn-primary" style="margin-left: 10px;" onclick="jQuery('#test_send_email_dialog').dialog({{width:380, height:210}});">Send Test Email...</a>
+                    <a class="btn btn-primary" style="margin-left: 10px;" onclick="$('#test_send_email_dialog').dialog({{width:380, height:210}});">Send Test Email...</a>
                 </div>
             </div>
         </div>
@@ -360,8 +360,8 @@ jQuery(document).ready( function(){
                 <tr>
                     <td colspan="2">
                         <div style="float:right;">
-                            <a id="btn_send_test_response_email" style="color: #fff; background-color: #006dcc;background-image: -moz-linear-gradient(center top , #08c, #04c);padding: 4px 10px;border-radius: 4px;border-width: 1px; cursor: pointer; text-decoration: none;" onclick="send_test_response_email(jQuery('#test_email_first_name').val(), jQuery('#test_email_last_name').val(), jQuery('#test_email_recipient').val()); jQuery('#test_send_email_dialog').dialog('close');">Send</a>
-                            <a style="color: #fff; background-color: #006dcc;background-image: -moz-linear-gradient(center top , #08c, #04c);padding: 4px 10px;border-radius: 4px;border-width: 1px; cursor: pointer; text-decoration: none; margin-left:10px;" onclick="jQuery('#test_send_email_dialog').dialog('close');">Cancel</a>
+                            <a id="btn_send_test_response_email" style="color: #fff; background-color: #006dcc;background-image: -moz-linear-gradient(center top , #08c, #04c);padding: 4px 10px;border-radius: 4px;border-width: 1px; cursor: pointer; text-decoration: none;" onclick="send_test_response_email($('#test_email_first_name').val(), $('#test_email_last_name').val(), $('#test_email_recipient').val()); $('#test_send_email_dialog').dialog('close');">Send</a>
+                            <a style="color: #fff; background-color: #006dcc;background-image: -moz-linear-gradient(center top , #08c, #04c);padding: 4px 10px;border-radius: 4px;border-width: 1px; cursor: pointer; text-decoration: none; margin-left:10px;" onclick="$('#test_send_email_dialog').dialog('close');">Cancel</a>
                         </div>
                     </td>
                 </tr>

@@ -153,24 +153,41 @@ tr.unread {
     </table>
 
 <script type="text/javascript">
-  var group_bookings_rpt_table = jQuery('#group_bookings_rpt').DataTable({
+  var group_bookings_rpt_table = $('#group_bookings_rpt').DataTable({
     "paging": false,
     "searching": false,
-    "order": [[3, 'asc']]
+    "order": [[3, 'asc']],
+    responsive: {
+        details: {
+            renderer: function ( api, rowIdx, columns ) {
+                var data = $.map( columns, function ( col, i ) {
+                    return col.columnIndex != 8 ? '' : 
+                        $('&lt;div&gt;').html(col.data).text(); // html decode
+                } ).join('');
+
+                return data ?
+                    $('<table/>').append( data ) :
+                    false;
+            }
+        }
+    }
   });
   
-  jQuery('#group_bookings_rpt').on('mousemove', 'tr', function(e) {
+  $('#group_bookings_rpt').on('mousemove', 'tr', function(e) {
     var rowData = group_bookings_rpt_table.row(this).data();
     if(rowData) {
-      var rowNotes = jQuery('&lt;div&gt;').html(rowData[8]).text(); // html decode
-      jQuery("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
-      if (!jQuery("#tooltip").is(':visible')) jQuery("#tooltip").show();
+      var rowNotes = $('&lt;div&gt;').html(rowData[8]).text(); // html decode
+      $("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
+      if (!$("#tooltip").is(':visible')) $("#tooltip").show();
     }
   });
 
-  jQuery('#group_bookings_rpt').on('mouseleave', function(e) {
-    jQuery("#tooltip").hide();
-  });  
+  $('#group_bookings_rpt').on('mouseleave', function(e) {
+    $("#tooltip").hide();
+  });
+
+  // the expand icons won't display without this for some reason
+  $('#group_bookings_rpt').addClass('collapsed');
 </script>
 
 </xsl:template>
