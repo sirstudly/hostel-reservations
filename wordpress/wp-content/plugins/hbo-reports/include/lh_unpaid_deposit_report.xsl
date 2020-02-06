@@ -88,7 +88,7 @@ tr.unread {
                         <div style="color: red;">The last update of this report failed to run.
                             <xsl:choose>
                                 <xsl:when test="check_credentials = 'true'">
-                                    Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                                    Has the password changed recently? If so, update it on the admin page.
                                 </xsl:when>
                                 <xsl:otherwise>
                                     Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
@@ -130,7 +130,6 @@ tr.unread {
 
 
 <xsl:template name="report_data">
-    <p style="padding-left: 20px;"><strong>BOLD</strong> entries have not been viewed before in Little Hotelier.</p>
     <div id="tooltip"></div>
     <table id="unpaid_dep_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
         <thead>
