@@ -77,6 +77,10 @@
                                         <td><input id="payment_history_inv_url"  name="hbo_payment_history_inv_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{payment_history_inv_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="process_refunds_url">Process Refunds</label></th>
+                                        <td><input id="process_refunds_url"  name="hbo_process_refunds_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{process_refunds_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="report_settings_url">Report Settings</label></th>
                                         <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
                                     </tr>  

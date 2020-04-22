@@ -462,3 +462,58 @@ function delete_scheduled_job( scheduled_job_id ) {
     });
 }
 
+//Looks up a booking
+//booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
+function lookup_booking( booking_ref ) {
+
+jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+jQuery.ajax({                                           // Start Ajax Sending
+   url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+   type:'POST',
+   success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
+   error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+   data:{
+       ajax_action : 'LOOKUP_BOOKING',
+       booking_ref : booking_ref
+   }
+});
+}
+
+//Shows the refund dialog.
+//txn_id : (cloudbeds) transaction id
+function show_refund_dialog( txn_id ) {
+
+	jQuery.ajax({                                           // Start Ajax Sending
+		 url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+		 type:'POST',
+		 success: function (data, textStatus){if( textStatus == 'success') jQuery('#dialog_ajax_response').html( data ); },
+		 error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+		 data:{
+		     ajax_action : 'SHOW_REFUND_DIALOG',
+		     txn_id : txn_id
+	     }
+	});
+}
+
+//Submit a refund.
+//amount : amount to be refunded
+//description : refund note (optional)
+function submit_refund( amount, description ) {
+
+	jQuery('#refund_ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+	jQuery('#submit_refund_button').addClass("disabled");
+	
+	jQuery.ajax({                                           // Start Ajax Sending
+		 url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+		 type:'POST',
+		 success: function (data, textStatus){if( textStatus == 'success') jQuery('#refund_ajax_response').html( data ); },
+		 error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+		 data:{
+		     ajax_action : 'SUBMIT_REFUND',
+		     amount : amount,
+		     description : description
+	     }
+	});
+}
+

@@ -117,6 +117,18 @@ class AjaxController {
                 $this->deleteScheduledJob();
                 break;
 
+            case 'LOOKUP_BOOKING':
+                $this->lookupBooking();
+                break;
+                
+            case 'SHOW_REFUND_DIALOG':
+                $this->showRefundDialog();
+                break;
+                
+            case 'SUBMIT_REFUND':
+                $this->submitRefund();
+                break;
+                
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -481,6 +493,33 @@ class AjaxController {
     }
 
     /**
+     * Looks up an existing booking.
+     * Requires POST variables:
+     *   booking_ref : cloudbeds "identifier"
+     */
+    function lookupBooking() {
+        try {
+            $refundsPage = $_SESSION['PROCESS_REFUNDS_CONTROLLER'];
+            $refundsPage->lookupBooking($_POST['booking_ref']);
+            ?>
+            <script type="text/javascript">
+                document.getElementById('ajax_response').innerHTML = <?php echo json_encode($refundsPage->toHtml()); ?>;
+                jQuery("#ajax_response").css({ 'color': 'black' });
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?> 
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                     .html('<?php echo $e->getMessage(); ?>')
+                     .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
      * Looks up an existing booking and generates a new payment link.
      * Requires POST variables:
      *   booking_ref : cloudbeds "identifier"
@@ -668,6 +707,59 @@ class AjaxController {
                 jQuery("#delete_scheduled_job_" + <?php echo $_POST['scheduled_job_id']; ?> )
                      .html('<?php echo $e->getMessage(); ?>')
                      .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Shows the refund dialog for the given transaction.
+     * Requires POST variables:
+     *   txn_id : cloudbeds transaction id
+     */
+    function showRefundDialog() {
+        try {
+            $refundsPage = $_SESSION['PROCESS_REFUNDS_CONTROLLER'];
+            $refundsPage->showRefundDialog($_POST['txn_id']);
+            echo $refundsPage->toHtml();
+        }
+        catch( Exception $e ) {
+            error_log(var_export($e, true));
+            ?>
+            <script type="text/javascript">
+                jQuery("#dialog_ajax_response")
+                     .html('<span style="color:red"><?=$e->getMessage()?></span>');
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Creates a record in the relevant refund table to be processed.
+     * Requires POST variables:
+     *   amount : refund amount
+     *   description : refund description
+     */
+    function submitRefund() {
+        try {
+            $refundsPage = $_SESSION['PROCESS_REFUNDS_CONTROLLER'];
+            $refundsPage->submitRefund($_POST['amount'], $_POST['description']);
+            ?>
+            <script type="text/javascript">
+                jQuery("#refund_ajax_response").html('<span style="color:green; margin-left: 20px;">Task scheduled.</span>');
+                setTimeout(function () {
+                    jQuery("#refund_dialog").dialog("close");
+                }, 2000);
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            
+            ?>
+            <script type="text/javascript">
+                jQuery("#refund_ajax_response")
+                     .html('<span style="color:red"><?=$e->getMessage()?></span>');
+                jQuery("#submit_refund_button").removeClass("disabled");
             </script>
             <?php
         }

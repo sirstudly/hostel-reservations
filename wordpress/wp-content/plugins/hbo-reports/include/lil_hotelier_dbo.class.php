@@ -325,6 +325,55 @@ class LilHotelierDBO {
             throw new DatabaseException($wpdb->last_error);
         }
     }
+
+    /**
+    /**
+     * Create a new refund record.
+     * @param integer $reservationId cloudbeds identifier
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $email
+     * @param float $amount refund amount
+     * @param string $description (optional) note to add to booking
+     * @param string $txnId cloudbeds transaction (Stripe)
+     * @param string $vendorTxCode (Sagepay)
+     * @throws DatabaseException
+     */
+    static function insertRefundRecord($reservationId, $firstName, $lastName, $email, $amount, $description, $txnId, $vendorTxCode) {
+        global $wpdb;
+        if (false === $wpdb->insert("wp_tx_refund", array(
+                        'reservation_id' => $reservationId,
+                        'email' => $email,
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
+                        'amount' => $amount,
+                        'description' => $description),
+                    array( '%d', '%s', '%s', '%s', '%f', '%s'))) {
+                error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+                throw new DatabaseException($wpdb->last_error);
+            }
+            
+        $refId = $wpdb->insert_id;
+        if (! empty($vendorTxCode)) {
+            if (false === $wpdb->insert("wp_sagepay_tx_refund",
+                        array('id' => $refId, 'auth_vendor_tx_code' => $vendorTxCode),
+                        array('%d', '%s'))) {
+                    error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+                    throw new DatabaseException($wpdb->last_error);
+            }
+        }
+        else if (! empty($txnId)) {
+            if (false === $wpdb->insert("wp_stripe_tx_refund",
+                        array('id' => $refId, 'cloudbeds_tx_id' => $txnId),
+                        array('%d', '%s'))) {
+                    error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
+                    throw new DatabaseException($wpdb->last_error);
+            }
+        }
+        else {
+            throw new DatabaseException("Either txnId or vendorTxnCode must be provided.");
+        }
+    }
     
     /**
      * Inserts a new AllocationScraperJob.
