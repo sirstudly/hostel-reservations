@@ -350,7 +350,7 @@ class LilHotelierDBO {
                         'last_name' => $lastName,
                         'amount' => $amount,
                         'description' => $description),
-                    array( '%d', '%s', '%s', '%s', '%f', '%s'))) {
+                    array( '%d', '%s', '%s', '%s', '%s', '%f', '%s'))) {
                 error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
                 throw new DatabaseException($wpdb->last_error);
             }
