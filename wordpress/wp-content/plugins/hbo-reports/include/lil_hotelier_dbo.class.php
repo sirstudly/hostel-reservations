@@ -351,7 +351,7 @@ class LilHotelierDBO {
                         'amount' => $amount,
                         'description' => $description,
                         'last_updated_date' => current_time('mysql')),
-                    array( '%d', '%s', '%s', '%s', '%s', '%f', '%s', ''))) {
+                    array( '%d', '%s', '%s', '%s', '%s', '%f', '%s', '%s'))) {
                 error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
                 throw new DatabaseException($wpdb->last_error);
             }
