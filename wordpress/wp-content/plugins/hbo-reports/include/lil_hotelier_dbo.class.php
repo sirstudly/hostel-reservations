@@ -330,6 +330,7 @@ class LilHotelierDBO {
     /**
      * Create a new refund record.
      * @param integer $reservationId cloudbeds identifier
+     * @param string $bookingRef cloudbeds booking reference
      * @param string $firstName
      * @param string $lastName
      * @param string $email
@@ -339,10 +340,11 @@ class LilHotelierDBO {
      * @param string $vendorTxCode (Sagepay)
      * @throws DatabaseException
      */
-    static function insertRefundRecord($reservationId, $firstName, $lastName, $email, $amount, $description, $txnId, $vendorTxCode) {
+    static function insertRefundRecord($reservationId, $bookingRef, $firstName, $lastName, $email, $amount, $description, $txnId, $vendorTxCode) {
         global $wpdb;
         if (false === $wpdb->insert("wp_tx_refund", array(
                         'reservation_id' => $reservationId,
+                        'booking_reference' => $bookingRef,
                         'email' => $email,
                         'first_name' => $firstName,
                         'last_name' => $lastName,
@@ -1084,6 +1086,27 @@ class LilHotelierDBO {
         $dblink->mysqli->close();
     }
         
+    /**
+     * Returns previously made refunds.
+     */
+    static function getRefundHistory() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT r.reservation_id, r.booking_reference, r.email, r.first_name, r.last_name, r.amount, r.description, 
+                    sf.charge_id, sr.auth_vendor_tx_code, COALESCE(sf.ref_status, sr.ref_status) AS refund_status, 
+                    sr.refund_status_detail, COALESCE(sf.last_updated_date, sr.last_updated_date, r.last_updated_date) AS last_updated_date 
+               FROM wp_tx_refund r 
+               LEFT OUTER JOIN wp_stripe_tx_refund sf ON sf.id = r.id
+               LEFT OUTER JOIN wp_sagepay_tx_refund sr ON sr.id = r.id
+               ORDER BY r.id DESC" );
+                    
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+error_log("Result HISTORY:" . var_export($resultset, true));
+        return $resultset;
+    }
+
     /**
      * Returns the wp_lh_jobs records for the past number of days in reverse chrono order.
      * $numberOfDays : number of days to include in the past

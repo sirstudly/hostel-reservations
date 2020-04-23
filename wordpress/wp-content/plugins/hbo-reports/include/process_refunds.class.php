@@ -48,6 +48,7 @@ class ProcessRefundsController extends XslTransform {
 
         LilHotelierDBO::insertRefundRecord(
             $this->booking['reservation_id'], 
+            $this->booking['identifier'],
             $this->booking['first_name'],
             $this->booking['last_name'],
             $this->booking['email'], 

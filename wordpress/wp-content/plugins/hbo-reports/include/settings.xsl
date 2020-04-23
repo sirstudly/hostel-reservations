@@ -81,6 +81,10 @@
                                         <td><input id="process_refunds_url"  name="hbo_process_refunds_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{process_refunds_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
+                                        <th scope="row"><label for="refund_history_url">Refund History Link</label></th>
+                                        <td><input id="refund_history_url"  name="hbo_refund_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{refund_history_url}" /></td>
+                                    </tr>  
+                                    <tr valign="top">
                                         <th scope="row"><label for="report_settings_url">Report Settings</label></th>
                                         <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
                                     </tr>  

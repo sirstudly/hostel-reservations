@@ -135,6 +135,9 @@ Tested WordPress Versions: 4.6
     if (file_exists(HBO_PLUGIN_DIR. '/include/process_refunds.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/process_refunds.class.php' ); }
 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/refund_history.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/refund_history.class.php' ); }
+
     if (file_exists(HBO_PLUGIN_DIR. '/include/lil_hotelier_dbo.class.php')) 
         { require_once(HBO_PLUGIN_DIR. '/include/lil_hotelier_dbo.class.php' ); }
 

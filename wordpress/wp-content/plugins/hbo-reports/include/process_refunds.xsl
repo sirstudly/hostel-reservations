@@ -113,22 +113,23 @@
             <xsl:call-template name="write_inline_css"/>
     
             <div class="wpdevbk body-content booking_form_div">
+                <h3>What is this page for?</h3>
+                <p>You want to process a partial/full refund for an existing booking and the card details may or may not be present in Cloudbeds.</p>
+
                 <h3>How does it work?</h3>
-                <p>You have an existing booking you want to process a partial/full refund for.
-                   So, you come here and enter the booking reference below and click Submit.
+                <p>
+                   Enter the booking reference below and click Submit.
                    This will search for the booking and give you any payments made against it so far.
-                   Refunds need an existing transaction to be credited against.<br/> 
-                   If the payment was originally done via Cloudbeds, the refund must be processed through Stripe. 
+                   Refunds need an existing transaction to be credited against. 
+                   If the payment was originally done via Cloudbeds, the refund will be processed through Stripe. 
                    If it was with <a href="https://pay.macbackpackers.com/">https://pay.macbackpackers.com/</a>,
                    then the refund goes through Sagepay.
                 </p>
                 <p>
-                   Note: You can't refund more than what was originally processed. And you can't refund against
-                   a card that was never used in a transaction with us.<br/>
-                   If the guest wants to refund against a different card, this will need to be done using the EFTPOS 
-                   terminal (so card details must be taken over the phone) - 
-                   <i>not through email</i> as this would not be PCI-compliant and we would risk being fined or 
-                   losing our merchant banking privileges. 
+                   Note: You can't refund more than what was originally charged. And you can't refund against
+                   a card that was never used in a transaction with us. If the guest wants to refund against a different card, 
+                   this will need to be done using the EFTPOS terminal (so card details must be taken over the phone; 
+                   not through email as it's not secure).
                 </p>
                 <p>Successful refunds will be automatically added to their "Folio" page in Cloudbeds.
                    You can also view all processed/pending refunds on <a href="placeholder">this page (PLACEHOLDER).</a>.
