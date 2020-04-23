@@ -196,7 +196,7 @@
 		    </table>
 	    </xsl:when>
 	    <xsl:otherwise>
-	        <div style="font-style: italic">No transactions found.</div>
+	        <div style="font-style: italic; font-size: 14px; clear: both; padding: 10px 0 10px 100px;">No transactions found.</div>
 	    </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
@@ -209,11 +209,12 @@
             <xsl:if test="string-length(original_description) &gt; 0">
                 (<xsl:value-of select="original_description"/>)
             </xsl:if>
+        </td>
+        <td><xsl:value-of select="notes"/>
             <xsl:if test="is_vcc">
                 <p style="font-style: italic;">You cannot refund a prepaid charge against a virtual CC. Contact BDC to deal with refund.</p>
             </xsl:if>
         </td>
-        <td><xsl:value-of select="notes"/></td>
         <td>
             <xsl:if test="is_refundable">
                 <a class="btn btn-primary" ><xsl:attribute name="onclick">show_refund_dialog('<xsl:value-of select="id"/>');</xsl:attribute>Refund <span class="icon-share-alt icon-white"></span></a>

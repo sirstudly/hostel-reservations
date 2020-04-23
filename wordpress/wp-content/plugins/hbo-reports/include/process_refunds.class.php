@@ -95,19 +95,7 @@ class ProcessRefundsController extends XslTransform {
             ));
         $this->booking['transactions'] = $this->getTransactionsForBooking($this->booking['reservation_id']);
 
-        // we need to mark any transactions done against a VCC 
-        if($this->booking['channel_name'] == 'Booking.com') {
-            $cc_cache = array();
-            foreach( $this->booking['transactions']['records'] as &$tx) {
-                if($tx['paid'] && $tx['credit_card_id'] && $tx['credit_card_id'] != '0') {
-                    if(!$cc_cache[$tx['credit_card_id']]) {
-                        $cc_cache[$tx['credit_card_id']] = $this->getCreditCardInfo($tx['credit_card_id'], $this->booking['reservation_id']);
-                    }
-                    $tx['is_vcc'] = $cc_cache[$tx['credit_card_id']]['card_info']['token_data']['value']['cardholder_name'] == 'Bookingcom Agent';
-                }
-            }
-        }
-
+        // identify any sagepay records
         foreach( $this->booking['transactions']['records'] as &$tx) {
             if ($tx['paid'] && strpos($tx['notes'], "VendorTxCode:") !== false && floatval($tx['debit']) > 0) {
                 $tx['vendor_tx_code'] = substr($tx['notes'], 14, strpos($tx['notes'], ',') - 14);
@@ -223,8 +211,11 @@ class ProcessRefundsController extends XslTransform {
                     $txnRoot->appendChild($domtree->createElement('vendor_tx_code', $txn['vendor_tx_code']));
                     $txnRoot->appendChild($domtree->createElement('original_description', $txn['original_description']));
                     $txnRoot->appendChild($domtree->createElement('paid', $txn['paid']));
-                    if ($txn['is_vcc']) {
-                        $txnRoot->appendChild($domtree->createElement('is_vcc', $txn['is_vcc']));
+
+                    // we can't figure out whether a transaction was against a VCC if it's been deleted
+                    // so disable refunds against all "channel collect" BDC bookings
+                    if($this->booking['channel_name'] == 'Booking.com' && $this->booking['channel_payment_type'] == 'Channel') {
+                        $txnRoot->appendChild($domtree->createElement('is_vcc', 'true'));
                     }
                     else if (floatval($txn['debit']) > 0) {
                         if ($txn['gateway_name'] == 'Stripe' && $txn['refunded_value'] != $txn['paid']) {
