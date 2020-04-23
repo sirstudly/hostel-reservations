@@ -6,6 +6,7 @@
 class RefundHistoryController extends XslTransform {
 
     var $refunds = array(); // array of existing refunds
+    var $selected_refund; // current refund to view
 
     /**
      * Default constructor.
@@ -18,9 +19,23 @@ class RefundHistoryController extends XslTransform {
      * Reloads the view details.
      */
     function doView() {
+        $this->selected_refund = null;
         $this->refunds = LilHotelierDBO::getRefundHistory();
     }
-   
+
+    /**
+     * Views the JSON response for a particular transaction.
+     * @param integer $txnId refund transaction id
+     */
+    function viewResponse($txnId) {
+        $this->selected_refund = null;
+        foreach( $this->refunds as &$refund ) {
+            if($refund->id == $txnId) {
+                $this->selected_refund = $refund;
+            }
+        }
+    }
+
     /**
      * Adds this object to the DOMDocument/XMLElement specified.
      * See toXml() for details.
@@ -29,12 +44,32 @@ class RefundHistoryController extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
-        if( $this->refunds ) {
+
+        // view the JSON response for a particular record
+        if($this->selected_refund) {
+            $refundRoot = $parentElement->appendChild($domtree->createElement('selected_refund'));
+            $refundRoot->appendChild($domtree->createElement('response', htmlspecialchars($this->selected_refund->refund_response)));
+            if($this->selected_refund->charge_id) {
+                if(strpos($this->selected_refund->refund_response, 'trialLeft')) {
+                    $refundRoot->appendChild($domtree->createElement("gateway", "Cloudbeds"));
+                }
+                else {
+                    $refundRoot->appendChild($domtree->createElement("gateway", "Stripe"));
+                }
+            }
+            else if($this->selected_refund->auth_vendor_tx_code) {
+                $refundRoot->appendChild($domtree->createElement("gateway", "Sagepay"));
+            }
+            else {
+                $refundRoot->appendChild($domtree->createElement("gateway", "Unknown"));
+            }
+        }
+        else {
             $refundsRoot = $parentElement->appendChild($domtree->createElement('refunds'));
             $propId = get_option('hbo_cloudbeds_property_id');
             foreach( $this->refunds as $refund ) {
                 $refundRoot = $parentElement->appendChild($domtree->createElement('refund'));
-                foreach( array("reservation_id", "booking_reference", "email", "first_name", "last_name", "email", "amount", "description", "charge_id", "auth_vendor_tx_code", "refund_status", "refund_status_detail", "last_updated_date") as &$fieldname ) {
+                foreach( array("id", "reservation_id", "booking_reference", "email", "first_name", "last_name", "email", "amount", "description", "charge_id", "auth_vendor_tx_code", "refund_status", "refund_status_detail", "last_updated_date") as &$fieldname ) {
                     if( !empty($refund->$fieldname) ) {
                         $refundRoot->appendChild($domtree->createElement($fieldname, htmlspecialchars($refund->$fieldname)));
                     }

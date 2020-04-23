@@ -128,7 +128,11 @@ class AjaxController {
             case 'SUBMIT_REFUND':
                 $this->submitRefund();
                 break;
-                
+
+            case 'SHOW_REFUND_RESPONSE':
+                $this->showRefundResponse();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -760,6 +764,28 @@ class AjaxController {
                 jQuery("#refund_ajax_response")
                      .html('<span style="color:red"><?=$e->getMessage()?></span>');
                 jQuery("#submit_refund_button").removeClass("disabled");
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Shows the refund response for the given transaction.
+     * Requires POST variables:
+     *   txn_id : cloudbeds transaction id
+     */
+    function showRefundResponse() {
+        try {
+            $refundsPage = $_SESSION['REFUND_HISTORY_CONTROLLER'];
+            $refundsPage->viewResponse($_POST['txn_id']);
+            echo $refundsPage->toHtml();
+        }
+        catch( Exception $e ) {
+            error_log(var_export($e, true));
+            ?>
+            <script type="text/javascript">
+                jQuery("#dialog_ajax_response")
+                     .html('<span style="color:red"><?=$e->getMessage()?></span>');
             </script>
             <?php
         }
