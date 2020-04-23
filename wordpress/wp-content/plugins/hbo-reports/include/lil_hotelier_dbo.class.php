@@ -349,8 +349,9 @@ class LilHotelierDBO {
                         'first_name' => $firstName,
                         'last_name' => $lastName,
                         'amount' => $amount,
-                        'description' => $description),
-                    array( '%d', '%s', '%s', '%s', '%s', '%f', '%s'))) {
+                        'description' => $description,
+                        'last_updated_date' => current_time('mysql')),
+                    array( '%d', '%s', '%s', '%s', '%s', '%f', '%s', ''))) {
                 error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
                 throw new DatabaseException($wpdb->last_error);
             }
@@ -358,16 +359,18 @@ class LilHotelierDBO {
         $refId = $wpdb->insert_id;
         if (! empty($vendorTxCode)) {
             if (false === $wpdb->insert("wp_sagepay_tx_refund",
-                        array('id' => $refId, 'auth_vendor_tx_code' => $vendorTxCode),
-                        array('%d', '%s'))) {
+                array('id' => $refId,
+                      'auth_vendor_tx_code' => $vendorTxCode,
+                      'last_updated_date' => current_time('mysql')),
+                array('%d', '%s', '%s'))) {
                     error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
                     throw new DatabaseException($wpdb->last_error);
             }
         }
         else if (! empty($txnId)) {
             if (false === $wpdb->insert("wp_stripe_tx_refund",
-                        array('id' => $refId, 'cloudbeds_tx_id' => $txnId),
-                        array('%d', '%s'))) {
+                array('id' => $refId, 'cloudbeds_tx_id' => $txnId, 'last_updated_date' => current_time('mysql')),
+                array('%d', '%s', '%s'))) {
                     error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
                     throw new DatabaseException($wpdb->last_error);
             }
