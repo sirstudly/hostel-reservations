@@ -131,8 +131,9 @@
                    this will need to be done using the EFTPOS terminal (so card details must be taken over the phone; 
                    not through email as it's not secure).
                 </p>
-                <p>Successful refunds will be automatically added to their "Folio" page in Cloudbeds.
-                   You can also view all processed/pending refunds on the Refund History page.
+                <p>Successful refunds will be automatically added to their "Folio" page in Cloudbeds and a
+                   confirmation email will be sent using the Cloudbeds email template "Refund Processed".
+                   You can view all processed/pending refunds on the Refund History page.
                 </p>
                 <form name="post_option" action="" method="post" id="post_option">
                     <p>
