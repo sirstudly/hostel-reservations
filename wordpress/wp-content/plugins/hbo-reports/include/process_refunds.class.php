@@ -56,6 +56,7 @@ class ProcessRefundsController extends XslTransform {
             $description, 
             $txn['id'], 
             $txn['vendor_tx_code']);
+        LilHotelierDBO::runProcessor();
     }
 
     /**
