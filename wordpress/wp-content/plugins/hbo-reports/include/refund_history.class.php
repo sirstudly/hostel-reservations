@@ -69,7 +69,7 @@ class RefundHistoryController extends XslTransform {
             $propId = get_option('hbo_cloudbeds_property_id');
             foreach( $this->refunds as $refund ) {
                 $refundRoot = $parentElement->appendChild($domtree->createElement('refund'));
-                foreach( array("id", "reservation_id", "booking_reference", "email", "first_name", "last_name", "email", "amount", "description", "charge_id", "auth_vendor_tx_code", "refund_status", "refund_status_detail", "last_updated_date") as &$fieldname ) {
+                foreach( array("id", "reservation_id", "booking_reference", "email", "first_name", "last_name", "amount", "description", "charge_id", "auth_vendor_tx_code", "refund_status", "refund_status_detail", "last_updated_date") as &$fieldname ) {
                     if( !empty($refund->$fieldname) ) {
                         $refundRoot->appendChild($domtree->createElement($fieldname, htmlspecialchars($refund->$fieldname)));
                     }

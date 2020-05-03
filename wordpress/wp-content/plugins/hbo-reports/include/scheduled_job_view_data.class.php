@@ -73,6 +73,9 @@ class ScheduledJobViewData extends XslTransform {
         elseif( $classname == 'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' ) {
             $params = array( 'booking_date' => 'TODAY-3', 'days_ahead' => 4 );
         }
+        elseif( $classname == 'com.macbackpackers.jobs.CreateRefreshStripeRefundTransactionJob' ) {
+            $params = array();
+        }
         else {
             throw new ValidationException( "Unsupported job type: $classname" );
         }
