@@ -212,8 +212,8 @@
             </xsl:if>
         </td>
         <td><xsl:value-of select="notes"/>
-            <xsl:if test="is_vcc">
-                <p style="font-style: italic;">You cannot refund a prepaid charge against a virtual CC. Contact BDC to deal with refund.</p>
+            <xsl:if test="is_vcc and is_refundable">
+                <p style="font-style: italic;">The original charge was against a virtual CC. Guest must contact BDC to initiate refund (only refund once contacted by BDC).</p>
             </xsl:if>
         </td>
         <td>

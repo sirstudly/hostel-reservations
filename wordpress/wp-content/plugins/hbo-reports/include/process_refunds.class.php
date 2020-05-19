@@ -218,7 +218,7 @@ class ProcessRefundsController extends XslTransform {
                     if($this->booking['channel_name'] == 'Booking.com' && $this->booking['channel_payment_type'] == 'Channel') {
                         $txnRoot->appendChild($domtree->createElement('is_vcc', 'true'));
                     }
-                    else if (floatval($txn['debit']) > 0) {
+                    if (floatval($txn['debit']) > 0) {
                         if ($txn['gateway_name'] == 'Stripe' && $txn['refunded_value'] != $txn['paid']) {
                             $txnRoot->appendChild($domtree->createElement('is_refundable', 'true'));
                         }
