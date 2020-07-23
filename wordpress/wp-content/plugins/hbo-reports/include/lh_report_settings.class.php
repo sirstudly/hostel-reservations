@@ -118,6 +118,7 @@ class LHReportSettings extends XslTransform {
     */
    function updateCloudbeds2FACode( $scaCode ) {
        update_option( "hbo_cloudbeds_2facode", $scaCode );
+       LilHotelierDBO::runProcessor();
    }
 
    /**
