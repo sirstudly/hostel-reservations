@@ -1,72 +1,127 @@
 /*
-Theme Name: Twenty Eleven CR Movie List
-Theme URI: http://wordpress.org/extend/themes/twentyeleven-movielist
-Author: sir_studly
-Author URI: http://wordpress.org/
+Theme Name:   Twenty Eleven Bootstrap Edition
+Author:       sir_studly
 Template:     twentyeleven
-Description: XBOX Film List
-Version: 0.1
-License: GNU General Public License v2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tags: dark, light, white, black, gray, one-column, two-columns, left-sidebar, right-sidebar, fixed-width, flexible-width, custom-background, custom-colors, custom-header, custom-menu, editor-style, featured-image-header, featured-images, full-width-template, microformats, post-formats, rtl-language-support, sticky-post, theme-options, translation-ready
-Text Domain: twentyeleven-child
+Description:  Bootstrap-enabled theme based on twentyeleven
+Version:      3.4.1
+License:      GNU General Public License v2 or later
+License URI:  http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 @import url("../twentyeleven/style.css");
-@import url("tabs.css");
 
-/* =Theme customization starts here
--------------------------------------------------------------- */
+/* Theme customization starts here */
+#site-title {
+    padding: 0;
+}
 
-  div.filmContent {
-    width:100%;
-    font-family:verdana;
-    font-size:12px;
-  }
+#site-description {
+    margin: 0 270px 1.8em 0;
+}
 
-  table.films{
-    border-collapse: collapse;
-  }
-  table.films td{
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  td.filmTitle {
-    width: 300px;
+/* fix bootstrap tables */
+caption, th, td {
     font-weight: bold;
-    border: 1px solid black;
-  }
+    text-align: inherit;
+}
 
-  td.filmSubHeading {
-    font-weight: bold;
-  }
+#page {
+    margin: auto;
+    max-width: 1000px;
+}
 
-  td.imdbRating {
-    padding-right: 60px;
-    width: 30px;
-  }
+#branding {
+    border-top: none;
+    z-index: 6; /* otherwise header covers bootstrap calendar */
+}
 
-  td.filmYear {
-    padding-right: 40px;
-    width: 30px;
-  }
+#branding #s {
+    width: 92px;
+}
 
-  td.filmRuntime {
-    width: 100px;
-  }
+#branding #searchform {
+    top: 1.4em;
+}
 
-  td.filmDirectors {
-    width: 200px;
-  }
+#access ul {
+    font-size: 14px; /* make menu items a bit bigger */
+}
 
-  td.filmSynopsis {
-    border-top: 1px solid black;
-    padding-bottom: 10px;
-  }
+#access ul ul a {
+    font-size: 14px;
+}
 
-  td.filmActors {
-    padding-bottom: 10px;
-  }
+#access ul ul {
+    width: 168px; /* submenu bounding box incorrectly sized in original theme? */
+}
 
+input#s {
+    height: 32px;
+}
 
+.singular.page .hentry {
+    padding: 0;
+}
+
+.card-body {
+	padding: 0 !important; /* remove padding around tables */
+}
+
+.table {
+    margin-bottom: 0 !important;
+}
+
+.tooltip-inner {
+    max-width: 100% !important;
+}
+
+/* https://icons.getbootstrap.com/ */
+.bi-check-circle-white::before {
+  display: inline-block;
+  content: "";
+  background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='%23fff' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/><path fill-rule='evenodd' d='M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  width: 16px;
+  height: 16px;
+}
+
+.bi-card-list::before {
+  display: inline-block;
+  content: "";
+  background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M14.5 3h-13a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z'/><path fill-rule='evenodd' d='M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z'/><circle cx='3.5' cy='5.5' r='.5'/><circle cx='3.5' cy='8' r='.5'/><circle cx='3.5' cy='10.5' r='.5'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  width: 16px;
+  height: 16px;
+}
+
+.bi-arrow-repeat-white::before {
+  display: inline-block;
+  content: "";
+  background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='%23fff' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M2.854 7.146a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L2.5 8.207l1.646 1.647a.5.5 0 0 0 .708-.708l-2-2zm13-1a.5.5 0 0 0-.708 0L13.5 7.793l-1.646-1.647a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0 0-.708z'/><path fill-rule='evenodd' d='M8 3a4.995 4.995 0 0 0-4.192 2.273.5.5 0 0 1-.837-.546A6 6 0 0 1 14 8a.5.5 0 0 1-1.001 0 5 5 0 0 0-5-5zM2.5 7.5A.5.5 0 0 1 3 8a5 5 0 0 0 9.192 2.727.5.5 0 1 1 .837.546A6 6 0 0 1 2 8a.5.5 0 0 1 .501-.5z'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  width: 16px;
+  height: 16px;
+}
+
+.bi-calendar-day::before {
+  display: inline-block;
+  content: "";
+  background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><path d='M4.684 11.523v-2.3h2.261v-.61H4.684V6.801h2.464v-.61H4v5.332h.684zm3.296 0h.676V8.98c0-.554.227-1.007.953-1.007.125 0 .258.004.329.015v-.613a1.806 1.806 0 0 0-.254-.02c-.582 0-.891.32-1.012.567h-.02v-.504H7.98v4.105zm2.805-5.093c0 .238.192.425.43.425a.428.428 0 1 0 0-.855.426.426 0 0 0-.43.43zm.094 5.093h.672V7.418h-.672v4.105z'/><path fill-rule='evenodd' d='M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1zm1-3a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H2z'/><path fill-rule='evenodd' d='M3.5 0a.5.5 0 0 1 .5.5V1a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5zm9 0a.5.5 0 0 1 .5.5V1a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5z'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  width: 16px;
+  height: 16px;
+}
+
+.bi-book::before {
+  display: inline-block;
+  content: "";
+  background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M3.214 1.072C4.813.752 6.916.71 8.354 2.146A.5.5 0 0 1 8.5 2.5v11a.5.5 0 0 1-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 0 1 0 13.5v-11a.5.5 0 0 1 .276-.447L.5 2.5l-.224-.447.002-.001.004-.002.013-.006a5.017 5.017 0 0 1 .22-.103 12.958 12.958 0 0 1 2.7-.869zM1 2.82v9.908c.846-.343 1.944-.672 3.074-.788 1.143-.118 2.387-.023 3.426.56V2.718c-1.063-.929-2.631-.956-4.09-.664A11.958 11.958 0 0 0 1 2.82z'/><path fill-rule='evenodd' d='M12.786 1.072C11.188.752 9.084.71 7.646 2.146A.5.5 0 0 0 7.5 2.5v11a.5.5 0 0 0 .854.354c.843-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.276-.447L15.5 2.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 0 0-.799-.34 12.96 12.96 0 0 0-2.073-.609zM15 2.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.387-.023-3.426.56V2.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0 1 15 2.82z'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 2rem 2rem;
+  width: 32px;
+  height: 32px;
+}
