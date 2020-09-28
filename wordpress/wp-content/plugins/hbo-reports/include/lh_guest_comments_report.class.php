@@ -8,8 +8,8 @@ class LHGuestCommentsReport extends LHGuestCommentsReportData {
     /**
      * Default constructor.
      */
-    function LHGuestCommentsReport() {
-        parent::LHGuestCommentsReportData();
+    function __construct() {
+        parent::__construct();
     }
 
     /**

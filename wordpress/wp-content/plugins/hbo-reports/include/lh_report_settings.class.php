@@ -10,7 +10,7 @@ class LHReportSettings extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHReportSettings() {
+    function __construct() {
         
     }
 

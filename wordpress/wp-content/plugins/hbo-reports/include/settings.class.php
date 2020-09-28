@@ -8,7 +8,7 @@ class Settings extends XslTransform {
     /** 
      * Default constructor.
      */
-    function Settings() {
+    function __construct() {
     }
 
     /**

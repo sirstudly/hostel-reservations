@@ -34,15 +34,9 @@
     <script type="text/javascript" src="{pluginurl}/js/common.js"><xsl:comment/></script>  
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"><xsl:comment/></script>
 
-
     <!-- C S S -->
-    <link href="{pluginurl}/css/skins/traditional.css" rel="stylesheet" type="text/css" /> 
-    <link href="{pluginurl}/interface/bs/css/bs.min.css" rel="stylesheet" type="text/css" />
-    <link href="{pluginurl}/interface/chosen/chosen.css" rel="stylesheet" type="text/css" />
-    <link href="{pluginurl}/css/admin.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="{pluginurl}/interface/bs/js/bs.js"><xsl:comment/></script>  
-    <script type="text/javascript" src="{pluginurl}/interface/chosen/chosen.jquery.min.js"><xsl:comment/></script>
-    <link href="{pluginurl}/css/client.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"><xsl:comment/></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css" />
 </xsl:template>
 

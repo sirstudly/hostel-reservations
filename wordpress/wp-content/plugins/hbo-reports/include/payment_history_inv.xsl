@@ -8,15 +8,15 @@
 -->
 <xsl:template match="view">
 
-  <xsl:choose>
-    <xsl:when test="invoices/invoice[@selected='true']">
-        <xsl:apply-templates select="invoices/invoice[@selected='true']" mode="inv-detail-dialog"/>
-    </xsl:when>
-    <xsl:when test="reload_table_only = 'true'">
-        <xsl:apply-templates select="invoices"/>
-        <xsl:if test="not(invoices)">
-            <xsl:call-template name="no_records"/>
-        </xsl:if>
+    <xsl:choose>
+        <xsl:when test="invoices/invoice[@selected='true']">
+            <xsl:apply-templates select="invoices/invoice[@selected='true']" mode="inv-detail-dialog"/>
+        </xsl:when>
+        <xsl:when test="reload_table_only = 'true'">
+            <xsl:apply-templates select="invoices"/>
+            <xsl:if test="not(invoices)">
+                <xsl:call-template name="no_records"/>
+            </xsl:if>
 
 <script type="text/javascript">
     jQuery( ".inv-detail" ).dialog({
@@ -24,56 +24,11 @@
         modal: true,
         width:'80%' });
 </script>
-        
-    </xsl:when>
-    <xsl:otherwise>
+
+        </xsl:when>
+        <xsl:otherwise>
 
 <style media="screen" type="text/css">
-
-.form-table {
-    border-style: none; 
-}
-
-.form-table th label {
-    font-size: 12px;
-    font-weight: bold;
-    font-style: normal;
-    line-height: 25px;
-}
-
-.form-table td {
-    border-top: initial;
-}
-
-.hint {
-    margin-left: 20px;
-}
-
-#report-container {
-    font-family: sans-serif;
-    margin-left: 20px;
-    margin-bottom: 20px;
-}
-
-#report-container h3 {
-    margin: 10px 0;
-}
-
-#invoice-report tbody tr:nth-child(odd) td {
-	background-color: #e3e3e3;
-}
-
-#invoice-report tbody tr td {
-	padding-left: 15px;
-}
-
-#transaction-report tbody tr:nth-child(odd) td {
-    background-color: #e3e3e3;
-}
-
-#transaction-report tbody tr td {
-    padding-left: 15px;
-}
 
 .inv-detail label {
     font-weight: bold;
@@ -81,8 +36,6 @@
 
 </style>
 <script type="text/javascript">
-function initDialogs() {
-}
 
 jQuery(document).ready(function(){
     jQuery( ".inv-detail" ).dialog({
@@ -95,44 +48,41 @@ jQuery(document).ready(function(){
 });
 </script>
 
-    <div id="report-container" class="wrap bookingpage wpdevbk">
+            <h3>Invoice Payment History</h3>
 
-        <h3>Invoice Payment History</h3> 
+            <div class="font-italic">
+                <p>This lists all invoice payments made to our payment gateway (Sagepay).<br/>
+                    This might include payments made to us for:
+                    <ul>
+                        <li>Lost property. Request any shipping costs be paid before posting.</li>
+                        <li>...I can't think of anything else right now...</li>
+                    </ul>
+                </p>
+            </div>
+            <div id="invoice_view">
+                <xsl:apply-templates select="invoices"/>
+            </div>
+            <xsl:if test="not(invoices)">
+                <xsl:call-template name="no_records"/>
+            </xsl:if>
 
-        <div style="font-style:italic;">
-            <p>This lists all invoice payments made to our payment gateway (Sagepay).<br/>
-               This might include payments made to us for: 
-               <ul>
-                   <li>Lost property. Request any shipping costs be paid before posting.</li>
-                   <li>...I can't think of anything else right now...</li>
-               </ul>
-            </p>
-        </div>
-        <div class="visibility_container" id="invoice_view">
-            <xsl:apply-templates select="invoices" />
-        </div>
-	    <xsl:if test="not(invoices)">
-            <xsl:call-template name="no_records"/>
-	    </xsl:if>
-    </div>
-
-    </xsl:otherwise>
-  </xsl:choose>
+        </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template match="invoices">
-    <table id="invoice-report" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <th width="15%">Contact</th>
-            <th>Payment Description</th>
-            <th width="80px">Total Requested</th>
-            <th width="80px">Total Paid</th>
-            <th>Notes</th>
-            <th width="100px"><xsl:comment/></th>
-            <th width="100px">Acknowledge
-          <input type="checkbox" name="show_ack_invoices" onClick="update_invoice_payment_view(this.checked);">
-              <xsl:if test="/view/show_acknowledged = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
-          </input>
+    <table id="invoice-report" class="table table-striped">
+        <thead class="thead-dark">
+            <th scope="col" width="15%">Contact</th>
+            <th scope="col">Payment Description</th>
+            <th scope="col" width="80px">Total Requested</th>
+            <th scope="col" width="80px">Total Paid</th>
+            <th scope="col">Notes</th>
+            <th scope="col" width="100px"><xsl:comment/></th>
+            <th scope="col" class="text-center" width="100px">Acknowledge
+                <input type="checkbox" name="show_ack_invoices" onClick="update_invoice_payment_view(this.checked);">
+                    <xsl:if test="/view/show_acknowledged = 'true'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+                </input>
             </th>
         </thead>
         <tbody>
@@ -161,7 +111,7 @@ jQuery(document).ready(function(){
 </xsl:template>
 
 <xsl:template match="invoice" mode="inv-detail-dialog">
-    <div class="visibility_container inv-detail" title="Invoice/Payment Details">
+    <div class="inv-detail" title="Invoice/Payment Details">
         <xsl:attribute name="id">inv-detail-<xsl:value-of select="invoice_id"/></xsl:attribute>
         <div style="width:100%; clear:both;">
             <label style="width: 200px; float: left;">Payment Link</label>
@@ -195,22 +145,22 @@ jQuery(document).ready(function(){
             <xsl:apply-templates select="transactions" />
         </xsl:if>
         <br/>
-        <div class="wpdevbk" style="margin: 5px 0 10px 0;">
+        <div style="margin: 5px 0 10px 0;">
             <xsl:apply-templates select="notes"/>
         </div>
     </div>
 </xsl:template>
 
 <xsl:template match="transactions">
-    <table id="transaction-report" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <th width="140px">Payee</th>
-            <th width="170px">Vendor Tx Code</th>
-            <th width="70px">Payment Amount</th>
-            <th width="60px">Auth Status</th>
-            <th>Auth Detail</th>
-            <th width="180px">Card Details</th>
-            <th width="120px">Process Date</th>
+    <table id="transaction-report" class="table table-striped">
+        <thead class="thead-dark">
+            <th scope="col" width="140px">Payee</th>
+            <th scope="col" width="170px">Vendor Tx Code</th>
+            <th scope="col" width="70px">Payment Amount</th>
+            <th scope="col" width="60px">Auth Status</th>
+            <th scope="col">Auth Detail</th>
+            <th scope="col" width="180px">Card Details</th>
+            <th scope="col" width="120px">Process Date</th>
         </thead>
         <tbody>
             <xsl:apply-templates select="transaction"/>

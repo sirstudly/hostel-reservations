@@ -8,7 +8,7 @@ class PageFactory {
     /** 
      * Default constructor.
      */
-    function PageFactory() {
+    function __construct() {
     }
 
     /**

@@ -11,82 +11,49 @@
 
 <xsl:template match="/view">
 
-<style media="screen" type="text/css">
-#bedcounts_rpt tbody tr:nth-child(odd) td,#bedcounts_rpt tbody tr:nth-child(odd) th {
-	background-color: #e3e3e3;
-}
-
-#bedcounts_rpt tbody tr td {
-    text-align: center;
-}
-
-#bedcounts_rpt tfoot tr td {
-    text-align: center;
-    font-weight: bold;
-	background-color: #d7d7d7;
-}
-
-</style>
-
-    <div id="wpdev-booking-bedcounts" class="wrap bookingpage">
-        <div class="icon32" style="margin:10px 25px 10px 10px;"><img src="{homeurl}/wp-content/plugins/hbo-reports/img/bunkbed-48x48.png"/><br /></div>
-        <h2>Bed Counts - <xsl:value-of select="selectiondate_long"/></h2>
-        <div class="wpdevbk">
-    
-            <div style="margin-top:10px;" class="booking-submenu-tab-container">
-                <div class="nav-tabs booking-submenu-tab-insidecontainer">
-
-                    <div id="filter" class="visibility_container active">
-                        <xsl:call-template name="show_bedcount_view"/>
-                    </div>
-
-                </div>
-            </div>
-
-            <div style="height:1px;clear:both;margin-top:40px;"><xsl:comment/></div>
-    
-            <div class="visibility_container" id="bedcount_view">
-                <xsl:choose>
-                    <xsl:when test="bedcounts/room">
-                        <xsl:apply-templates select="bedcounts"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
-                    </xsl:otherwise>
-                </xsl:choose>
-                <xsl:comment/>
-            </div>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-auto icon32" style="margin:10px 25px 10px 10px;"><img src="{homeurl}/wp-content/plugins/hbo-reports/img/bunkbed-48x48.png"/></div>
+            <div class="col-md-auto mt-2"><h2>Bed Counts - <xsl:value-of select="selectiondate_long"/></h2></div>
         </div>
-
-        <xsl:call-template name="write_inline_js"/>
-        <xsl:call-template name="write_inline_css"/>
     </div>
+
+    <div class="card text-center">
+        <div class="card-header">
+            <xsl:call-template name="show_bedcount_view" />
+        </div>
+        <div class="card-body">
+            <xsl:choose>
+                <xsl:when test="bedcounts/room">
+                    <xsl:apply-templates select="bedcounts" />
+                </xsl:when>
+                <xsl:otherwise>
+                    <div class="ml-5 mb-2 mt-2 font-italic">
+                        <h6>No data available.</h6>
+                    </div>
+                </xsl:otherwise>
+            </xsl:choose>
+        </div>
+    </div>
+    <xsl:call-template name="write_inline_js"/>
+    <xsl:call-template name="write_inline_css"/>
 
 </xsl:template>
 
 <xsl:template name="show_bedcount_view">
-    <div style="clear:both;height:1px;"><xsl:comment/></div>
-    <div class="wpdevbk-filters-section ">
-
-        <form  name="bedcount_view_form" action="" method="post" id="bedcount_view_form"  class="form-inline">
-            <a class="btn btn-primary" style="float: left; margin-right: 15px;"
-                onclick="javascript:document.getElementById('download_bedcounts').value = '';bedcount_view_form.submit();">Apply <span class="icon-refresh icon-white"></span>
-            </a>
-
-            <div class="control-group" style="float:left;">
-                <label for="selectiondate" class="control-label"><xsl:comment/></label>
-                <div class="inline controls">
-                    <div class="btn-group">
-                        <input style="width:100px;" type="text" class="span2span2 wpdevbk-filters-section-calendar" 
-                            value="{selectiondate}"  id="selectiondate"  name="selectiondate" />
-                        <span class="add-on"><span class="icon-calendar"></span></span>
-                    </div>
-                <p class="help-block" style="float:left;padding-left:5px;">Selection Date</p>
-                </div>
+    <form name="bedcount_view_form" action="" method="post" id="bedcount_view_form"  class="form-inline">
+    <div class="container mt-1">
+        <div class="row">
+            <div class="col-2">
+                <input style="width:100px;" type="text" data-date-format="yyyy-mm-dd"
+                    value="{selectiondate}"  id="selectiondate"  name="selectiondate" 
+                    onchange="document.getElementById('download_bedcounts').value = '';bedcount_view_form.submit();"/>
+                <span class="bi-calendar-day ml-1"></span>
+                <label for="selectiondate" style="justify-content: normal; margin-left: 20px;">Selection Date</label>
             </div>
     
-            <div class="control-group" style="float:left;">
-                <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
+            <div class="col-6 text-left">
+                <p class="help-block mb-0">
                     <xsl:if test="last_completed_job">
                         This report aggregates data as it appeared on <xsl:value-of select="last_completed_job"/>.<br/>
                     </xsl:if>
@@ -95,7 +62,7 @@
                         <div style="color: red;">The last update of this report failed to run.
                             <xsl:choose>
                                 <xsl:when test="check_credentials = 'true'">
-                                    Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                                    Credentials check failed.
                                 </xsl:when>
                                 <xsl:otherwise>
                                     Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
@@ -106,56 +73,56 @@
                 </p>
             </div>
     
-            <div class="btn-group" style="float:right;">
-                <div class="inline controls">
-                    <div class="btn-group">
-                        <xsl:choose>
-                            <xsl:when test="job_in_progress">
-                                <a class="btn btn-primary disabled" style="float: right; margin-right: 15px;">Update in Progress <span class="icon-refresh icon-white"></span></a>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <input type="hidden" name="bedcount_job" id="bedcount_job" value="" />
-                                <a class="btn btn-primary" style="float: right; margin-right: 15px;" onclick="javascript:document.getElementById('bedcount_job').value = 'true';bedcount_view_form.submit();">Reload Data <span class="icon-refresh icon-white"></span></a>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                        <span style="padding-left:10px;"><input type="hidden" name="download_bedcounts" id="download_bedcounts" value="" /></span>
-                        <a data-original-title="Export this page to CSV format"  rel="tooltip" class="tooltip_top btn" onclick="javascript:document.getElementById('download_bedcounts').value = 'true';bedcount_view_form.submit();">
-                            Export <span class="icon-list"></span></a>
-                    </div>
-                <p class="help-block" style="float:left;padding-left:5px;">
+            <div class="col-4">
+                <div class="d-flex justify-content-end">
+                    <input type="hidden" name="download_bedcounts" id="download_bedcounts" value="" />
+                    <a title="Export this page to CSV format" data-toggle="tooltip" data-placement="top" href="javascript:void(0)" class="btn btn-outline-secondary" onclick="document.getElementById('download_bedcounts').value = 'true';bedcount_view_form.submit();">
+                        Export <span class="bi-card-list ml-1"></span></a>
+                    <span style="margin: 0 5px;"/>
+    
+                    <xsl:choose>
+                        <xsl:when test="job_in_progress">
+                            <a class="btn btn-primary disabled" href="javascript:void(0)">Update in Progress <span class="bi-arrow-repeat-white ml-1"/></a>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <input type="hidden" name="bedcount_job" id="bedcount_job" value="" />
+                            <a class="btn btn-primary" href="javascript:void(0)" onclick="document.getElementById('bedcount_job').value = 'true';bedcount_view_form.submit();">Reload Data <span class="bi-arrow-repeat-white ml-1"/></a>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
+
+                <p class="help-block">
                     <xsl:if test="job_in_progress">
                         An update is already in progress. <br/>
-                        Re-apply the filter on this form in a few minutes.
+                        Reload this page in a few minutes.
                     </xsl:if>
                 </p>
-                </div>
             </div>
-
-            <div class="clear"><xsl:comment/></div>
-        </form>
-
+        </div>
     </div>
-    <div style="clear:both;height:1px;"><xsl:comment/></div>
+    </form>
 </xsl:template>
 
 <xsl:template match="bedcounts">
 
-    <table id="bedcounts_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <th>Room</th>
-            <th>Number of Beds</th>
-            <th>Room Type</th>
-            <th>Paid Beds</th>
-            <th>Staff Beds</th>
-            <th>No Shows</th>
-            <th>Empty Beds</th>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Room</th>
+                <th scope="col">Number of Beds</th>
+                <th scope="col">Room Type</th>
+                <th scope="col">Paid Beds</th>
+                <th scope="col">Staff Beds</th>
+                <th scope="col">No Shows</th>
+                <th scope="col">Empty Beds</th>
+            </tr>
         </thead>
         <tbody>
             <xsl:apply-templates select="room"/>
         </tbody>
         <tfoot>
-            <tr>
-                <td><b>Total Beds</b></td>
+            <tr class="table-primary font-weight-bold">
+                <td>Total Beds</td>
                 <td><xsl:value-of select="sum(room/capacity)"/></td>
                 <td><!-- room type --></td>
                 <td><xsl:value-of select="sum(room/num_paid)"/></td>
@@ -163,12 +130,12 @@
                 <td><xsl:value-of select="sum(room/num_noshow)"/></td>
                 <td><xsl:value-of select="sum(room/num_empty)"/></td>
             </tr>
-            <tr>
+            <tr class="table-primary font-weight-bold">
                 <td>Total Paid</td>
                 <td><xsl:value-of select="sum(room/num_paid) + sum(room/num_noshow)"/></td>
                 <td colspan="5"></td>
             </tr>
-            <tr>
+            <tr class="table-primary font-weight-bold">
                 <td>Total Occupied</td>
                 <td><xsl:value-of select="sum(room/num_paid) + sum(room/num_noshow) + sum(room/num_staff)"/></td>
                 <td colspan="5"></td>

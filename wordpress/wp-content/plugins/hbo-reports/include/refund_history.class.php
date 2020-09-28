@@ -11,7 +11,7 @@ class RefundHistoryController extends XslTransform {
     /**
      * Default constructor.
      */
-    function RefundHistoryController() {
+    function __construct() {
         
     }
 

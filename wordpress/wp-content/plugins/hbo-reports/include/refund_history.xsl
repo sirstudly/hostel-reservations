@@ -14,52 +14,9 @@
 
     <xsl:if test="refunds">
 
-<style media="screen" type="text/css">
+        <h4>Refund History</h4>
 
-.form-table {
-    border-style: none; 
-}
-
-.form-table th label {
-    font-size: 12px;
-    font-weight: bold;
-    font-style: normal;
-    line-height: 25px;
-}
-
-.form-table td {
-    border-top: initial;
-}
-
-.hint {
-    margin-left: 20px;
-}
-
-#report-container {
-    font-family: sans-serif;
-    margin-left: 20px;
-    margin-bottom: 20px;
-}
-
-#report-container h3 {
-    margin: 10px 0;
-}
-
-#transaction-report tbody tr:nth-child(odd) td {
-    background-color: #e3e3e3;
-}
-
-#transaction-report tbody tr td {
-    padding-left: 15px;
-}
-
-</style>
-
-    <div id="report-container" class="wrap bookingpage wpdevbk">
-
-        <h3>Refund History</h3> 
-
-        <div style="font-style:italic;">
+        <div class="font-italic">
             <p>This lists all refunds that have been initiated from the Process Refunds page.
             </p>
         </div>
@@ -67,29 +24,27 @@
         <xsl:if test="not(refunds)">
             <div style="margin: 20px 0 20px 50px; font-style: italic;"><h4>No data available.</h4></div>
         </xsl:if>
-        <div id="dialog_ajax_response" class="wpdevbk"><xsl:comment/><!-- ajax response here--></div>
-    </div>
+        <div id="dialog_ajax_response"><xsl:comment/><!-- ajax response here--></div>
     </xsl:if>
 </xsl:template>
 
 <xsl:template match="refunds">
-    <div class="visibility_container" id="transaction_view">
-        <xsl:choose>
-            <xsl:when test="refund">
-                <table id="transaction-report" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-                    <thead>
-                        <th>Booking</th>
-                        <th>Booking Reference</th>
-                        <th>Refund Amount</th>
-                        <th>Description</th>
-                        <th>Gateway</th>
-                        <th>Details</th>
-                        <th>Processed Date</th>
-                    </thead>
-                    <tbody>
-                        <xsl:apply-templates select="refund"/>
-                    </tbody>
-                </table>
+    <xsl:choose>
+        <xsl:when test="refund">
+            <table id="transaction-report" class="table table-striped">
+                <thead class="thead-dark">
+                    <th scope="col">Booking</th>
+                    <th scope="col">Booking Reference</th>
+                    <th scope="col">Refund Amount</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Gateway</th>
+                    <th scope="col">Details</th>
+                    <th scope="col">Processed Date</th>
+                </thead>
+                <tbody>
+                    <xsl:apply-templates select="refund"/>
+                </tbody>
+            </table>
 
 <script type="text/javascript">
    jQuery('#transaction-report').DataTable({
@@ -98,12 +53,11 @@
     "order": [[6, 'desc']]
   });
 </script>
-            </xsl:when>
-            <xsl:otherwise>
-                <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
-            </xsl:otherwise>
-        </xsl:choose>
-    </div>
+        </xsl:when>
+        <xsl:otherwise>
+            <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
+        </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template match="refund">
@@ -128,7 +82,7 @@
 
 <xsl:template match="selected_refund">
 
-    <div id="response_dialog" class="visibility_container refund-detail wpdevbk" style="display:none;">
+    <div id="response_dialog" class="refund-detail" style="display:none;">
         <xsl:attribute name="title">
             <xsl:if test="gateway = 'Cloudbeds'">Cloudbeds Response (Processed with Stripe)</xsl:if>
             <xsl:if test="gateway = 'Stripe'">Stripe Gateway Response</xsl:if>

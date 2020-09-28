@@ -15,7 +15,7 @@ class LHUnpaidDepositReport extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHUnpaidDepositReport() {
+    function __construct() {
         
     }
 

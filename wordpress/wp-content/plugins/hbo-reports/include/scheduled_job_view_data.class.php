@@ -10,7 +10,7 @@ class ScheduledJobViewData extends XslTransform {
     /**
      * Default constructor.
      */
-    function ScheduledJobViewData() {
+    function __construct() {
     }
 
     /**

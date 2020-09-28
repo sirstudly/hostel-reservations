@@ -18,117 +18,156 @@
     font-size: 140%;
 }
 
-td.border_top {
-    border-top: 1px solid #DFDFDF;
+.badge-empty {
+    color: #fff;
+    background-color: #B8B8B8;
+    font-size: 100%;
 }
 
-td.border_bottom {
-    border-bottom: 1px solid #DFDFDF;
+.badge-nochange {
+    color: #fff;
+    background-color: #7A7A7A;
+    font-size: 100%;
 }
 
+.badge-3daychange {
+    color: #fff;
+    background-color: #C87F5B;
+    font-size: 100%;
+}
+
+.badge-change {
+    color: #fff;
+    background-color: #3A87AD;
+    font-size: 100%;
+}
 </style>
 
-    <div class="wpdevbk wrap">
-        <div class="booking-submenu-tab-container">
-            <div class="nav-tabs booking-submenu-tab-insidecontainer">
-                <form id="housekeeping_form" class="form-inline" method="post" action="" name="housekeeping_form">
-                    <div style="text-align: center">
-                        <h3 id="selected_date_label"><xsl:value-of select="selectiondate"/></h3>
-                    </div>
-                    <!-- show the last /completed/ job -->
-                    <!-- also, if one is currently pending/submitted - disable the refresh button -->
-                    <p class="help-block" style="float:left;padding-left:5px;font-style: italic;">
-                        <xsl:choose>
-                            <xsl:when test="job">
-                                This report was last updated on: <xsl:value-of select="job/end_date"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                This report has never been updated for this date.
-                            </xsl:otherwise>
-                        </xsl:choose>
-                        <xsl:if test="last_job_status = 'failed'">
-                            <div style="color: red;">The last update of this report failed to run.
-                                <xsl:choose>
-                                    <xsl:when test="check_credentials = 'true'">
-                                        Has the LittleHotelier password changed recently? If so, update it on the admin page.
-                                    </xsl:when>
-                                    <xsl:otherwise>
-                                        Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
-                                    </xsl:otherwise>
-                                </xsl:choose>
-                            </div>
-                        </xsl:if>
-                    </p>
-                    <div class="control-group" style="float: right;">
-                        <div class="inline controls">
-                            <div class="btn-group">
-                                <xsl:choose>
-                                    <xsl:when test="job_in_progress">
-                                        <a class="btn btn-primary disabled" style="float: right; margin-right: 15px;">Update in Progress <span class="icon-refresh icon-white"></span></a>
-                                    </xsl:when>
-                                    <xsl:otherwise>
-                                        <input type="hidden" name="housekeeping_job" id="housekeeping_job" value="" />
-                                        <a class="btn btn-primary" style="float: right; margin-right: 15px;" onclick="javascript:document.getElementById('housekeeping_job').value = 'true';housekeeping_form.submit();">Refresh Now <span class="icon-refresh icon-white"></span></a>
-                                    </xsl:otherwise>
-                                </xsl:choose>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-auto ml-2"><h3><xsl:value-of select="selectiondate"/></h3></div>
         </div>
-
-        <!--
-        Home URL: <xsl:value-of select="home_url"/><br/>
-        <xsl:choose>
-            <xsl:when test="job">
-                ID: <xsl:value-of select="job/id"/><br/>
-                Name: <xsl:value-of select="job/name"/><br/>
-                Status: <xsl:value-of select="job/status"/><br/>
-                Start Date: <xsl:value-of select="job/start_date"/><br/>
-                End Date: <xsl:value-of select="job/end_date"/><br/>
-            </xsl:when>
-            <xsl:otherwise>
-                No job defined.
-            </xsl:otherwise>
-        </xsl:choose>
-        -->
-
-        <xsl:if test="totals/level2">
-        <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-            <thead>
-                <th>20s : <xsl:value-of select="totals/level2"/></th>
-                <th>40s : <xsl:value-of select="totals/level4"/></th>
-                <th>50s : <xsl:value-of select="totals/level5"/></th>
-                <th>60s / 70s : <xsl:value-of select="totals/level6_7"/></th>
-            </thead>
-        </table>
-        </xsl:if>
-        
-        <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-            <thead>
-                <xsl:if test="totals/upstairs">
-                    <th style="text-align: left; padding-left: 20%;">Upstairs : <xsl:value-of select="totals/upstairs"/></th>
-                </xsl:if>
-                <th style="text-align: left; padding-left: 20%;">Total : <xsl:value-of select="totals/total"/></th>
-            </thead>
-        </table>
-
-        <div style="padding: 10px 0; background-color: #e3e3e3;"><xsl:comment/></div>
-
-        <table class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-            <thead>
-                <th width="50">Room</th>
-                <th width="150">Bed</th>
-                <th>Bedsheets</th>
-            </thead>
-            <tbody>
-                <xsl:apply-templates select="bed" mode="bedsheet_row"/>
-            </tbody>
-        </table>
     </div>
 
+    <div class="card text-center">
+        <div class="card-header pb-0">
+            <xsl:call-template name="report_header" />
+        </div>
+        <div class="card-body">
+            <xsl:choose>
+                <xsl:when test="bed">
+                    <xsl:call-template name="report_data"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <div class="ml-5 mb-2 mt-2 font-italic">
+                        <h6>No data available.</h6>
+                    </div>
+                </xsl:otherwise>
+            </xsl:choose>
+        </div>
+    </div>
     <xsl:call-template name="write_inline_js"/>
+    <xsl:call-template name="write_inline_css"/>
+
+</xsl:template>
+
+<xsl:template name="report_header">
+
+    <form id="housekeeping_form" class="form-inline" method="post" action="" name="housekeeping_form">
+    <div class="container mt-1">
+        <div class="row">
+            <div class="col-9">
+                <p class="help-block font-italic text-left">
+                    <xsl:choose>
+                        <xsl:when test="job">
+                            This report was last updated on: <xsl:value-of select="job/end_date"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            This report has never been updated for this date.
+                        </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:if test="last_job_status = 'failed'">
+                        <div class="text-left" style="color: red;">The last update of this report failed to run.
+                            <xsl:choose>
+                                <xsl:when test="check_credentials = 'true'">
+                                    Credentials check failed.
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </div>
+                    </xsl:if>
+                </p>
+            </div>
+            <div class="col-3">
+                <div class="d-flex justify-content-end">
+                    <xsl:choose>
+                        <xsl:when test="job_in_progress">
+                            <a class="btn btn-primary disabled" href="javascript:void(0)">Update in Progress <span class="bi-arrow-repeat-white ml-1"/></a>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <input type="hidden" name="housekeeping_job" id="housekeeping_job" value="" />
+                            <a class="btn btn-primary" href="javascript:void(0)" onclick="document.getElementById('housekeeping_job').value = 'true';housekeeping_form.submit();">Refresh Now <span class="bi-arrow-repeat-white ml-1"/></a>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
+
+                <p class="help-block">
+                    <xsl:if test="job_in_progress">
+                        Come back to this page in a few minutes.
+                    </xsl:if>
+                </p>
+            </div>
+        </div>
+    </div>
+    </form>
+
+    <div class="container-fluid font-weight-bold">
+        <xsl:if test="totals/level2">
+            <div class="row">
+                <div class="col">
+                    20s : <xsl:value-of select="totals/level2"/>
+                </div>
+                <div class="col">
+                    40s : <xsl:value-of select="totals/level4"/>
+                </div>
+                <div class="col">
+                    50s : <xsl:value-of select="totals/level5"/>
+                </div>
+                <div class="col">
+                    60s / 70s : <xsl:value-of select="totals/level6_7"/>
+                </div>
+            </div>
+        </xsl:if>
+        <div class="row mt-2 mb-2">
+            <xsl:if test="totals/upstairs">
+                <div class="col">
+                    Upstairs : <xsl:value-of select="totals/upstairs" />
+                </div>
+            </xsl:if>
+            <div class="col">
+                Total : <xsl:value-of select="totals/total" />
+            </div>
+        </div>
+    </div>
+
+</xsl:template>
+
+<xsl:template name="report_data">
+
+    <table  class="table table-borderless table-hover table-sm">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="width: 50px;">Room</th>
+                <th scope="col" style="width: 150px;">Bed</th>
+                <th scope="col">Bedsheets</th>
+            </tr>
+        </thead>
+        <tbody>
+            <xsl:apply-templates select="bed" mode="bedsheet_row"/>
+        </tbody>
+    </table>
 
 </xsl:template>
 
@@ -138,54 +177,39 @@ td.border_bottom {
         <xsl:when test="room = preceding-sibling::node()/room" />
         <xsl:otherwise>
             <tr>
-                <td colspan="3" class="border_top border_bottom border_left border_right"><div class="room_demarkation">Room <xsl:value-of select="room"/></div></td>
+                <td colspan="3" class="border_top border_bottom border_left border_right"><div class="room_demarkation">Room <xsl:value-of select="room"/> (<xsl:value-of select="room_type"/>)</div></td>
             </tr>
         </xsl:otherwise>
     </xsl:choose>
     <tr>
-        <xsl:attribute name="class">
-            <xsl:text>alloc_resource_attrib</xsl:text>
-            <xsl:choose>
-                <xsl:when test="position() mod 2">odd</xsl:when>
-                <xsl:otherwise>even</xsl:otherwise>
-            </xsl:choose>
-        </xsl:attribute>
-
-        <td class="border_left border_right" valign="top">
+        <td class="text-left">
             <xsl:value-of select="room"/>
         </td>
-        <td class="border_right" valign="top">
+        <td class="text-left">
             <xsl:value-of select="bed_name"/>
         </td>
-        <td>
-            <!--
-    guest name: <xsl:value-of select="guest_name"/><br/>
-    checkin_date: <xsl:value-of select="checkin_date"/><br/>
-    checkout_date: <xsl:value-of select="checkout_date"/><br/>
-    data href:  <xsl:value-of select="data_href"/><br/>
-    Bed Sheet:<br/>
-            -->
-        <span>
-            <xsl:attribute name="class">
-                <xsl:text>label </xsl:text>
-                <xsl:if test="bedsheet = 'CHANGE'">
-                    <xsl:text>label-change </xsl:text>
-                </xsl:if>
-                <xsl:if test="bedsheet = '3 DAY CHANGE'">
-                    <xsl:text>label-3daychange </xsl:text>
-                </xsl:if>
-                <xsl:if test="bedsheet = 'NO CHANGE'">
-                    <xsl:text>label-nochange </xsl:text>
-                </xsl:if>
-                <xsl:if test="bedsheet = 'EMPTY'">
-                    <xsl:text>label-empty </xsl:text>
-                </xsl:if>
-            </xsl:attribute>
-            <xsl:value-of select="bedsheet"/>
-        </span>
-        <xsl:if test="contains(data_href, 'room_closures') and ( bedsheet = 'CHANGE' or bedsheet = '3 DAY CHANGE' )">
-            * Room closure. Please manually check this.
-        </xsl:if>
+        <td class="text-left">
+            <span>
+                <xsl:attribute name="class">
+                    <xsl:text>badge </xsl:text>
+                    <xsl:if test="bedsheet = 'CHANGE'">
+                        <xsl:text>badge-change</xsl:text>
+                    </xsl:if>
+                    <xsl:if test="bedsheet = '3 DAY CHANGE'">
+                        <xsl:text>badge-3daychange</xsl:text>
+                    </xsl:if>
+                    <xsl:if test="bedsheet = 'NO CHANGE'">
+                        <xsl:text>badge-nochange</xsl:text>
+                    </xsl:if>
+                    <xsl:if test="bedsheet = 'EMPTY'">
+                        <xsl:text>badge-empty</xsl:text>
+                    </xsl:if>
+                </xsl:attribute>
+                <xsl:value-of select="bedsheet"/>
+            </span>
+            <xsl:if test="contains(data_href, 'room_closures') and ( bedsheet = 'CHANGE' or bedsheet = '3 DAY CHANGE' )">
+                * Room closure. Please manually check this.
+            </xsl:if>
         </td>
     </tr>
 

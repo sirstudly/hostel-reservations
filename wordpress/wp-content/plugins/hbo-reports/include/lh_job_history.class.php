@@ -13,7 +13,7 @@ class LHJobHistory extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHJobHistory() {
+    function __construct() {
         
     }
 

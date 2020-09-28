@@ -15,7 +15,7 @@ class LHSplitRoomReport extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHSplitRoomReport() {
+    function __construct() {
         
     }
 

@@ -12,7 +12,7 @@ class LHManualCharge extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHManualCharge() {
+    function __construct() {
         
     }
 

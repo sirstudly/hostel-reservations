@@ -12,83 +12,49 @@
 
 <xsl:template match="view">
 
-<style media="screen" type="text/css">
-
-#group_bookings_rpt tr:nth-child(odd) td {
-	background-color: #e3e3e3;
-}
-
-tr.unread {
-    font-weight: bold;
-}
-
-#tooltip {
-  position: absolute;
-  z-index: 1001;
-  display: none;
-  border: 2px solid #ebebeb;
-  border-radius: 5px;
-  padding: 10px;
-  background-color: #fff;
-}
-
-#report_data_view {
-  margin-bottom: 100px;
-}
-
-</style>
-
-    <div id="report-container" class="wrap bookingpage">
+    <div class="d-flex">
+        <span class="bi-book" style="margin: 5px 10px 5px 100px;"/>
         <h2>Bookings with <xsl:value-of select="group_size"/> or More Guests</h2>
-        <div class="wpdevbk">
-    
-            <div style="margin-top:10px;" class="booking-submenu-tab-container">
-                <div class="nav-tabs booking-submenu-tab-insidecontainer">
-
-                    <div id="filter" class="visibility_container active">
-                        <xsl:call-template name="report_header"/>
-                    </div>
-
-                </div>
-            </div>
-
-            <div style="height:1px;clear:both;margin-top:40px;"><xsl:comment/></div>
-    
-            <div class="visibility_container" id="report_data_view">
-                <xsl:choose>
-                    <xsl:when test="record">
-                        <xsl:call-template name="report_data"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </div>
-        </div>
-
-        <xsl:call-template name="write_inline_js"/>
-        <xsl:call-template name="write_inline_css"/>
     </div>
+
+    <div class="card text-center">
+        <div class="card-header pb-0">
+            <xsl:call-template name="report_header" />
+        </div>
+        <div class="card-body">
+            <xsl:choose>
+                <xsl:when test="record">
+                    <xsl:call-template name="report_data"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <div class="ml-5 mb-2 mt-2 font-italic">
+                        <h6>No data available.</h6>
+                    </div>
+                </xsl:otherwise>
+            </xsl:choose>
+        </div>
+    </div>
+    <xsl:call-template name="write_inline_js"/>
+    <xsl:call-template name="write_inline_css"/>
 
 </xsl:template>
 
 
 <xsl:template name="report_header">
-    <div style="clear:both;height:1px;"><xsl:comment/></div>
-    <div class="wpdevbk-filters-section ">
 
-        <form  name="report_form" action="" method="post" id="report_form"  class="form-inline">
-
-            <div class="control-group" style="float:left;">
-                <p class="help-block" style="float:left;padding-left:5px;font-style: italic; width: 100%;">
+    <form name="report_form" action="" method="post" id="report_form" class="form-inline">
+    <div class="container mt-1">
+        <div class="row">
+            <div class="col-9">
+                <p class="help-block font-italic text-left">
                     <xsl:if test="last_completed_job">
                         This report was last run on <xsl:value-of select="last_completed_job"/>.
                     </xsl:if>
                     <xsl:if test="last_job_status = 'failed'">
-                        <div style="color: red;">The last update of this report failed to run.
+                        <div class="text-left" style="color: red;">The last update of this report failed to run.
                             <xsl:choose>
                                 <xsl:when test="check_credentials = 'true'">
-                                    Has the LittleHotelier password changed recently? If so, update it on the admin page.
+                                    Credentials check failed.
                                 </xsl:when>
                                 <xsl:otherwise>
                                     Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
@@ -98,33 +64,28 @@ tr.unread {
                     </xsl:if>
                 </p>
             </div>
-    
-            <div class="btn-group" style="float:right;">
-                <div class="inline controls">
-                    <div class="btn-group">
-                        <xsl:choose>
-                            <xsl:when test="last_submitted_job">
-                                <a class="btn btn-primary disabled" style="float: right; margin-right: 15px;">Update in Progress <span class="icon-refresh icon-white"></span></a>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <input type="hidden" name="reload_data" id="reload_data" value="true" />
-                                <a class="btn btn-primary" style="float: right; margin-right: 15px;" onclick="javascript:report_form.submit();">Reload Data <span class="icon-refresh icon-white"></span></a>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </div>
-                <p class="help-block" style="float:left;padding-left:5px;padding-right:15px;font-style:italic;">
-                    <xsl:if test="last_submitted_job">
+            <div class="col-3">
+                <div class="d-flex justify-content-end">
+                    <xsl:choose>
+                        <xsl:when test="last_submitted_job">
+                            <a class="btn btn-primary disabled" href="javascript:void(0)">Update in Progress <span class="bi-arrow-repeat-white ml-1"/></a>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <input type="hidden" name="reload_data" id="reload_data" value="true" />
+                            <a class="btn btn-primary" href="javascript:void(0)" onclick="report_form.submit();">Reload Data <span class="bi-arrow-repeat-white ml-1"/></a>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
+
+                <p class="help-block">
+                    <xsl:if test="job_in_progress">
                         Come back to this page in a few minutes.
                     </xsl:if>
                 </p>
-                </div>
             </div>
-
-            <div class="clear"><xsl:comment/></div>
-        </form>
-
+        </div>
     </div>
-    <div style="clear:both;height:1px;"><xsl:comment/></div>
+    </form>
 
 </xsl:template>
 
@@ -134,18 +95,18 @@ tr.unread {
         <p style="padding-left: 20px;"><strong>BOLD</strong> entries have not been viewed before in Little Hotelier.</p>
     </xsl:if>
 
-    <div id="tooltip"></div>
-    <table id="group_bookings_rpt" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <th>Guest Name(s)</th>
-            <th>Booking Reference</th>
-            <th>Booking Source</th>
-            <th>Checkin Date</th>
-            <th>Checkout Date</th>
-            <th>Booked Date</th>
-            <th>Payment<br/>Outstanding</th>
-            <th>Number of<br/>Guests</th>
-            <th data-visible="false">Notes</th>
+    <table id="group_bookings_rpt" class="table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Guest Name(s)</th>
+                <th scope="col">Booking Reference</th>
+                <th scope="col" style="width: 120px;">Booking Source</th>
+                <th scope="col">Checkin Date</th>
+                <th scope="col">Checkout Date</th>
+                <th scope="col">Booked Date</th>
+                <th scope="col">Payment<br/>Outstanding</th>
+                <th scope="col">Number of<br/>Guests</th>
+            </tr>
         </thead>
         <tbody>
             <xsl:apply-templates select="record"/>
@@ -153,35 +114,25 @@ tr.unread {
     </table>
 
 <script type="text/javascript">
-  var group_bookings_rpt_table = jQuery('#group_bookings_rpt').DataTable({
+  jQuery('#group_bookings_rpt').DataTable({
     "paging": false,
     "searching": false,
     "order": [[3, 'asc']]
   });
-  
-  jQuery('#group_bookings_rpt').on('mousemove', 'tr', function(e) {
-    var rowData = group_bookings_rpt_table.row(this).data();
-    if(rowData) {
-      var rowNotes = jQuery('&lt;div&gt;').html(rowData[8]).text(); // html decode
-      jQuery("#tooltip").html(rowNotes).animate({ left: e.pageX, top: e.pageY }, 1);
-      if (!jQuery("#tooltip").is(':visible')) jQuery("#tooltip").show();
-    }
-  });
-
-  jQuery('#group_bookings_rpt').on('mouseleave', function(e) {
-    jQuery("#tooltip").hide();
-  });  
 </script>
 
 </xsl:template>
 
 
 <xsl:template match="record">
-    <tr>
+    <tr data-toggle="tooltip" data-html="true">
         <xsl:attribute name="class">
             <xsl:if test="viewed_yn = 'N'">unread</xsl:if>
         </xsl:attribute>
-        <td><a target="_blank">
+        <xsl:attribute name="title">
+            <xsl:value-of select="notes"/>
+        </xsl:attribute>
+        <td class="text-left"><a target="_blank">
                <xsl:choose>
                  <xsl:when test="../property_manager = 'cloudbeds'">
                    <xsl:attribute name="href">https://hotels.cloudbeds.com<xsl:value-of select="data_href"/></xsl:attribute>
@@ -193,14 +144,13 @@ tr.unread {
               <xsl:value-of select="guest_name"/>
             </a>
         </td>
-        <td><xsl:value-of select="booking_reference"/></td>
-        <td><xsl:value-of select="booking_source"/></td>
-        <td><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
-        <td><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
-        <td><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
-        <td style="padding-left: 50px;"><xsl:value-of select="payment_outstanding"/></td>
-        <td style="padding-left: 50px;"><xsl:value-of select="num_guests"/></td>
-        <td><xsl:value-of select="notes"/></td>
+        <td class="text-left"><xsl:value-of select="booking_reference"/></td>
+        <td class="text-left"><xsl:value-of select="booking_source"/></td>
+        <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
+        <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
+        <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
+        <td class="text-right"><p class="mr-3"><xsl:value-of select="payment_outstanding"/></p></td>
+        <td><xsl:value-of select="num_guests"/></td>
     </tr>
 </xsl:template>
 

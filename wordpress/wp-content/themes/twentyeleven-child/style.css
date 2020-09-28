@@ -20,14 +20,30 @@ License URI:  http://www.gnu.org/licenses/gpl-2.0.html
 }
 
 /* fix bootstrap tables */
-caption, th, td {
+caption, th {
     font-weight: bold;
     text-align: inherit;
 }
 
+textarea, input, select {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+/** Not sure why theme has the input fields grey; change it back to black */
+input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], textarea {
+    color: #000;
+}
+
+th, td {
+    font-size: 14px;
+}
+
+/** this overrides default max-width of 1000px in the twenty eleven theme */
 #page {
     margin: auto;
-    max-width: 1000px;
+    max-width: 100%;
 }
 
 #branding {
@@ -49,10 +65,7 @@ caption, th, td {
 
 #access ul ul a {
     font-size: 14px;
-}
-
-#access ul ul {
-    width: 168px; /* submenu bounding box incorrectly sized in original theme? */
+    width: 188px; /* submenu bounding box incorrectly sized in original theme? */
 }
 
 input#s {

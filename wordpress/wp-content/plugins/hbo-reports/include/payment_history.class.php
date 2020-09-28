@@ -10,7 +10,7 @@ class PaymentHistoryController extends XslTransform {
     /**
      * Default constructor.
      */
-    function PaymentHistoryController() {
+    function __construct() {
         
     }
 
@@ -39,7 +39,9 @@ class PaymentHistoryController extends XslTransform {
                     }
                 }
                 $paymentRoot->appendChild($domtree->createElement("data-href", "https://hotels.cloudbeds.com/connect/" . get_option('hbo_cloudbeds_property_id') . "#/reservations/" . $payment->reservation_id));
-                $paymentRoot->appendChild($domtree->createElement("processed_datetime", DateTime::createFromFormat('Y-m-d H:i:s', $payment->processed_date)->getTimestamp()));
+                if($payment->processed_date) {
+                    $paymentRoot->appendChild($domtree->createElement("processed_datetime", DateTime::createFromFormat('Y-m-d H:i:s', $payment->processed_date)->getTimestamp()));
+                }
                 $paymentsRoot->appendChild($paymentRoot);
             }
             $parentElement->appendChild($paymentsRoot);

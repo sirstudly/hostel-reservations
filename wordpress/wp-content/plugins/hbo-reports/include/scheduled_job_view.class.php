@@ -8,8 +8,8 @@ class ScheduledJobView extends ScheduledJobViewData {
     /**
      * Default constructor.
      */
-    function ScheduledJobView() {
-        parent::ScheduledJobViewData();
+    function __construct() {
+        parent::__construct();
     }
 
     /**

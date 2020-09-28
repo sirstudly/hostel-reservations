@@ -15,7 +15,7 @@ class LHGroupBookingsReport extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHGroupBookingsReport() {
+    function __construct() {
         
     }
 

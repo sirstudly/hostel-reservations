@@ -17,7 +17,7 @@ class AjaxController {
     /**
      * Default constructor.
      */    
-    function AjaxController() {
+    function __construct() {
         session_start();  // continue current session
     }
 

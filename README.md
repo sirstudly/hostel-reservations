@@ -1,7 +1,7 @@
 Installation Notes
    * Copy hbo-reports into wp-content/plugins folder
    * In Wordpress, Plugins, Activate...
-   * Run db-schema.sql to create tables
+   * Under Themes, activate "Twenty Eleven Bootstrap Edition"
    * Under Dashboard, Settings, Permalink... Select "Post name"
    * Under Appearance, Menus
       * Create a new menu, with the same structure as the pages

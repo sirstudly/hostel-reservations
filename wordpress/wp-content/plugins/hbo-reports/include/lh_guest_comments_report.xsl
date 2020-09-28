@@ -15,22 +15,6 @@
 
 <style media="screen" type="text/css">
 
-#guest_comments_rpt {
-    margin: 0 10px 0 10px;
-}
-
-#guest_comments_rpt tbody tr:nth-child(4n+1) td {
-	background-color: #e3e3e3
-}
-
-#guest_comments_rpt tbody tr:nth-child(4n+2) td {
-	background-color: #e3e3e3
-}
-
-#guest_comments_rpt tbody tr td {
-    padding-left: 20px; 
-}
-
 .comment_header {
     float: left; 
     margin: 5px 0 0 0; 
@@ -53,83 +37,73 @@ jQuery(document).ready(function(){
 });
 </script>
 
-    <div id="report-container" class="wrap bookingpage">
-        <h2>Guest Comments</h2>
-        <div class="wpdevbk">
-    
-            <div style="margin-top:10px;" class="booking-submenu-tab-container">
-                <div class="nav-tabs booking-submenu-tab-insidecontainer">
-
-                    <div id="filter" class="visibility_container active">
-                        <xsl:call-template name="report_header"/>
-                    </div>
-
-                </div>
-            </div>
-
-            <div style="height:1px;clear:both;margin-top:40px;"><xsl:comment/></div>
-    
-            <div class="visibility_container" id="report_data_view">
-                <xsl:choose>
-                    <xsl:when test="record">
-                        <xsl:call-template name="report_data"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No data available.</h4></div>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </div>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-auto mt-2 ml-2"><h2>Guest Comments</h2></div>
         </div>
+    </div>
+
+    <div class="card text-center">
+        <div class="card-header">
+            <xsl:call-template name="report_header" />
+        </div>
+        <div class="card-body">
+            <xsl:choose>
+                <xsl:when test="record">
+                    <xsl:call-template name="report_data"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <div class="ml-5 mb-2 mt-2 font-italic">
+                        <h6>No data available.</h6>
+                    </div>
+                </xsl:otherwise>
+            </xsl:choose>
+        </div>
+    </div>
 
         <div id="ajax_respond"><xsl:comment/><!-- ajax response here--></div>
-
         <xsl:call-template name="write_inline_js"/>
         <xsl:call-template name="write_inline_css"/>
-    </div>
 
 </xsl:template>
 
 
 <xsl:template name="report_header">
-    <div style="clear:both;height:1px;"><xsl:comment/></div>
-    <div class="wpdevbk-filters-section ">
-
-        <div class="control-group" style="float:left;">
-            <xsl:if test="last_completed_job">
-                <p class="help-block" style="padding-left:5px;font-style: italic; width: 100%">
-                    This report was last run on <xsl:value-of select="last_completed_job"/>.
+    <div class="container mt-1">
+        <div class="row">
+            <div class="w-100">
+                <p class="help-block font-italic text-left">
+                    <xsl:if test="last_completed_job">
+                        This report was last run on <xsl:value-of select="last_completed_job"/>.
+                    </xsl:if>
+                    <xsl:if test="last_job_status = 'failed'">
+                        <div class="text-left" style="color: red;">The last update of this report failed to run.
+                            <xsl:choose>
+                                <xsl:when test="check_credentials = 'true'">
+                                    Credentials check failed.
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </div>
+                    </xsl:if>
                 </p>
-            </xsl:if>
-            <xsl:if test="last_job_status = 'failed'">
-                <div style="color: red;">The last update of this report failed to run.
-                    <xsl:choose>
-                        <xsl:when test="check_credentials = 'true'">
-                            Has the LittleHotelier password changed recently? If so, update it on the admin page.
-                        </xsl:when>
-                        <xsl:otherwise>
-                            Check the <a><xsl:attribute name="href"><xsl:value-of select="last_job_error_log"/></xsl:attribute>error log</a> for details.
-                        </xsl:otherwise>
-                    </xsl:choose>
+                <p class="help-block text-left" style="font-style: normal">Acknowledge each request once it's been handled (if applicable) by clicking on the checkbox next to the associated booking.<br/>
+                     Showing <xsl:value-of select="count(record)"/> unacknowledged records.
+                </p>
+            </div>
+            <div class="col-3">
+                <div class="d-flex justify-content-end">
+                    <p class="help-block">
+                        <xsl:if test="job_in_progress">
+                            Come back to this page in a few minutes.
+                        </xsl:if>
+                    </p>
                 </div>
-            </xsl:if>
-        </div>
-    
-        <div class="btn-group" style="float:right;">
-            <div class="inline controls">
-            <p class="help-block" style="float:left;padding-left:5px;padding-right:15px;font-style:italic;">
-                <xsl:if test="last_submitted_job">
-                    Come back to this page in a few minutes.
-                </xsl:if>
-            </p>
             </div>
         </div>
-
-        <div style="clear:both;">Acknowledge each request once it's been handled (if applicable) by clicking on the checkbox next to the associated booking.<br/>
-        Showing <xsl:value-of select="count(record)"/> unacknowledged records.</div>
-
     </div>
-    <div style="clear:both;height:1px;"><xsl:comment/></div>
-
 </xsl:template>
 
 </xsl:stylesheet>

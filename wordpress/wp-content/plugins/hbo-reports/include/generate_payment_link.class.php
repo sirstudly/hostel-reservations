@@ -18,7 +18,7 @@ class GeneratePaymentLinkController extends XslTransform {
     /**
      * Default constructor.
      */
-    function GeneratePaymentLinkController() {
+    function __construct() {
         
     }
 

@@ -9,8 +9,8 @@ class BedCounts extends AbstractBedCounts {
      * Default constructor.
      * $selectionDate : date to display bedcounts for (DateTime) (defaults to now)
      */
-    function BedCounts($selectionDate = null) {
-        parent::AbstractBedCounts($selectionDate == null ? new DateTime() : $selectionDate);
+    function __construct($selectionDate = null) {
+        parent::__construct($selectionDate == null ? new DateTime() : $selectionDate);
     }
     
     /** 

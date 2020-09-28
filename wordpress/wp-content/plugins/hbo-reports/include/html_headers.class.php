@@ -9,7 +9,7 @@ class HtmlHeaders extends XslTransform {
     /**
      * Default constructor.
      */
-    function HtmlHeaders() {
+    function __construct() {
     }
 
     /** 

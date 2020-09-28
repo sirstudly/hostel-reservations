@@ -20,7 +20,7 @@ class LHGuestCommentsReportData extends XslTransform {
     /**
      * Default constructor.
      */
-    function LHGuestCommentsReportData() {
+    function __construct() {
         
     }
 

@@ -21,42 +21,24 @@
     <xsl:if test="not(booking) and not(invoice)">
 
 <style media="screen" type="text/css">
-.body-content {
-    padding-top: 20px;
-    padding-left: 100px;
-    width: 800px;
-}
+
 .form_label {
     padding-left: 40px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
     font-style: normal;
 }
 
-.tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dotted black;
-  font-size: 10px;
-  font-weight: normal;
+.invoice_label {
+    width: 80px;
 }
 
-.tooltip .tooltiptext {
-  visibility: hidden;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
-  top: -100px;
-  left: 105%;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
+.tooltip_label {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    font-size: 10px;
+    font-weight: normal;
 }
 
 .matched_booking {
@@ -78,15 +60,6 @@
   user-select:text;
 }
 
-.wpdevbk input[readonly] {
-  cursor: text;
-}
-
-.invoice_label {
-  display: inline-block;
-  width: 80px;
-  font-weight: bold;
-}
 </style>
 
 <script>
@@ -104,16 +77,16 @@ function copyToClipboard(inputElem, infoMsgElem) {
 }
 </script>
 
-        <div id="report-container" class="wrap bookingpage">
-            <h2>Generate Payment Links</h2>
-    
-            <xsl:call-template name="write_inline_js"/>
-            <xsl:call-template name="write_inline_css"/>
-    
-            <div class="wpdevbk body-content booking_form_div">
-                <h3>What's this? A new page? What is it for?</h3>
-                <p>
-                    We now have an online payment portal for guests
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-auto mt-2 ml-2 mb-2"><h2>Generate Payment Links</h2></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="offset-md-1 col-9">
+                <h3>What's this page for?</h3>
+                <p> We now have an online payment portal for guests
                     to pay for their booking (e.g. for group bookings, unpaid deposits, etc..) without
                     resorting to calling us or (gasp!) emailing their card details to us!
                 </p>
@@ -130,58 +103,91 @@ function copyToClipboard(inputElem, infoMsgElem) {
                 <p>Successful payments will be automatically added to their "Folio" page in Cloudbeds.
                    Multiple guests (in a group) can use the same link to pay separately if they wish.
                 </p>
-                <form name="post_option" action="" method="post" id="post_option">
-                    <p>
-                        <div class="form_label">Booking Ref:
-                            <div class="tooltip">Where do I find this?
-                                <span class="tooltiptext"><img src="{homeurl}/wp-content/plugins/hbo-reports/img/cloudbeds-reservation.png"/></span>
-                            </div>                       
-                            <input id="booking_ref" name="booking_ref" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="20" value="{booking_ref}" />
-                            <a class="btn btn-primary" style="margin-left: 15px;" onclick="generate_payment_link(document.post_option.booking_ref.value, document.post_option.deposit_chk.checked);">Submit</a>
-                        </div>
-                        <div class="form_label">Request Deposit Only (first night):
-                            <input id="deposit_chk" name="deposit_chk" type="checkbox" style="margin-left: 25px;"/>
-                        </div>
-                    </p>
-                    <div style="float: left;" id="ajax_response"><xsl:comment/><!-- ajax response here--></div>
-                </form>
-                <xsl:if test="payment_history_inv_url">
-	                <div style="margin-left: 200px; padding: 20px 0 10px 0; clear: both;"><h3>OR Generate an Invoice Link</h3></div>
-	                <p>You may want to request payment from a guest (or ex-guest) but it may not be tied to a booking.
-	                   The most common example is to request for postage to be paid before sending a lost item.
-	                </p>
-	                <p>Enter the details below. This will generate a link that you can email the recipient (this page won't do this for you!). 
-	                   Once they navigate to the link you send them below and provide their card details, they will receive a confirmation 
-	                   email (if payment is successful) and the reception email account will also be CC'd in. You can also view any pending/completed 
-	                   payments in the <a href="{payment_history_inv_url}">Invoice Payment History</a> page.
-	                </p>
-	                <form name="post_invoice" action="" method="post" id="post_invoice">
-	                    <p>
-	                        <div>
-	                            <span class="invoice_label">Name:</span>
-	                            <input id="invoice_name" name="invoice_name" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_name}" />
-	                        </div>
-	                        <div>
-	                            <span class="invoice_label">Email:</span>
-	                            <input id="invoice_email" name="invoice_email" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_email}" />
-	                            <span style="margin-left: 25px;" class="invoice_label">Amount (£):</span>
-	                            <input id="invoice_amount" name="invoice_amount" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_amount}" />
-	                        </div>
-	                        <div style="margin-top: 10px;">
-	                            <span class="invoice_label">Description (appears on transaction):</span>
-	                            <textarea id="invoice_description" name="invoice_description" class="regular-text code" style="margin-left: 25px; width: 440px;" maxlength="{payment_description_max_length}"><xsl:comment/></textarea>
-	                        </div>
-	                        <div style="margin-top: 10px;">
-	                            <span class="invoice_label">Staff Notes (not sent to recipient):</span>
-	                            <textarea id="invoice_notes" name="invoice_notes" class="regular-text code" style="margin-left: 25px; width: 440px;"><xsl:comment/></textarea>
-	                            <a class="btn btn-primary" style="margin-left: 10px; vertical-align: bottom; font-weight: bold;" onclick="generate_invoice_link(document.post_invoice.invoice_name.value, document.post_invoice.invoice_email.value, document.post_invoice.invoice_amount.value, document.post_invoice.invoice_description.value, document.post_invoice.invoice_notes.value);">Submit</a>
-	                        </div>
-	                    </p>
-	                    <div style="float: left;" id="ajax_response_inv"><xsl:comment/><!-- ajax response here--></div>
-	                </form>
-                </xsl:if>
             </div>
         </div>
+        <form name="post_option" action="" method="post" id="post_option">
+            <div class="row">
+                <div class="offset-md-1 col-7">
+                    <label class="form_label" for="booking_ref">Booking Ref:
+                        <div class="tooltip_label pl-2" data-toggle="tooltip" data-html="true" data-placement="auto" data-container="body">
+                            <xsl:attribute name="title">&lt;img src="<xsl:value-of select="homeurl"/>/wp-content/plugins/hbo-reports/img/cloudbeds-reservation.png"/&gt;</xsl:attribute>
+                            Where do I find this?</div>
+                    </label>
+                    <input id="booking_ref" name="booking_ref" class="regular-text code" type="text" style="margin-left: 25px; margin-right: 10px; width:150px;" size="20" value="{booking_ref}" />
+                    <a class="btn btn-primary" href="javascript:void(0);" onclick="generate_payment_link(document.post_option.booking_ref.value, document.post_option.deposit_chk.checked);">Submit</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-1 col-7">
+                    <label class="form_label" for="deposit_chk">Request Deposit Only (first night):</label>
+                    <input id="deposit_chk" name="deposit_chk" type="checkbox" style="margin-left: 25px;"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-1 col-6">
+                    <div id="ajax_response"><xsl:comment/><!-- ajax response here--></div>
+                </div>
+            </div>
+        </form>
+
+        <xsl:if test="payment_history_inv_url">
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-auto">
+                    <h3>OR Generate an Invoice Link</h3>
+                </div>
+            </div>
+            <form name="post_invoice" action="" method="post" id="post_invoice">
+	        <div class="row">
+	            <div class="offset-md-1 col-9">
+                    <p>You may want to request payment from a guest (or ex-guest) but it may not be tied to a booking.
+                       The most common example is to request for postage to be paid before sending a lost item.
+                    </p>
+                    <p>Enter the details below. This will generate a link that you can email the recipient (this page won't do this for you!). 
+                       Once they navigate to the link you send them below and provide their card details, they will receive a confirmation 
+                       email (if payment is successful) and the reception email account will also be CC'd in. You can also view any pending/completed 
+                       payments in the <a href="{payment_history_inv_url}">Invoice Payment History</a> page.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-1 col-7">
+                    <label for="invoice_name" class="form_label" style="width:80px">Name:</label>
+                    <input id="invoice_name" name="invoice_name" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_name}" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-1 col-7">
+                    <label for="invoice_email" class="form_label" style="width:80px">Email:</label>
+                    <input id="invoice_email" name="invoice_email" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_email}" />
+                    <label for="invoice_amount" class="form_label" style="margin-left: 25px;">Amount (£):</label>
+                    <input id="invoice_amount" name="invoice_amount" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="30" value="{invoice_amount}" />
+                </div>
+            </div>
+            <div class="row mt-1">
+                <div class="offset-md-1 col-7">
+                    <label for="invoice_description" class="form_label">Description (appears on transaction):</label>
+                    <textarea id="invoice_description" name="invoice_description" class="regular-text code" style="margin-left: 40px; width: 500px;" maxlength="{payment_description_max_length}"><xsl:comment/></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-1 col-7">
+                    <label class="form_label">Staff Notes (not sent to recipient):</label>
+                    <textarea id="invoice_notes" name="invoice_notes" class="regular-text code" style="margin-left: 40px; margin-right: 10px; width: 500px;"><xsl:comment/></textarea>
+                    <a class="btn btn-primary" href="javascript:void(0);" style="vertical-align: top; margin-top: 5px;" onclick="generate_invoice_link(document.post_invoice.invoice_name.value, document.post_invoice.invoice_email.value, document.post_invoice.invoice_amount.value, document.post_invoice.invoice_description.value, document.post_invoice.invoice_notes.value);">Submit</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-1 col-6">
+                    <div id="ajax_response_inv"><xsl:comment/><!-- ajax response here--></div>
+                </div>
+            </div>
+            </form>
+        </xsl:if>
+    </div>
+
+    <xsl:call-template name="write_inline_js"/>
+    <xsl:call-template name="write_inline_css"/>
+
     </xsl:if>
 </xsl:template>
 

@@ -13,7 +13,7 @@ class ProcessRefundsController extends XslTransform {
     /**
      * Default constructor.
      */
-    function ProcessRefundsController() {
+    function __construct() {
         $this->PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
         $this->HEADERS = array(
             "Accept: application/json, text/javascript, */*; q=0.01",
@@ -181,7 +181,10 @@ class ProcessRefundsController extends XslTransform {
             $txn = $this->getSelectedTransaction();
             $dialogRoot->appendChild($domtree->createElement('txn_id', $txn['id']));
             $dialogRoot->appendChild($domtree->createElement('paid', $txn['paid']));
-            $dialogRoot->appendChild($domtree->createElement('gateway_name', $txn['gateway_name'] ? $txn['gateway_name'] : 'Sagepay'));
+            $dialogRoot->appendChild($domtree->createElement('gateway_name', isset($txn['gateway_name']) ? $txn['gateway_name'] : 'Sagepay'));
+            if (isset($txn['vendor_tx_code'])) {
+                $dialogRoot->appendChild($domtree->createElement('vendor_tx_code', $txn['vendor_tx_code']));
+            }
             $dialogRoot->appendChild($domtree->createElement('default_refund', number_format($txn['paid'] * 0.9, 2)));
         }
         else if($this->booking) {
@@ -197,9 +200,7 @@ class ProcessRefundsController extends XslTransform {
             $bookingRoot->appendChild($domtree->createElement('num_guests', intval($this->booking['adults_number']) + intval($this->booking['kids_number'])));
             $bookingRoot->appendChild($domtree->createElement('grand_total', number_format($this->booking['grand_total'], 2)));
             $bookingRoot->appendChild($domtree->createElement('balance_due', number_format($this->booking['balance_due'], 2)));
-            $bookingRoot->appendChild($domtree->createElement('amount_first_night', number_format($this->booking['amount_first_night'], 2)));
             $bookingRoot->appendChild($domtree->createElement('amount_paid', number_format($this->booking['paid_value'], 2)));
-            $bookingRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_booking_payments_url") . $this->booking['lookup_key']));
             $transactionsRoot = $bookingRoot->appendChild($domtree->createElement('transactions'));
 
             foreach ($this->booking['transactions']['records'] as $txn) {
@@ -209,7 +210,6 @@ class ProcessRefundsController extends XslTransform {
                     $txnRoot->appendChild($domtree->createElement('datetime_transaction', $txn['datetime_transaction_server_time']));
                     $txnRoot->appendChild($domtree->createElement('description', $txn['description']));
                     $txnRoot->appendChild($domtree->createElement('notes', $txn['notes']));
-                    $txnRoot->appendChild($domtree->createElement('vendor_tx_code', $txn['vendor_tx_code']));
                     $txnRoot->appendChild($domtree->createElement('original_description', $txn['original_description']));
                     $txnRoot->appendChild($domtree->createElement('paid', $txn['paid']));
 
@@ -219,10 +219,10 @@ class ProcessRefundsController extends XslTransform {
                         $txnRoot->appendChild($domtree->createElement('is_vcc', 'true'));
                     }
                     if (floatval($txn['debit']) > 0) {
-                        if ($txn['gateway_name'] == 'Stripe' && $txn['refunded_value'] != $txn['paid']) {
+                        if (isset($txn['gateway_name']) && $txn['gateway_name'] == 'Stripe' && $txn['refunded_value'] != $txn['paid']) {
                             $txnRoot->appendChild($domtree->createElement('is_refundable', 'true'));
                         }
-                        else if ($txn['vendor_tx_code']) {
+                        else if (isset($txn['vendor_tx_code'])) {
                             $txnRoot->appendChild($domtree->createElement('is_refundable', 'true'));
                         }
                     }

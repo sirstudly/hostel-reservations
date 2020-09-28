@@ -18,7 +18,7 @@ abstract class AbstractBedCounts extends XslTransform {
      * Default constructor.
      * $selectionDate : date to display bedcounts for (DateTime) (defaults to now)
      */
-    function AbstractBedCounts($selectionDate = null) {
+    function __construct($selectionDate = null) {
         $this->selectionDate = $selectionDate == null ? new DateTime() : $selectionDate;
     }
     

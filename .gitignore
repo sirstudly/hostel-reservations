@@ -1,0 +1,7 @@
+.DS_Store
+
+# IDE Files
+#-------------------------
+/.settings/
+/.idea/
+.project

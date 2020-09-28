@@ -21,7 +21,7 @@ class ScheduledJobRepeat extends ScheduledJob {
      * $lastRunDate : datetime this job was run (optional)
      * $repeatTimeMin : number of minutes between runs
      */
-    function ScheduledJobRepeat($jobId, $classname, $repeatTimeMin, $active, $lastRunDate, $params = array()) {
+    function __construct($jobId, $classname, $repeatTimeMin, $active, $lastRunDate, $params = array()) {
         $this->jobId = $jobId;
         $this->classname = $classname;
         $this->repeatTimeMin = $repeatTimeMin;

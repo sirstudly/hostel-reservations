@@ -17,7 +17,7 @@ class HouseKeeping extends XslTransform {
     /**
      * Default constructor.
      */
-    function HouseKeeping() {
+    function __construct() {
         $this->selectionDate = new DateTime();
     }
 
@@ -172,6 +172,7 @@ class HouseKeeping extends XslTransform {
             foreach( $this->bedsheetView as $bed ) {
                 $bedRoot = $parentElement->appendChild($domtree->createElement('bed'));
                 $bedRoot->appendChild($domtree->createElement('room', $bed->room));
+                $bedRoot->appendChild($domtree->createElement('room_type', in_array($bed->room_type, array("F", "M", "MX")) ? $bed->capacity . $bed->room_type : $bed->room_type));
                 $bedRoot->appendChild($domtree->createElement('bed_name', htmlspecialchars(html_entity_decode($bed->bed_name, ENT_COMPAT, "UTF-8" ))));
                 $bedRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($bed->guest_name, ENT_COMPAT, "UTF-8" ))));
                 $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date));
@@ -182,7 +183,7 @@ class HouseKeeping extends XslTransform {
         }
 
         // calculate bedcounts
-        $bedcounts = strpos(get_option('hbo_lilho_username'), 'castlerock') === 0 ?
+        $bedcounts = strpos(get_option('siteurl'), 'castlerock') !== false ?
             $this->calculateBedChangeCountsByRoomsCastleRock() :
             $this->calculateBedChangeCountsByRoomsGeneric();
 

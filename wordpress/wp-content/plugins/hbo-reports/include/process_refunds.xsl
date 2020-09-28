@@ -21,11 +21,7 @@
     <xsl:if test="not(booking) and not(refund_dialog)">
 
 <style media="screen" type="text/css">
-.body-content {
-    padding-top: 20px;
-    padding-left: 100px;
-    width: 800px;
-}
+
 .form_label {
     padding-left: 40px;
     font-size: 12px;
@@ -33,30 +29,12 @@
     font-style: normal;
 }
 
-.tooltip {
+.tooltip_text {
   position: relative;
   display: inline-block;
   border-bottom: 1px dotted black;
   font-size: 10px;
   font-weight: normal;
-}
-
-.tooltip .tooltiptext {
-  visibility: hidden;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
-  top: -100px;
-  left: 105%;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
 }
 
 .booking_details {
@@ -81,23 +59,6 @@
     background-color: #efefef;
 }
 
-.allocation_view {
-    table-layout: auto;
-}
-
-.allocation_view td {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-#transaction-report th {
-    border-right: none;
-}
-
-#transaction-report tbody tr:nth-child(odd) td {
-    background-color: #ffffff;
-}
-
 #ajax_response {
     float: left;
     margin-left: 20px;
@@ -106,49 +67,52 @@
 
 </style>
 
-        <div id="report-container" class="wrap bookingpage">
-            <h2>Process Refunds</h2>
-    
-            <xsl:call-template name="write_inline_js"/>
-            <xsl:call-template name="write_inline_css"/>
-    
-            <div class="wpdevbk body-content booking_form_div">
-                <h3>What is this page for?</h3>
-                <p>You want to process a partial/full refund for an existing booking and the card details may or may not be present in Cloudbeds.</p>
+        <h3>Process Refunds</h3>
 
-                <h3>How does it work?</h3>
+        <div class="row offset-sm-1 col-10 mt-3">
+            <h4>What is this page for?</h4>
+            <p>You want to process a partial/full refund for an existing booking and the card details may or may not be present in Cloudbeds.</p>
+
+            <h4>How does it work?</h4>
+            <p>
+               Enter the booking reference below and click Submit.
+               This will search for the booking and give you any payments made against it so far.
+               Refunds need an existing transaction to be credited against.
+               If the payment was originally done via Cloudbeds, the refund will be processed through Stripe.
+               If it was with <a href="https://pay.macbackpackers.com/">https://pay.macbackpackers.com/</a>,
+               then the refund goes through Sagepay.
+            </p>
+            <p>
+               Note: You can't refund more than what was originally charged. And you can't refund against
+               a card that was never used in a transaction with us. If the guest wants to refund against a different card,
+               this will need to be done using the EFTPOS terminal (so card details must be taken over the phone;
+               not through email as it's not secure).
+            </p>
+            <p>Successful refunds will be automatically added to their "Folio" page in Cloudbeds and a
+               confirmation email will be sent using the Cloudbeds email template "Refund Processed".
+               You can view all processed/pending refunds on the Refund History page.
+            </p>
+
+            <form name="post_option" action="" method="post" id="post_option">
                 <p>
-                   Enter the booking reference below and click Submit.
-                   This will search for the booking and give you any payments made against it so far.
-                   Refunds need an existing transaction to be credited against. 
-                   If the payment was originally done via Cloudbeds, the refund will be processed through Stripe. 
-                   If it was with <a href="https://pay.macbackpackers.com/">https://pay.macbackpackers.com/</a>,
-                   then the refund goes through Sagepay.
-                </p>
-                <p>
-                   Note: You can't refund more than what was originally charged. And you can't refund against
-                   a card that was never used in a transaction with us. If the guest wants to refund against a different card, 
-                   this will need to be done using the EFTPOS terminal (so card details must be taken over the phone; 
-                   not through email as it's not secure).
-                </p>
-                <p>Successful refunds will be automatically added to their "Folio" page in Cloudbeds and a
-                   confirmation email will be sent using the Cloudbeds email template "Refund Processed".
-                   You can view all processed/pending refunds on the Refund History page.
-                </p>
-                <form name="post_option" action="" method="post" id="post_option">
-                    <p>
-                        <div class="form_label">Booking Ref:
-                            <div class="tooltip">Where do I find this?
-                                <span class="tooltiptext"><img src="{homeurl}/wp-content/plugins/hbo-reports/img/cloudbeds-reservation.png"/></span>
-                            </div>                       
-                            <input id="booking_ref" name="booking_ref" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="20" value="{booking_ref}" />
-                            <a class="btn btn-primary" style="margin-left: 15px;" onclick="lookup_booking(document.post_option.booking_ref.value);">Submit</a>
+                    <div><span class="form_label mr-1">Booking Ref:</span>
+                        <div class="tooltip_text" data-toggle="tooltip" data-html="true">
+                            <xsl:attribute name="title">
+                                &lt;img src='<xsl:value-of select="homeurl"/>/wp-content/plugins/hbo-reports/img/cloudbeds-reservation.png'/&gt;
+                            </xsl:attribute>
+                            Where do I find this?
                         </div>
-                    </p>
-                    <div id="ajax_response" class="wpdevbk"><xsl:comment/><!-- ajax response here--></div>
-                </form>
-            </div>
+                        <input id="booking_ref" name="booking_ref" class="regular-text code" type="text" style="margin-left: 25px; width:150px;" size="20" value="{booking_ref}" />
+                        <a class="btn btn-primary" style="margin-left: 15px;" onclick="lookup_booking(document.post_option.booking_ref.value);">Submit</a>
+                    </div>
+                </p>
+                <div id="ajax_response"><xsl:comment/><!-- ajax response here--></div>
+            </form>
         </div>
+
+        <xsl:call-template name="write_inline_js"/>
+        <xsl:call-template name="write_inline_css"/>
+
     </xsl:if>
 </xsl:template>
 
@@ -173,7 +137,7 @@
         </div>
         <br/>
         <xsl:apply-templates select="transactions"/>
-        <div id="dialog_ajax_response" class="wpdevbk"><xsl:comment/><!-- ajax response here--></div>
+        <div id="dialog_ajax_response"><xsl:comment/><!-- ajax response here--></div>
     </div>
 
 </xsl:template>
@@ -181,14 +145,14 @@
 <xsl:template match="transactions">
     <xsl:choose>
 	    <xsl:when test="transaction">
-		    <table id="transaction-report" class="allocation_view">
-		        <thead>
+		    <table id="transaction-report" class="table table-striped">
+		        <thead class="thead-dark">
 		            <tr>
-			            <th style="width: 130px;">Date/Time</th>
-			            <th style="width: 70px;">Amount Paid</th>
-			            <th style="width: 90px;">Description</th>
-			            <th>Notes</th>
-			            <th style="width: 100px;"></th>
+			            <th scope="col" style="width: 130px;">Date/Time</th>
+			            <th scope="col" style="width: 70px;">Amount Paid</th>
+			            <th scope="col" style="width: 90px;">Description</th>
+			            <th scope="col">Notes</th>
+			            <th scope="col" style="width: 100px;"></th>
 		            </tr>
 		        </thead>
 		        <tbody>
@@ -218,17 +182,17 @@
         </td>
         <td>
             <xsl:if test="is_refundable">
-                <a class="btn btn-primary" ><xsl:attribute name="onclick">show_refund_dialog('<xsl:value-of select="id"/>');</xsl:attribute>Refund <span class="icon-share-alt icon-white"></span></a>
+                <a class="btn btn-primary" ><xsl:attribute name="onclick">show_refund_dialog('<xsl:value-of select="id"/>');</xsl:attribute>Refund</a>
             </xsl:if>
             <xsl:if test="not(is_refundable) and not(is_refund)">
-                <a class="btn btn-primary disabled">Refund <span class="icon-share-alt icon-white"></span></a>
+                <a class="btn btn-primary disabled">Refund</a>
             </xsl:if>
         </td>
     </tr>
 </xsl:template>
 
 <xsl:template match="refund_dialog">
-    <div id="refund_dialog" class="visibility_container refund-detail wpdevbk" style="display:none;" title="Refund Details">
+    <div id="refund_dialog" class="refund-detail" style="display:none;" title="Refund Details">
         <form name="post_refund" action="" method="post">
         <div style="width:50%; float:left;">
             <label style="width: 240px; float: left;">Booking Total:</label>
@@ -237,10 +201,15 @@
         <div style="float:left;">
             <label>Payment Gateway: <xsl:value-of select="gateway_name"/></label>
         </div>
-        <div style="width:100%; clear:both;">
+        <div style="width:50%; float:left; clear:both;">
             <label style="width: 240px; float: left;">Total Paid:</label>
             <div><xsl:value-of select="amount_paid"/></div>
         </div>
+        <xsl:if test="vendor_tx_code">
+        <div style="float:left;">
+            <label>Vendor Tx Code: <xsl:value-of select="vendor_tx_code"/></label>
+        </div>
+        </xsl:if>
         <div style="width:100%; clear:both;">
             <label style="width: 240px; float: left;">Amount Charged for this Transaction:<br/><i>(This is the maximum refundable amount)</i></label>
             <div><xsl:value-of select="paid"/></div>

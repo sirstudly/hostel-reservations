@@ -13,7 +13,7 @@ class PaymentHistoryInvoiceController extends XslTransform {
     /**
      * Default constructor.
      */
-    function PaymentHistoryInvoiceController() {
+    function __construct() {
         
     }
 

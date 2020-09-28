@@ -12,81 +12,41 @@
 
 <xsl:template match="view">
 
-<style media="screen" type="text/css">
-
-#job_history_table tbody tr:nth-child(odd) td {
-	background-color: #e3e3e3;
-}
-
-#job_history_table tbody tr td {
-	padding-left: 15px;
-}
-
-a.tooltip {
-    outline:none; 
-}
-
-a.tooltip:hover {
-    text-decoration:none;
-} 
-
-a.tooltip span {
-    z-index:10;display:none; 
-    padding:14px 20px;
-    margin-top:-30px; 
-    margin-left:28px;
-    line-height:16px;
-}
-
-a.tooltip:hover span {
-    display:inline; 
-    position:absolute; 
-    color:#111;
-    border:1px solid #DCA; 
-    background:#fffAF0;
-}
-    
-/*CSS3 extras*/
-a.tooltip span {
-    border-radius:4px;
-    box-shadow: 5px 5px 8px #CCC;
-}
-
-</style>
-
-    <div id="report-container" class="wrap bookingpage">
-        <h2>Job History</h2>
-        <div class="wpdevbk">
-    
-            <div class="visibility_container" id="report_data_view">
-                <xsl:choose>
-                    <xsl:when test="record">
-                        <xsl:call-template name="report_data"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <div style="margin-left:50px; margin-bottom: 20px; font-style: italic;"><h4>No jobs found.</h4></div>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </div>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-auto mt-2 ml-2"><h2>Job History</h2></div>
         </div>
-
-        <xsl:call-template name="write_inline_js"/>
-        <xsl:call-template name="write_inline_css"/>
     </div>
+
+    <div class="card text-center">
+        <div class="card-body">
+            <xsl:choose>
+                <xsl:when test="record">
+                    <xsl:call-template name="report_data"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <div class="ml-5 mb-2 mt-2 font-italic">
+                        <h6>No jobs found.</h6>
+                    </div>
+                </xsl:otherwise>
+            </xsl:choose>
+        </div>
+    </div>
+
+    <xsl:call-template name="write_inline_js"/>
+    <xsl:call-template name="write_inline_css"/>
 
 </xsl:template>
 
-
-
 <xsl:template name="report_data">
-    <table id="job_history_table" class="allocation_view" width="100%" cellspacing="0" cellpadding="3" border="0">
-        <thead>
-            <th>Job ID</th>
-            <th>Job Name</th>
-            <th>Status</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Log File</th>
+    <table id="job_history_table" class="table table-striped">
+        <thead class="thead-dark">
+            <th scope="col">Job ID</th>
+            <th scope="col">Job Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
+            <th scope="col">Log File</th>
         </thead>
         <tbody>
             <xsl:apply-templates select="record"/>
@@ -99,12 +59,12 @@ a.tooltip span {
 <xsl:template match="record">
     <tr>
         <td><xsl:value-of select="job_id"/></td>
-        <td>
+        <td class="text-left">
             <xsl:choose>
                 <xsl:when test="job_param">
-                    <a href="javascript:void(0);" class="tooltip">
+                    <a href="javascript:void(0)" data-toggle="tooltip" data-html="true" data-trigger="hover focus click">
+                        <xsl:attribute name="title"><xsl:apply-templates select="job_param"/></xsl:attribute>
                         <xsl:value-of select="job_name"/>
-                        <span><xsl:apply-templates select="job_param"/></span>
                     </a>
                 </xsl:when>
                 <xsl:otherwise>
@@ -120,7 +80,7 @@ a.tooltip span {
 </xsl:template>
 
 <xsl:template match="job_param">
-    <xsl:value-of select="name"/>: <xsl:value-of select="value"/><br/>
+    <xsl:value-of select="name"/>: <xsl:value-of select="value"/>&lt;br&gt;
 </xsl:template>
 
 </xsl:stylesheet>
