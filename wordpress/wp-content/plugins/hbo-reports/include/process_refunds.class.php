@@ -7,29 +7,7 @@ class ProcessRefundsController extends XslTransform {
 
     // currently loaded booking
     var $booking;
-    var $PROPERTY_ID, $HEADERS, $VERSION;
     var $showDialogTxnId; // if set, generates the refund dialog on toXml()
-
-    /**
-     * Default constructor.
-     */
-    function __construct() {
-        $this->PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
-        $this->HEADERS = array(
-            "Accept: application/json, text/javascript, */*; q=0.01",
-            "Content-Type: application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer: https://hotels.cloudbeds.com/connect/" . $this->PROPERTY_ID,
-            "Accept-Language: en-GB,en-US;q=0.9,en;q=0.8",
-            "Accept-Encoding: gzip, deflate, br",
-            "X-Requested-With: XMLHttpRequest",
-            "X-Used-Method: common.ajax",
-            "Cache-Control: max-age=0",
-            "Origin: https://hotels.cloudbeds.com",
-            "User-Agent: " . get_option('hbo_cloudbeds_useragent'),
-            "Cookie: " . get_option('hbo_cloudbeds_cookies'),
-        );
-        $this->VERSION = get_option('hbo_cloudbeds_version');
-    }
 
     /**
      * Creates a record in the appropriate refund table for processing.
@@ -85,14 +63,15 @@ class ProcessRefundsController extends XslTransform {
      */
     function lookupBooking($booking_ref) {
         $this->showDialogTxnId = null; // reset
-        $this->booking = $this->doCallAPI(
+        $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
+        $this->booking = $this->doCloudbedsPOST(
             "https://hotels.cloudbeds.com/connect/reservations/get_reservation",
             array(
                 "id" => $booking_ref,
                 "is_identifier" => "1",
-                "property_id" => $this->PROPERTY_ID,
-                "group_id" => $this->PROPERTY_ID,
-                "version" => $this->VERSION,
+                "property_id" => $PROPERTY_ID,
+                "group_id" => $PROPERTY_ID,
+                "version" => get_option('hbo_cloudbeds_version'),
             ));
         $this->booking['transactions'] = $this->getTransactionsForBooking($this->booking['reservation_id']);
 
@@ -111,35 +90,15 @@ class ProcessRefundsController extends XslTransform {
      * @return array transactions for the given booking
      */
     function getTransactionsForBooking($booking_ref) {
-        error_log("Looking up transactions for " . $booking_ref);
-        return $this->doCallAPI(
+        $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
+        return $this->doCloudbedsPOST(
             "https://hotels.cloudbeds.com/connect/reports/transactions_by_reservation",
             array(
                 "booking_id" => $booking_ref,
                 "options" => "{\"filters\":{\"from\":\"\",\"to\":\"\",\"filter\":\"\",\"user\":\"all\",\"posted\":[\"1\"],\"description\":[]},\"group\":{\"main\":\"\",\"sub\":\"\"},\"sort\":{\"column\":\"datetime_transaction\",\"order\":\"desc\"},\"loaded_filter\":1}",
-                "property_id" => $this->PROPERTY_ID,
-                "group_id" => $this->PROPERTY_ID,
-                "version" => $this->VERSION,
-            ));
-    }
-
-    /**
-     * Looks up credit card details against cloudbeds booking ("identifier")
-     *
-     * @param $credit_card_id string card identifier
-     * @param $booking_ref string cloudbeds identifier
-     * @return array response
-     */
-    function getCreditCardInfo($credit_card_id, $booking_ref) {
-        error_log("Looking up credit card $credit_card_id  for $booking_ref");
-        return $this->doCallAPI(
-            "https://hotels.cloudbeds.com/cc_passwords/get_credit_card_info",
-            array(
-                "id" => $credit_card_id,
-                "booking_id" => $booking_ref,
-                "property_id" => $this->PROPERTY_ID,
-                "group_id" => $this->PROPERTY_ID,
-                "version" => $this->VERSION,
+                "property_id" => $PROPERTY_ID,
+                "group_id" => $PROPERTY_ID,
+                "version" => get_option('hbo_cloudbeds_version'),
             ));
     }
 
@@ -258,83 +217,6 @@ class ProcessRefundsController extends XslTransform {
         return HBO_PLUGIN_DIR. '/include/process_refunds.xsl';
     }
 
-    /**
-     * Make a Cloudbeds (POST) API call to the given URL.
-     * 
-     * @param String $url target
-     * @param Array $data HTTP request parameters
-     * @throws RuntimeException
-     */
-    function doCallAPI($url, $data) {
-        try {
-            $start_ms = time();
-            $make_call = $this->callAPI('POST', $url, $this->HEADERS, $data);
-            error_log("Cloudbeds request took " . (time() - $start_ms) . "ms.");
-            $response = json_decode($make_call, true);
-        }
-        catch (Exception $ex) {
-            error_log($ex->getMessage());
-            throw new RuntimeException('Error attempting to retrieve booking. Please try again later.');
-        }
-        
-        if( $response['success'] != 'true' ) {
-            error_log('Unexpected error calling ' . $url);
-            error_log('request: ' . json_encode($data));
-            error_log('response: ' . $make_call);
-            if( strlen($response['message']) && strpos($response['message'], 'you are not using the latest version') !== false) {
-                throw new RuntimeException("Cloudbeds version sync error. Please try again later.");
-            }
-            throw new RuntimeException('Error loading booking.');
-        }
-        return $response;
-    }
-
-    function callAPI($method, $url, $headers, $data = NULL) {
-        error_log('callAPI');
-        error_log("method: $method");
-        error_log("url: $url");
-        error_log("headers: " . json_encode($headers));
-        error_log("data: " . var_export($data, TRUE));
-        $curl = curl_init($url);
-        
-        switch ($method){
-            case "POST":
-                curl_setopt($curl, CURLOPT_POST, 1);
-                if ($data)
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-                    break;
-            case "PUT":
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
-                if ($data)
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-                    break;
-            default:
-                if ($data)
-                    $url = sprintf("%s?%s", $url, http_build_query($data));
-        }
-        
-        // OPTIONS:
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_ENCODING, "");
-        
-        // EXECUTE:
-        $result = curl_exec($curl);
-        if (curl_error($curl)) {
-            $error_msg = "Connection Failure: " . curl_error($curl);
-        }
-        
-        $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        error_log('callAPI HTTP status ' . $http_status);
-        curl_close($curl);
-        
-        if (isset($error_msg)) {
-            throw new RuntimeException($error_msg);
-        }
-        return $result;
-    }
 }
 
 ?>

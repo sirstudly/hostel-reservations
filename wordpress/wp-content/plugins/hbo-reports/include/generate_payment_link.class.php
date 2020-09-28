@@ -39,21 +39,8 @@ class GeneratePaymentLinkController extends XslTransform {
      * @param $deposit_only boolean true to request deposit amount only, false for total outstanding
      */
     function generatePaymentLink($booking_ref, $deposit_only) {
+
         $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
-        $headers = array(
-            "Accept: application/json, text/javascript, */*; q=0.01",
-            "Content-Type: application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer: https://hotels.cloudbeds.com/connect/" . $PROPERTY_ID,
-            "Accept-Language: en-GB,en-US;q=0.9,en;q=0.8",
-            "Accept-Encoding: gzip, deflate, br",
-            "X-Requested-With: XMLHttpRequest",
-            "X-Used-Method: common.ajax",
-            "Cache-Control: max-age=0",
-            "Origin: https://hotels.cloudbeds.com",
-            "User-Agent: " . get_option('hbo_cloudbeds_useragent'),
-            "Cookie: " . get_option('hbo_cloudbeds_cookies'),
-        );
-        
         $data = array(
             "id" => $booking_ref,
             "is_identifier" => "1",
@@ -61,27 +48,16 @@ class GeneratePaymentLinkController extends XslTransform {
             "group_id" => $PROPERTY_ID,
             "version" => get_option('hbo_cloudbeds_version'),
         );
-        
+
         try {
-            $start_ms = time();
-            $make_call = $this->callAPI('POST', "https://hotels.cloudbeds.com/connect/reservations/get_reservation", $headers, $data);
-            error_log("Cloudbeds request took " . (time() - $start_ms) . "ms.");
-//            error_log("Booking::curl result: " . $make_call);
-            $response = json_decode($make_call, true);
+            $response = $this->doCloudbedsPOST("https://hotels.cloudbeds.com/connect/reservations/get_reservation", $data);
         }
         catch (Exception $ex) {
-            error_log($ex->getMessage());
-            throw new RuntimeException('Error attempting to retrieve booking. Please try again later.');
-        }
-        
-        if( $response['success'] != 'true' ) {
-            error_log('Unexpected error looking up booking.');
-            error_log('request: ' . json_encode($data));
-            error_log('response: ' . $make_call);
-            if( strlen($response['message']) && strpos($response['message'], 'you are not using the latest version') !== false) {
-                throw new RuntimeException("Cloudbeds version sync error. Please try again later.");
+            // Cloudbeds doesn't give a description if booking doesn't exist...
+            if ($ex->getMessage() == "Error attempting operation.") {
+                throw new RuntimeException("Unable to find this booking.");
             }
-            throw new RuntimeException('Unable to find this booking.');
+            throw $ex;
         }
 
         // sum all rates matching checkin-date
@@ -217,53 +193,6 @@ class GeneratePaymentLinkController extends XslTransform {
         return HBO_PLUGIN_DIR. '/include/generate_payment_link.xsl';
     }
 
-    function callAPI($method, $url, $headers, $data = NULL)
-    {
-        error_log('callAPI');
-        error_log("method: $method");
-        error_log("url: $url");
-        error_log("headers: " . json_encode($headers));
-        error_log("data: " . var_export($data, TRUE));
-        $curl = curl_init($url);
-        
-        switch ($method){
-            case "POST":
-                curl_setopt($curl, CURLOPT_POST, 1);
-                if ($data)
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-                    break;
-            case "PUT":
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
-                if ($data)
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-                    break;
-            default:
-                if ($data)
-                    $url = sprintf("%s?%s", $url, http_build_query($data));
-        }
-        
-        // OPTIONS:
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_ENCODING, "");
-        
-        // EXECUTE:
-        $result = curl_exec($curl);
-        if (curl_error($curl)) {
-            $error_msg = "Connection Failure: " . curl_error($curl);
-        }
-        
-        $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        error_log('callAPI HTTP status ' . $http_status);
-        curl_close($curl);
-        
-        if (isset($error_msg)) {
-            throw new RuntimeException($error_msg);
-        }
-        return $result;
-    }
 }
 
 ?>
