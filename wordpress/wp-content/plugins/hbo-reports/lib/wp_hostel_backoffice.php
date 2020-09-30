@@ -60,6 +60,7 @@ class WP_HostelBackoffice {
         add_option('hbo_log_directory_url', '/__SITENAME__/view-log/?job_id=');
         add_option('hbo_job_history_url', 'admin/job-history');
         add_option('hbo_job_scheduler_url', 'admin/job-scheduler');
+        add_option('hbo_online_checkin_url', 'online-checkin');
         add_option('hbo_group_booking_size', '6');
         add_option('hbo_include_5_guests_in_6bed_dorm', 'true');
         self::insert_site_pages();
@@ -89,6 +90,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_payment_history_inv_url');
         delete_option('hbo_process_refunds_url');
         delete_option('hbo_refund_history_url');
+        delete_option('hbo_online_checkin_url');
         delete_option('hbo_run_processor_cmd');
         delete_option('hbo_group_booking_size');
         delete_option('hbo_include_5_guests_in_6bed_dorm');
@@ -236,6 +238,7 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_payment_history_inv_url'), 'payment-history-inv.php');
         $this->do_redirect_for_page(get_option('hbo_process_refunds_url'), 'process-refunds.php');
         $this->do_redirect_for_page(get_option('hbo_refund_history_url'), 'refund-history.php');
+        $this->do_redirect_for_page(get_option('hbo_online_checkin_url'), 'online-checkin.php');
         $this->do_redirect_for_page(get_option('hbo_view_log_url'), 'view-log.php');
     }
 

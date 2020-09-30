@@ -52,7 +52,7 @@ class ProcessRefundsController extends XslTransform {
         $this->showDialogTxnId = null; // reset
         $this->booking = null;
     }
-   
+
     /**
      * Looks up the cloudbeds booking ("identifier") and generates:
      *   - the booking details (name, checkin-date, checkout-date, number of guests, total, amount due)
@@ -60,19 +60,24 @@ class ProcessRefundsController extends XslTransform {
      *   - an error message if booking doesn't exist
      *
      * @param $booking_ref string cloudbeds identifier
+     * @throws Exception
      */
     function lookupBooking($booking_ref) {
         $this->showDialogTxnId = null; // reset
         $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
-        $this->booking = $this->doCloudbedsPOST(
-            "https://hotels.cloudbeds.com/connect/reservations/get_reservation",
+        $ENDPOINT = "https://hotels.cloudbeds.com/connect/reservations/get_reservation";
+        $this->booking = $this->cloudbeds_api_request($ENDPOINT,
             array(
                 "id" => $booking_ref,
                 "is_identifier" => "1",
                 "property_id" => $PROPERTY_ID,
                 "group_id" => $PROPERTY_ID,
-                "version" => get_option('hbo_cloudbeds_version'),
+                "version" => $this->get_cloudbeds_version_for_endpoint($ENDPOINT)
             ));
+        if ($this->booking['success'] != 'true') {
+            error_log('Unexpected error looking up booking ' . $booking_ref);
+            throw new Exception("Failed to load reservation.");
+        }
         $this->booking['transactions'] = $this->getTransactionsForBooking($this->booking['reservation_id']);
 
         // identify any sagepay records
@@ -88,18 +93,23 @@ class ProcessRefundsController extends XslTransform {
      *
      * @param $booking_ref string cloudbeds identifier
      * @return array transactions for the given booking
+     * @throws Exception
      */
     function getTransactionsForBooking($booking_ref) {
         $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
-        return $this->doCloudbedsPOST(
-            "https://hotels.cloudbeds.com/connect/reports/transactions_by_reservation",
-            array(
-                "booking_id" => $booking_ref,
+        $ENDPOINT = "https://hotels.cloudbeds.com/connect/reports/transactions_by_reservation";
+        $response = $this->cloudbeds_api_request($ENDPOINT,
+            array("booking_id" => $booking_ref,
                 "options" => "{\"filters\":{\"from\":\"\",\"to\":\"\",\"filter\":\"\",\"user\":\"all\",\"posted\":[\"1\"],\"description\":[]},\"group\":{\"main\":\"\",\"sub\":\"\"},\"sort\":{\"column\":\"datetime_transaction\",\"order\":\"desc\"},\"loaded_filter\":1}",
                 "property_id" => $PROPERTY_ID,
                 "group_id" => $PROPERTY_ID,
-                "version" => get_option('hbo_cloudbeds_version'),
+                "version" => $this->get_cloudbeds_version_for_endpoint($ENDPOINT)
             ));
+        if ($response['success'] != 'true') {
+            error_log('Unexpected error looking up transactions for booking ' . $booking_ref);
+            throw new Exception("Failed to load reservation.");
+        }
+        return $response;
     }
 
     /**
@@ -111,10 +121,11 @@ class ProcessRefundsController extends XslTransform {
     function _selectTransaction($txn) {
         return $this->showDialogTxnId == $txn['id'];
     }
-    
+
     /**
      * Returns the selected transaction we're doing a refund on. Throws exception if we don't have
      * a selected transaction - which shouldn't happen!
+     * @throws ValidationException
      */
     function getSelectedTransaction() {
         $txn = array_filter($this->booking['transactions']['records'], array($this, '_selectTransaction'));

@@ -133,6 +133,10 @@ class AjaxController {
                 $this->showRefundResponse();
                 break;
 
+            case 'GENERATE_BOOKING_URL':
+                $this->generateBookingURL();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -786,6 +790,33 @@ class AjaxController {
             <script type="text/javascript">
                 jQuery("#dialog_ajax_response")
                      .html('<span style="color:red"><?=$e->getMessage()?></span>');
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Returns a URL for accessing booking (guest) details.
+     * Requires POST variables:
+     *   booking_identifier : cloudbeds booking id as shown on the page
+     * @throws Exception on lookup failure
+     */
+    function generateBookingURL() {
+        try {
+            $controller = new OnlineCheckin();
+            $booking_url = $controller->generateBookingURL($_POST['booking_identifier']);
+            ?>
+            <script type="text/javascript">
+                display_qrcode('<?=$booking_url?>');
+            </script>
+            <?php
+        }
+        catch (Exception $e) {
+            error_log(var_export($e, true));
+            ?>
+            <script type="text/javascript">
+                display_qrcode("https://bookings.macbackpackers.com/");
+                jQuery("#ajax_error").html('<?=$e->getMessage()?>');
             </script>
             <?php
         }

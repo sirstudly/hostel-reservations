@@ -40,25 +40,7 @@ class GeneratePaymentLinkController extends XslTransform {
      */
     function generatePaymentLink($booking_ref, $deposit_only) {
 
-        $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
-        $data = array(
-            "id" => $booking_ref,
-            "is_identifier" => "1",
-            "property_id" => $PROPERTY_ID,
-            "group_id" => $PROPERTY_ID,
-            "version" => get_option('hbo_cloudbeds_version'),
-        );
-
-        try {
-            $response = $this->doCloudbedsPOST("https://hotels.cloudbeds.com/connect/reservations/get_reservation", $data);
-        }
-        catch (Exception $ex) {
-            // Cloudbeds doesn't give a description if booking doesn't exist...
-            if ($ex->getMessage() == "Error attempting operation.") {
-                throw new RuntimeException("Unable to find this booking.");
-            }
-            throw $ex;
-        }
+        $response = $this->lookupReservation($booking_ref);
 
         // sum all rates matching checkin-date
         $total_deposit = 0;
@@ -79,6 +61,45 @@ class GeneratePaymentLinkController extends XslTransform {
         $this->booking['lookup_key'] = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH);
         LilHotelierDBO::insertLookupKeyForBooking($response['reservation_id'], $this->booking['lookup_key'],
             $deposit_only && $total_deposit > 0 ? $total_deposit : null);
+    }
+
+    /**
+     * Finds a cloudbeds booking by ID.
+     * @param $booking_identifier string cloudbeds identifier as it appears on the page
+     * @return JSON response
+     * @throws Exception
+     */
+    function lookupReservation($booking_identifier) {
+        $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
+        $ENDPOINT = "https://hotels.cloudbeds.com/connect/reservations/get_reservation";
+        $data = array(
+            "id" => $booking_identifier,
+            "is_identifier" => "1",
+            "property_id" => $PROPERTY_ID,
+            "group_id" => $PROPERTY_ID,
+            "version" => $this->get_cloudbeds_version_for_endpoint($ENDPOINT),
+        );
+
+        $response = $this->cloudbeds_api_request($ENDPOINT, $data);
+        if ($response['success'] != 'true') {
+            error_log('Unexpected error looking up booking ' . $booking_identifier);
+            throw new Exception("Failed to load reservation.");
+        }
+        return $response;
+    }
+
+    /**
+     * Generates a URL for updating user details for a cloudbeds booking
+     * @param $booking_identifier string cloudbeds booking identifier
+     * @return string booking URL
+     * @throws Exception on lookup failure
+     */
+    function generateBookingURL($booking_identifier) {
+        $response = $this->lookupReservation($booking_identifier);
+        $lookup_key = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH);
+        LilHotelierDBO::insertLookupKeyForBooking(
+            $response['reservation_id'], $lookup_key, null);
+        return get_option("hbo_bookings_url") . $lookup_key;
     }
 
     /**

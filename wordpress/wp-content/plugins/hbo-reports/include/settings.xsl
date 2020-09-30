@@ -83,7 +83,11 @@
                                     <tr valign="top">
                                         <th scope="row"><label for="refund_history_url">Refund History Link</label></th>
                                         <td><input id="refund_history_url"  name="hbo_refund_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{refund_history_url}" /></td>
-                                    </tr>  
+                                    </tr>
+                                    <tr valign="top">
+                                        <th scope="row"><label for="online_checkin_url">Online Checkin</label></th>
+                                        <td><input id="online_checkin_url"  name="hbo_online_checkin_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{online_checkin_url}" /></td>
+                                    </tr>
                                     <tr valign="top">
                                         <th scope="row"><label for="report_settings_url">Report Settings</label></th>
                                         <td><input id="report_settings_url"  name="hbo_report_settings_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{report_settings_url}" /></td>
@@ -99,7 +103,7 @@
                                     <tr valign="top">
                                         <th scope="row"><label for="job_scheduler_url">Job Scheduler</label></th>
                                         <td><input id="job_scheduler_url"  name="hbo_job_scheduler_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{job_scheduler_url}" /></td>
-                                    </tr>  
+                                    </tr>
                                     <tr valign="top">
                                         <th scope="row"><label for="log_directory">Log Directory</label></th>
                                         <td><input id="log_directory"  name="hbo_log_directory" class="regular-text code" type="text" style="width:350px;" size="145" value="{log_directory}" /></td>

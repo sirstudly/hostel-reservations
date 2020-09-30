@@ -533,3 +533,27 @@ function show_refund_response( txn_id ) {
 	});
 }
 
+//generate a booking URL (for users to enter details) given a booking reference
+//booking_identifier : cloudbeds booking identifier (the one displayed on the page)
+function generate_booking_url(booking_identifier) {
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        success: function (data, textStatus) {
+            if (textStatus == 'success') {
+                jQuery('#ajax_response').html( data );
+            }
+            else {
+                jQuery('#ajax_error').html(textStatus + " - Failed to generate booking URL");
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            jQuery('#ajax_error').html(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText)
+        },
+        data: {
+            ajax_action: 'GENERATE_BOOKING_URL',
+            booking_identifier: booking_identifier
+        }
+    });
+}
