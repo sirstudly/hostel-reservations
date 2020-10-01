@@ -804,12 +804,8 @@ class AjaxController {
     function generateBookingURL() {
         try {
             $controller = new OnlineCheckin();
-            $booking_url = $controller->generateBookingURL($_POST['booking_identifier']);
-            ?>
-            <script type="text/javascript">
-                display_qrcode('<?=$booking_url?>');
-            </script>
-            <?php
+            $controller->loadBooking($_POST['booking_identifier']);
+            echo $controller->toHtml();
         }
         catch (Exception $e) {
             error_log(var_export($e, true));

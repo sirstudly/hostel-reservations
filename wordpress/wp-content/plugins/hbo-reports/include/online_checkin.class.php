@@ -5,6 +5,8 @@
  */
 class OnlineCheckin extends XslTransform {
 
+    var $booking; // the currently displayed booking
+
     /**
      * Reloads the view details.
      */
@@ -12,13 +14,13 @@ class OnlineCheckin extends XslTransform {
     }
 
     /**
-     * Creates a booking URL from a booking.
+     * Loads a cloudbeds booking.
      * @param $booking_identifier string cloudbeds booking id as it appears on the page
      * @throws Exception on lookup failure
      */
-    function generateBookingURL($booking_identifier) {
+    function loadBooking($booking_identifier) {
         $controller = new GeneratePaymentLinkController();
-        return $controller->generateBookingURL($booking_identifier);
+        $this->booking = $controller->loadBookingWithLookupKey($booking_identifier);
     }
 
     /**
@@ -30,6 +32,21 @@ class OnlineCheckin extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
+        $parentElement->appendChild($domtree->createElement('notifyurl', get_option("hbo_checkin_notify_wss_url")));
+        if($this->booking) {
+	        $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
+	        $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
+	        $bookingRoot->appendChild($domtree->createElement('third_party_identifier', $this->booking['third_party_identifier']));
+	        $bookingRoot->appendChild($domtree->createElement('booking_source', $this->booking['source_name']));
+	        $bookingRoot->appendChild($domtree->createElement('name', $this->booking['name']));
+	        $bookingRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d', $this->booking['checkin_date'])->format('D M d')));
+	        $bookingRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d', $this->booking['checkout_date'])->format('D M d')));
+	        $bookingRoot->appendChild($domtree->createElement('num_guests', intval($this->booking['adults_number']) + intval($this->booking['kids_number'])));
+	        $bookingRoot->appendChild($domtree->createElement('grand_total', number_format($this->booking['grand_total'], 2)));
+	        $bookingRoot->appendChild($domtree->createElement('balance_due', number_format($this->booking['balance_due'], 2)));
+	        $bookingRoot->appendChild($domtree->createElement('booking_url', get_option("hbo_bookings_url") . $this->booking['lookup_key']));
+	        $parentElement->appendChild($bookingRoot);
+        }
     }
     
     /** 

@@ -89,17 +89,20 @@ class GeneratePaymentLinkController extends XslTransform {
     }
 
     /**
-     * Generates a URL for updating user details for a cloudbeds booking
+     * Generates a lookup key for a cloudbeds booking so it can be accessed on either
+     * bookings.macbackpackers.com or pay.macbackpackers.com.
+     * Returns the Cloudbeds response with the lookup key saved under the key 'lookup_key'.
      * @param $booking_identifier string cloudbeds booking identifier
      * @return string booking URL
      * @throws Exception on lookup failure
      */
-    function generateBookingURL($booking_identifier) {
+    function loadBookingWithLookupKey($booking_identifier) {
         $response = $this->lookupReservation($booking_identifier);
         $lookup_key = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH);
         LilHotelierDBO::insertLookupKeyForBooking(
             $response['reservation_id'], $lookup_key, null);
-        return get_option("hbo_bookings_url") . $lookup_key;
+        $response['lookup_key'] = $lookup_key;
+        return $response;
     }
 
     /**

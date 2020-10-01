@@ -7,37 +7,80 @@
 //*****************************************************************************
 -->
 <xsl:template match="view">
-    <h3>Online Checkin</h3>
 
-    <div class="container-fluid">
-        <canvas id="qr_canvas"><xsl:comment/></canvas>
-        <div id="ajax_error"><xsl:comment/></div>
-        <div id="ajax_response">
-            <!-- only javascript responses should appear here -->
+    <xsl:if test="booking">
+        <xsl:apply-templates select="booking"/>
+    </xsl:if>
+    <xsl:if test="not(booking)">
+
+<style>
+:fullscreen {
+    background-color: #fff;
+}
+
+#qr_canvas_url {
+    font-size: 20px;
+}
+</style>
+
+        <div class="container">
+        <div id="body_content">
+            <h5>Please wait... reticulating splines...</h5>
+            <canvas id="qr_canvas"><xsl:comment/></canvas>
+            <div id="qr_canvas_url"><xsl:comment/></div>
         </div>
+        <div id="ajax_error"><xsl:comment/></div>
     </div>
 
     <script type="text/javascript" src="{pluginurl}/js/qrcode.js"><xsl:comment/></script>
     <script type="text/javascript">
+        const notify_url = '<xsl:value-of select="notifyurl"/>';
         <xsl:text disable-output-escaping="yes">
+
+        function open_fullscreen(elem) {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.mozRequestFullScreen) { /* Firefox */
+                elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // need to show fullscreen button if we exit fullscreen mode
+        if (document.addEventListener) {
+            document.addEventListener('fullscreenchange', fullscreen_exit_handler, false);
+            document.addEventListener('mozfullscreenchange', fullscreen_exit_handler, false);
+            document.addEventListener('MSFullscreenChange', fullscreen_exit_handler, false);
+            document.addEventListener('webkitfullscreenchange', fullscreen_exit_handler, false);
+        }
+
+        function fullscreen_exit_handler() {
+            if (!document.webkitIsFullScreen &amp;&amp; !document.mozFullScreen &amp;&amp; document.msFullscreenElement == null) {
+                jQuery('#fullscreen_btn').show();
+            }
+        }
+
         const getElement = (id) => document.getElementById(id);
         function display_qrcode(booking_url) {
-            QRCode.toCanvas(getElement('qr_canvas'), booking_url,
+            QRCode.toCanvas(getElement('qr_canvas'), booking_url, { width: 400 },
                 function (error) {
                     if (error) {
                         jQuery('#ajax_error').html(error);
                     }
                     else {
                         console.log('Successfully loaded ' + booking_url);
-                        jQuery('#ajax_error').html("");
                     }
                 });
+            jQuery("#qr_canvas_url").html('&lt;a href="' + booking_url + '"&gt;' + booking_url + '&lt;/a&gt;');
         }
 
         jQuery(document).ready(function() {
 
             function connect_ws() {
-                const ws = new WebSocket('wss://localhost:3030');
+                const ws = new WebSocket(notify_url);
                 ws.onopen = () => {
                     console.log('Now connected');
                 };
@@ -49,6 +92,7 @@
                     const payload = JSON.parse(event.data);
                     if(payload.action == 'reset') {
                         display_qrcode("https://bookings.macbackpackers.com/");
+                        //generate_booking_url('978600153274'); // FOR TESTING
                     }
                     else if(payload.booking_ref) {
                         generate_booking_url(payload.booking_ref);
@@ -61,6 +105,43 @@
         </xsl:text>
     </script>
 
+    </xsl:if>
+</xsl:template>
+
+<xsl:template match="booking">
+    <div style="margin-left: 40px; margin-top: 50px;">
+        <h3>Welcome <xsl:value-of select="name"/>!</h3>
+        <div class="row">
+            <div class="offset-sm-2 col-8" style="font-size: 30px;">
+                Here are your booking details. Please take the time now to update your details with us.
+                Everyone in your group needs to do this. Thank you and enjoy your stay!
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-5" style="font-size: 22px; margin-top: 100px;">
+                Booking Reference: <xsl:value-of select="identifier"/><br/>
+                <xsl:if test="string-length(third_party_identifier) > 0">
+                    3rd Party Booking Reference: <xsl:value-of select="third_party_identifier"/><br/>
+                </xsl:if>
+                Booking Source: <xsl:value-of select="booking_source"/><br/>
+                Checkin: <xsl:value-of select="checkin_date"/> Checkout: <xsl:value-of select="checkout_date"/><br/>
+                Number of Guests: <xsl:value-of select="num_guests"/><br/>
+                Grand Total: £<xsl:value-of select="grand_total"/><br/>
+                <strong>Balance Due: £<xsl:value-of select="balance_due"/></strong><br/>
+                <img style="margin-top: 100px;" width="100" src="https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg"/>
+            </div>
+            <div class="col-7 text-center">
+                <canvas id="qr_canvas"><xsl:comment/></canvas>
+                <div id="qr_canvas_url"><xsl:comment/></div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            display_qrcode('<xsl:value-of select="booking_url"/>');
+        </script>
+
+        <button id="fullscreen_btn" class="btn btn-primary" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
+    </div>
 </xsl:template>
 
 </xsl:stylesheet>

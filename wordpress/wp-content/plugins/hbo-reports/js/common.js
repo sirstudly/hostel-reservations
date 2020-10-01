@@ -542,7 +542,8 @@ function generate_booking_url(booking_identifier) {
         type: 'POST',
         success: function (data, textStatus) {
             if (textStatus == 'success') {
-                jQuery('#ajax_response').html( data );
+                jQuery('#body_content').html(data);
+                jQuery('#ajax_error').html("");
             }
             else {
                 jQuery('#ajax_error').html(textStatus + " - Failed to generate booking URL");
