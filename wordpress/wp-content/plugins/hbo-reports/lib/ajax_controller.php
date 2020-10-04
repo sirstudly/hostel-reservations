@@ -804,7 +804,12 @@ class AjaxController {
     function generateBookingURL() {
         try {
             $controller = new OnlineCheckin();
-            $controller->loadBooking($_POST['booking_identifier']);
+            if( $_POST['booking_identifier'] == 'reset_view') {
+	            $controller->resetView();
+            }
+            else {
+	            $controller->loadBooking( $_POST['booking_identifier'] );
+            }
             echo $controller->toHtml();
         }
         catch (Exception $e) {

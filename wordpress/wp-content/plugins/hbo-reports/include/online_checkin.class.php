@@ -6,14 +6,24 @@
 class OnlineCheckin extends XslTransform {
 
     var $booking; // the currently displayed booking
+	var $resetView; // set to display default view
 
     /**
      * Reloads the view details.
      */
     function doView() {
+    	$this->booking = NULL;
+    	$this->resetView = NULL;
     }
 
-    /**
+	/**
+	 * Generate the default panel.
+	 */
+	function resetView() {
+		$this->resetView = TRUE;
+	}
+
+	/**
      * Loads a cloudbeds booking.
      * @param $booking_identifier string cloudbeds booking id as it appears on the page
      * @throws Exception on lookup failure
@@ -33,7 +43,10 @@ class OnlineCheckin extends XslTransform {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
         $parentElement->appendChild($domtree->createElement('notifyurl', get_option("hbo_checkin_notify_wss_url")));
-        if($this->booking) {
+	    if ( $this->resetView ) {
+		    $parentElement->appendChild( $domtree->createElement( 'reset_view', "true" ) );
+	    }
+	    elseif ( $this->booking ) {
 	        $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
 	        $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
 	        $bookingRoot->appendChild($domtree->createElement('third_party_identifier', $this->booking['third_party_identifier']));

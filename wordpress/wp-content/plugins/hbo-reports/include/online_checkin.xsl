@@ -8,27 +8,30 @@
 -->
 <xsl:template match="view">
 
+    <xsl:if test="reset_view">
+        <xsl:apply-templates select="reset_view"/>
+    </xsl:if>
     <xsl:if test="booking">
         <xsl:apply-templates select="booking"/>
     </xsl:if>
-    <xsl:if test="not(booking)">
+    <xsl:if test="not(booking) and not(reset_view)">
 
 <style>
 :fullscreen {
     background-color: #fff;
 }
 
+#fullscreen_btn:fullscreen {
+    display: none;
+}
+
 #qr_canvas_url {
-    font-size: 20px;
+    font-size: 24px;
 }
 </style>
 
-        <div class="container">
-        <div id="body_content">
-            <h5>Please wait... reticulating splines...</h5>
-            <canvas id="qr_canvas"><xsl:comment/></canvas>
-            <div id="qr_canvas_url"><xsl:comment/></div>
-        </div>
+    <div class="container">
+        <div id="body_content" style="min-height: 200px;"><h5>Please wait... reticulating splines...</h5></div>
         <div id="ajax_error"><xsl:comment/></div>
     </div>
 
@@ -91,11 +94,12 @@
                 ws.onmessage = (event) => {
                     const payload = JSON.parse(event.data);
                     if(payload.action == 'reset') {
-                        display_qrcode("https://bookings.macbackpackers.com/");
-                        //generate_booking_url('978600153274'); // FOR TESTING
+                        generate_booking_url("reset_view");
                     }
                     else if(payload.booking_ref) {
                         generate_booking_url(payload.booking_ref);
+                        // reset after 5 minutes
+                        setInterval( () => { generate_booking_url("reset_view"); }, 300000);
                     }
                 };
             }
@@ -106,6 +110,29 @@
     </script>
 
     </xsl:if>
+</xsl:template>
+
+<xsl:template match="reset_view">
+    <div style="margin-left: 40px; margin-top: 50px;">
+        <h2>Welcome to Castle Rock!</h2>
+        <div class="row mt-3">
+            <div class="offset-sm-2 col-8" style="font-size: 30px;">
+                Please take the time now to update your details with us.
+                Everyone in your group needs to do this. Thank you and enjoy your stay!
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="w-100 text-center">
+                <canvas id="qr_canvas"><xsl:comment/></canvas>
+                <div id="qr_canvas_url"><xsl:comment/></div>
+            </div>
+        </div>
+        <img style="position:relative;top:-80px;" width="100" src="https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg"/>
+    </div>
+    <script type="text/javascript">
+        display_qrcode("https://bookings.macbackpackers.com/");
+    </script>
+    <button id="fullscreen_btn" class="btn btn-primary mb-3" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
 </xsl:template>
 
 <xsl:template match="booking">
@@ -124,11 +151,12 @@
                     3rd Party Booking Reference: <xsl:value-of select="third_party_identifier"/><br/>
                 </xsl:if>
                 Booking Source: <xsl:value-of select="booking_source"/><br/>
-                Checkin: <xsl:value-of select="checkin_date"/> Checkout: <xsl:value-of select="checkout_date"/><br/>
+                Checkin: <xsl:value-of select="checkin_date"/><br/>
+                Checkout: <xsl:value-of select="checkout_date"/><br/>
                 Number of Guests: <xsl:value-of select="num_guests"/><br/>
                 Grand Total: £<xsl:value-of select="grand_total"/><br/>
                 <strong>Balance Due: £<xsl:value-of select="balance_due"/></strong><br/>
-                <img style="margin-top: 100px;" width="100" src="https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg"/>
+                <img style="margin-top: 90px;" width="100" src="https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg"/>
             </div>
             <div class="col-7 text-center">
                 <canvas id="qr_canvas"><xsl:comment/></canvas>
@@ -140,7 +168,7 @@
             display_qrcode('<xsl:value-of select="booking_url"/>');
         </script>
 
-        <button id="fullscreen_btn" class="btn btn-primary" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
+        <button id="fullscreen_btn" class="btn btn-primary mb-3" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
     </div>
 </xsl:template>
 
