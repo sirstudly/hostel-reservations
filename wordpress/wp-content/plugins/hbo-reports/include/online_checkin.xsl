@@ -137,7 +137,7 @@
 
 <xsl:template match="booking">
     <div style="margin-left: 40px; margin-top: 50px;">
-        <h3>Welcome <xsl:value-of select="name"/>!</h3>
+        <h2>Welcome <xsl:value-of select="name"/>!</h2>
         <div class="row">
             <div class="offset-sm-2 col-8" style="font-size: 30px;">
                 Here are your booking details. Please take the time now to update your details with us.

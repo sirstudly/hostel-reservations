@@ -50,7 +50,7 @@ class OnlineCheckin extends XslTransform {
 	        $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
 	        $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
 	        $bookingRoot->appendChild($domtree->createElement('third_party_identifier', $this->booking['third_party_identifier']));
-	        $bookingRoot->appendChild($domtree->createElement('booking_source', $this->booking['source_name']));
+	        $bookingRoot->appendChild($domtree->createElement('booking_source', htmlspecialchars(html_entity_decode($this->booking['source_name'], ENT_COMPAT, "UTF-8" ))));
 	        $bookingRoot->appendChild($domtree->createElement('name', $this->booking['name']));
 	        $bookingRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d', $this->booking['checkin_date'])->format('D M d')));
 	        $bookingRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d', $this->booking['checkout_date'])->format('D M d')));
