@@ -85,10 +85,6 @@
             function connect_ws() {
                 const ws = new WebSocket(notify_url);
 
-                ws.ping = () => {
-                    ws.send("ping");
-                };
-
                 ws.onopen = () => {
                     console.log('Now connected');
                     ws.isAlive = true;
