@@ -99,7 +99,7 @@
                     else if(payload.booking_ref) {
                         generate_booking_url(payload.booking_ref);
                         // reset after 5 minutes
-                        setInterval( () => { generate_booking_url("reset_view"); }, 300000);
+                        setTimeout( () => { generate_booking_url("reset_view"); }, 300000);
                     }
                 };
             }
