@@ -90,7 +90,10 @@
                     ws.isAlive = true;
 
                     ws.interval = setInterval( () => {
-                        if(ws.isAlive === false) return ws.close();
+                        if(ws.isAlive === false) {
+                            console.log("Did not receive echo back. Forcing disconnect.");
+                            return ws.close();
+                        }
                         ws.isAlive = false;
                         ws.send("ping");
                     }, 30000 );
