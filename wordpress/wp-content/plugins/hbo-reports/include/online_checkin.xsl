@@ -84,22 +84,41 @@
 
             function connect_ws() {
                 const ws = new WebSocket(notify_url);
+
+                ws.ping = () => {
+                    ws.send("ping");
+                };
+
                 ws.onopen = () => {
                     console.log('Now connected');
+                    ws.isAlive = true;
+
+                    ws.interval = setInterval( () => {
+                        if(ws.isAlive === false) return ws.close();
+                        ws.isAlive = false;
+                        ws.send("ping");
+                    }, 30000 );
                 };
                 ws.onclose = () => {
                     console.log("Disconnected!");
+                    clearInterval(ws.interval);
                     connect_ws(); // keepalive!
                 };
                 ws.onmessage = (event) => {
-                    const payload = JSON.parse(event.data);
-                    if(payload.action == 'reset') {
-                        generate_booking_url("reset_view");
+                    if(event.data == "pong") {
+                        console.log("received echo back :)");
+                        ws.isAlive = true;
                     }
-                    else if(payload.booking_ref) {
-                        generate_booking_url(payload.booking_ref);
-                        // reset after 5 minutes
-                        setTimeout( () => { generate_booking_url("reset_view"); }, 300000);
+                    else {
+                        const payload = JSON.parse(event.data);
+                        if(payload.action == 'reset') {
+                            generate_booking_url("reset_view");
+                        }
+                        else if(payload.booking_ref) {
+                            generate_booking_url(payload.booking_ref);
+                            // reset after 5 minutes
+                            setTimeout( () => { generate_booking_url("reset_view"); }, 300000);
+                        }
                     }
                 };
             }
