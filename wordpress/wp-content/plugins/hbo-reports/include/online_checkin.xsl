@@ -123,6 +123,7 @@
             }
 
             connect_ws();
+            generate_booking_url("reset_view");
         });
         </xsl:text>
     </script>
