@@ -43,6 +43,17 @@ class OnlineCheckin extends XslTransform {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
         $parentElement->appendChild($domtree->createElement('notifyurl', get_option("hbo_checkin_notify_wss_url")));
+	    switch(get_option("hbo_cloudbeds_property_id")) {
+		    case '17363':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'Castle Rock')); break;
+		    case '17959':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'High Street Hostel')); break;
+		    case '18137':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'Lochside')); break;
+		    case '18265':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'Royal Mile Backpackers')); break;
+	    };
+
 	    if ( $this->resetView ) {
 		    $parentElement->appendChild( $domtree->createElement( 'reset_view', "true" ) );
 	    }

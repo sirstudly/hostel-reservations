@@ -133,7 +133,7 @@
 
 <xsl:template match="reset_view">
     <div style="margin-left: 40px; margin-top: 50px;">
-        <h2>Welcome to Castle Rock!</h2>
+        <h2>Welcome to {hostel}!</h2>
         <div class="row mt-3">
             <div class="offset-sm-2 col-8" style="font-size: 30px;">
                 Please take the time now to update your details with us.
