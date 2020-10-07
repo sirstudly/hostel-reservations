@@ -43,28 +43,27 @@ class OnlineCheckin extends XslTransform {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
         $parentElement->appendChild($domtree->createElement('notifyurl', get_option("hbo_checkin_notify_wss_url")));
+	    switch(get_option("hbo_cloudbeds_property_id")) {
+		    case '17363':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'Castle Rock'));
+			    $parentElement->appendChild($domtree->createElement('logo', 'https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg'));
+			    break;
+		    case '17959':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'High Street Hostel'));
+			    $parentElement->appendChild($domtree->createElement('logo', 'https://www.highstreethostel.com/wp-content/themes/highstreethostel/highstreethostel-large.svg'));
+			    break;
+		    case '18137':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'Lochside'));
+			    $parentElement->appendChild($domtree->createElement('logo', 'http://lochsidehostel.com/wp-content/uploads/2017/07/Logo-Bigger-Drop-Show.png'));
+			    break;
+		    case '18265':
+			    $parentElement->appendChild($domtree->createElement('hostel', 'Royal Mile Backpackers'));
+			    $parentElement->appendChild($domtree->createElement('logo', 'https://royalmilebackpackers.com/wp-content/uploads/2017/12/RMB-Small-Logo.png'));
+			    break;
+	    };
 
 	    if ( $this->resetView ) {
-		    $resetRoot = $parentElement->appendChild( $domtree->createElement( 'reset_view', "true" ) );
-		    switch(get_option("hbo_cloudbeds_property_id")) {
-			    case '17363':
-				    $resetRoot->appendChild($domtree->createElement('hostel', 'Castle Rock'));
-				    $resetRoot->appendChild($domtree->createElement('logo', 'https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg'));
-				    break;
-			    case '17959':
-				    $resetRoot->appendChild($domtree->createElement('hostel', 'High Street Hostel'));
-				    $resetRoot->appendChild($domtree->createElement('logo', 'https://www.highstreethostel.com/wp-content/themes/highstreethostel/highstreethostel-large.svg'));
-				    break;
-			    case '18137':
-				    $resetRoot->appendChild($domtree->createElement('hostel', 'Lochside'));
-				    $resetRoot->appendChild($domtree->createElement('logo', 'http://lochsidehostel.com/wp-content/uploads/2017/07/Logo-Bigger-Drop-Show.png'));
-				    break;
-			    case '18265':
-				    $resetRoot->appendChild($domtree->createElement('hostel', 'Royal Mile Backpackers'));
-				    $resetRoot->appendChild($domtree->createElement('logo', 'https://royalmilebackpackers.com/wp-content/uploads/2017/12/RMB-Small-Logo.png'));
-				    break;
-		    };
-		    $parentElement->appendChild($resetRoot);
+		    $parentElement->appendChild( $domtree->createElement( 'reset_view', "true" ) );
 	    }
 	    elseif ( $this->booking ) {
 	        $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));

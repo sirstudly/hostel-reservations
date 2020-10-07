@@ -133,7 +133,7 @@
 
 <xsl:template match="reset_view">
     <div style="margin-left: 40px; margin-top: 50px;">
-        <h2>Welcome to <xsl:value-of select="hostel"/>!</h2>
+        <h2>Welcome to <xsl:value-of select="../hostel"/>!</h2>
         <div class="row mt-3">
             <div class="offset-sm-2 col-8" style="font-size: 30px;">
                 Please take the time now to update your details with us.
@@ -146,7 +146,7 @@
                 <div id="qr_canvas_url"><xsl:comment/></div>
             </div>
         </div>
-        <img style="position:relative;top:-80px;" width="100" src="{logo}"/>
+        <img style="position:relative;top:-80px;" width="100" src="{../logo}"/>
     </div>
     <script type="text/javascript">
         display_qrcode("https://bookings.macbackpackers.com/");
@@ -175,7 +175,7 @@
                 Number of Guests: <xsl:value-of select="num_guests"/><br/>
                 Grand Total: £<xsl:value-of select="grand_total"/><br/>
                 <strong>Balance Due: £<xsl:value-of select="balance_due"/></strong><br/>
-                <img style="margin-top: 90px;" width="100" src="https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg"/>
+                <img style="margin-top: 90px;" width="100" src="../{logo}"/>
             </div>
             <div class="col-7 text-center">
                 <canvas id="qr_canvas"><xsl:comment/></canvas>
