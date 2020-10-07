@@ -175,7 +175,7 @@
                 Number of Guests: <xsl:value-of select="num_guests"/><br/>
                 Grand Total: £<xsl:value-of select="grand_total"/><br/>
                 <strong>Balance Due: £<xsl:value-of select="balance_due"/></strong><br/>
-                <img style="margin-top: 90px;" width="100" src="../{logo}"/>
+                <img style="margin-top: 90px;" width="100" src="{/view/logo}"/>
             </div>
             <div class="col-7 text-center">
                 <canvas id="qr_canvas"><xsl:comment/></canvas>
