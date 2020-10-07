@@ -58,7 +58,7 @@ class OnlineCheckin extends XslTransform {
 			    break;
 		    case '18265':
 			    $parentElement->appendChild($domtree->createElement('hostel', 'Royal Mile Backpackers'));
-			    $parentElement->appendChild($domtree->createElement('logo', 'https://royalmilebackpackers.com/wp-content/uploads/2017/12/RMB-Small-Logo.png'));
+			    $parentElement->appendChild($domtree->createElement('logo', '/royalmile/RMB-Small-Logo.png'));
 			    break;
 	    };
 
