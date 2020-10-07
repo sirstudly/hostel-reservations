@@ -146,7 +146,7 @@
                 <div id="qr_canvas_url"><xsl:comment/></div>
             </div>
         </div>
-        <img style="position:relative;top:-80px;" width="100" src="https://www.castlerockedinburgh.com/wp-content/themes/castlerock/castlerock-large.svg"/>
+        <img style="position:relative;top:-80px;" width="100" src="{logo}"/>
     </div>
     <script type="text/javascript">
         display_qrcode("https://bookings.macbackpackers.com/");
