@@ -134,7 +134,7 @@
 </xsl:template>
 
 <xsl:template match="reset_view">
-    <div style="margin-left: 40px; margin-top: 50px;">
+    <div style="margin-left: 40px; margin-top: calc(3vh);">
         <xsl:if test="error_message">
             <div class="alert alert-danger" role="alert">
                 <xsl:value-of select="error_message"/>
@@ -161,7 +161,7 @@
 </xsl:template>
 
 <xsl:template match="booking">
-    <div style="margin-left: 40px; margin-top: 50px;">
+    <div style="margin-left: 40px; margin-top: calc(3vh);">
         <h2>Welcome <xsl:value-of select="name"/>!</h2>
         <div class="row">
             <div class="offset-sm-2 col-8" style="font-size: 1.3rem;">
