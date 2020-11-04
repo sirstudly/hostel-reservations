@@ -815,10 +815,8 @@ class AjaxController {
         catch (Exception $e) {
             error_log(var_export($e, true));
             ?>
-            <script type="text/javascript">
-                display_qrcode("https://bookings.macbackpackers.com/");
-                jQuery("#ajax_error").html('<?=$e->getMessage()?>');
-            </script>
+                <!-- ERROR TEMPLATE -->
+                <?=$e->getMessage()?>
             <?php
         }
     }

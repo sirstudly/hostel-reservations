@@ -33,6 +33,7 @@
     <div class="container">
         <div id="body_content" style="min-height: 200px;"><h5>Please wait... reticulating splines...</h5></div>
         <div id="ajax_error"><xsl:comment/></div>
+        <button id="fullscreen_btn" class="btn btn-primary mt-5 mb-2" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
     </div>
 
     <script type="text/javascript" src="{pluginurl}/js/qrcode.js"><xsl:comment/></script>
@@ -68,7 +69,8 @@
 
         const getElement = (id) => document.getElementById(id);
         function display_qrcode(booking_url) {
-            QRCode.toCanvas(getElement('qr_canvas'), booking_url, { width: 400 },
+            const qrcode_width = screen.width &lt;= 1024 ? 300 : 400;
+            QRCode.toCanvas(getElement('qr_canvas'), booking_url, { width: qrcode_width },
                 function (error) {
                     if (error) {
                         jQuery('#ajax_error').html(error);
@@ -133,9 +135,14 @@
 
 <xsl:template match="reset_view">
     <div style="margin-left: 40px; margin-top: 50px;">
+        <xsl:if test="error_message">
+            <div class="alert alert-danger" role="alert">
+                <xsl:value-of select="error_message"/>
+            </div>
+        </xsl:if>
         <h2>Welcome to <xsl:value-of select="../hostel"/>!</h2>
         <div class="row mt-3">
-            <div class="offset-sm-2 col-8" style="font-size: 30px;">
+            <div class="offset-sm-2 col-8" style="font-size: 1.3rem;">
                 Please take the time now to update your details with us.
                 Everyone in your group needs to do this. Thank you and enjoy your stay!
             </div>
@@ -146,25 +153,24 @@
                 <div id="qr_canvas_url"><xsl:comment/></div>
             </div>
         </div>
-        <img style="position:relative;top:-80px;" width="100" src="{../logo}"/>
+        <img style="position:relative;top:-90px;" width="100" src="{../logo}"/>
     </div>
     <script type="text/javascript">
         display_qrcode("https://bookings.macbackpackers.com/");
     </script>
-    <button id="fullscreen_btn" class="btn btn-primary mb-3" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
 </xsl:template>
 
 <xsl:template match="booking">
     <div style="margin-left: 40px; margin-top: 50px;">
         <h2>Welcome <xsl:value-of select="name"/>!</h2>
         <div class="row">
-            <div class="offset-sm-2 col-8" style="font-size: 30px;">
+            <div class="offset-sm-2 col-8" style="font-size: 1.3rem;">
                 Here are your booking details. Please take the time now to update your details with us.
                 Everyone in your group needs to do this. Thank you and enjoy your stay!
             </div>
         </div>
-        <div class="row mb-4">
-            <div class="col-5" style="font-size: 22px; margin-top: 100px;">
+        <div class="row">
+            <div class="col-5 mt-5" style="font-size: 1.1rem;">
                 Booking Reference: <xsl:value-of select="identifier"/><br/>
                 <xsl:if test="string-length(third_party_identifier) > 0">
                     3rd Party Booking Reference: <xsl:value-of select="third_party_identifier"/><br/>
@@ -175,19 +181,19 @@
                 Number of Guests: <xsl:value-of select="num_guests"/><br/>
                 Grand Total: £<xsl:value-of select="grand_total"/><br/>
                 <strong>Balance Due: £<xsl:value-of select="balance_due"/></strong><br/>
-                <img style="margin-top: 90px;" width="100" src="{/view/logo}"/>
             </div>
-            <div class="col-7 text-center">
+            <div class="col-7">
                 <canvas id="qr_canvas"><xsl:comment/></canvas>
-                <div id="qr_canvas_url"><xsl:comment/></div>
             </div>
+        </div>
+        <div class="row mb-4 text-center" style="position: relative">
+            <div class="w-100" id="qr_canvas_url"><xsl:comment/></div>
+            <img style="position: absolute; left: 20px; top: calc(-9vh)" width="100" src="{/view/logo}"/>
         </div>
 
         <script type="text/javascript">
             display_qrcode('<xsl:value-of select="booking_url"/>');
         </script>
-
-        <button id="fullscreen_btn" class="btn btn-primary mb-3" onclick="open_fullscreen(getElement('body_content')); jQuery(this).hide();">View Fullscreen</button><br/>
     </div>
 </xsl:template>
 

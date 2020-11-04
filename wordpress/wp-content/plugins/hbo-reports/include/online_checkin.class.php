@@ -7,6 +7,7 @@ class OnlineCheckin extends XslTransform {
 
     var $booking; // the currently displayed booking
 	var $resetView; // set to display default view
+	var $errorMessage; // any errors when loading
 
     /**
      * Reloads the view details.
@@ -14,6 +15,7 @@ class OnlineCheckin extends XslTransform {
     function doView() {
     	$this->booking = NULL;
     	$this->resetView = NULL;
+    	$this->errorMessage = NULL;
     }
 
 	/**
@@ -21,6 +23,7 @@ class OnlineCheckin extends XslTransform {
 	 */
 	function resetView() {
 		$this->resetView = TRUE;
+		$this->errorMessage = NULL;
 	}
 
 	/**
@@ -29,8 +32,15 @@ class OnlineCheckin extends XslTransform {
      * @throws Exception on lookup failure
      */
     function loadBooking($booking_identifier) {
-        $controller = new GeneratePaymentLinkController();
-        $this->booking = $controller->loadBookingWithLookupKey($booking_identifier);
+    	try {
+		    $controller    = new GeneratePaymentLinkController();
+		    $this->booking = $controller->loadBookingWithLookupKey( $booking_identifier );
+	    }
+	    catch(Exception $e) {
+    		error_log("Error loading booking: " . var_export($e, TRUE));
+		    $this->resetView();
+		    $this->errorMessage = $e->getMessage();
+	    }
     }
 
     /**
@@ -63,7 +73,11 @@ class OnlineCheckin extends XslTransform {
 	    };
 
 	    if ( $this->resetView ) {
-		    $parentElement->appendChild( $domtree->createElement( 'reset_view', "true" ) );
+		    $resetViewRoot = $parentElement->appendChild( $domtree->createElement( 'reset_view', "true" ) );
+		    if ( $this->errorMessage ) {
+			    $resetViewRoot->appendChild( $domtree->createElement( 'error_message', $this->errorMessage ) );
+		    }
+		    $parentElement->appendChild( $resetViewRoot );
 	    }
 	    elseif ( $this->booking ) {
 	        $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));

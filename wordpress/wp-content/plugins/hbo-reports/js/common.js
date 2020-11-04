@@ -542,8 +542,14 @@ function generate_booking_url(booking_identifier) {
         type: 'POST',
         success: function (data, textStatus) {
             if (textStatus == 'success') {
-                jQuery('#body_content').html(data);
-                jQuery('#ajax_error').html("");
+                // not sure how else to report an error without messing up the main body content
+                if(data.indexOf("ERROR TEMPLATE") >= 0) {
+                    jQuery('#ajax_error').html(data);
+                }
+                else {
+                    jQuery('#body_content').html(data);
+                    jQuery('#ajax_error').html("");
+                }
             }
             else {
                 jQuery('#ajax_error').html(textStatus + " - Failed to generate booking URL");
