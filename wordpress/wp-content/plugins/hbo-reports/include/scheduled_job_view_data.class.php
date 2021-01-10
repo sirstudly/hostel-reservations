@@ -79,6 +79,9 @@ class ScheduledJobViewData extends XslTransform {
         elseif( $classname == 'com.macbackpackers.jobs.CreateSendCovidPrestayEmailJob' ) {
             $params = array( 'days_before' => '3' );
         }
+        elseif ( $classname == 'com.macbackpackers.jobs.CreateFixedRateLongTermReservationsJob' ) {
+	        $params = array( selected_date => 'TODAY+1', 'days' => 7, 'rate_per_day' => 10 );
+        }
         else {
             throw new ValidationException( "Unsupported job type: $classname" );
         }

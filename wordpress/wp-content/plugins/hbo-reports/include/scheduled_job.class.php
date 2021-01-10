@@ -26,7 +26,8 @@ abstract class ScheduledJob {
             'com.macbackpackers.jobs.CreateCopyCardDetailsToCloudbedsJob' => 'Copy Card Details from Hostelworld',
             'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' => 'Charge Non-Refundable Bookings',
             'com.macbackpackers.jobs.CreateRefreshStripeRefundTransactionJob' => 'Refresh Pending Refunds (Stripe)',
-            'com.macbackpackers.jobs.CreateSendCovidPrestayEmailJob' => 'Send Covid Pre-Stay Email'
+            'com.macbackpackers.jobs.CreateSendCovidPrestayEmailJob' => 'Send Covid Pre-Stay Email',
+	        'com.macbackpackers.jobs.CreateFixedRateLongTermReservationsJob' => 'Create Long-Term Reservations Job'
         ));
         if (strpos(get_option('siteurl'), 'castlerock') !== false) {
             $result['com.macbackpackers.jobs.CreateSendHogmanayEmailJob'] = 'Send Hogmanay Emails';
