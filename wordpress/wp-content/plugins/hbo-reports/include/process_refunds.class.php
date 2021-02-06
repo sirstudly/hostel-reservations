@@ -33,7 +33,8 @@ class ProcessRefundsController extends XslTransform {
             floatval($amount), 
             $description, 
             $txn['id'], 
-            $txn['vendor_tx_code']);
+            isset($txn['vendor_tx_code']) ? $txn['vendor_tx_code'] : null,
+	        isset($txn['gateway_name']) ? $txn['gateway_name'] : null);
         LilHotelierDBO::runProcessor();
     }
 
@@ -80,12 +81,13 @@ class ProcessRefundsController extends XslTransform {
         }
         $this->booking['transactions'] = $this->getTransactionsForBooking($this->booking['reservation_id']);
 
-        // identify any sagepay records
-        foreach( $this->booking['transactions']['records'] as &$tx) {
-            if ($tx['paid'] && strpos($tx['notes'], "VendorTxCode:") !== false && floatval($tx['debit']) > 0) {
-                $tx['vendor_tx_code'] = substr($tx['notes'], 14, strpos($tx['notes'], ',') - 14);
-            }
-        }
+        // identify any manually entered txn records
+	    foreach ( $this->booking['transactions']['records'] as &$tx ) {
+		    if ( $tx['paid'] && strpos( $tx['notes'], "VendorTxCode:" ) !== false && floatval( $tx['debit'] ) > 0 ) {
+			    $tx['vendor_tx_code'] = substr( $tx['notes'], 14, strpos( $tx['notes'], ',' ) - 14 );
+			    $tx['gateway_name']   = strpos( $tx['notes'], "Gateway: STRIPE" ) !== false ? "Stripe" : "Sagepay";
+		    }
+	    }
     }
 
     /**

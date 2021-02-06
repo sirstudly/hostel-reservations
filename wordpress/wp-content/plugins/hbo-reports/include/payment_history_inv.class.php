@@ -23,7 +23,7 @@ class PaymentHistoryInvoiceController extends XslTransform {
      * @param boolean $show_acknowledged (optional) show acknowledged records
      */
     function doView($invoice_id = null, $show_acknowledged = FALSE) {
-        $this->invoices = LilHotelierDBO::getSagepayPaymentInvoiceHistory($invoice_id, $show_acknowledged);
+        $this->invoices = LilHotelierDBO::getPaymentInvoiceHistory($invoice_id, $show_acknowledged);
         $this->selected_invoice_id = $invoice_id;
         $this->show_acknowledged = $show_acknowledged;
         $this->reload_table_only = FALSE;

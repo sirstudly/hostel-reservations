@@ -337,10 +337,11 @@ class LilHotelierDBO {
      * @param float $amount refund amount
      * @param string $description (optional) note to add to booking
      * @param string $txnId cloudbeds transaction (Stripe)
-     * @param string $vendorTxCode (Sagepay)
+     * @param string $vendorTxCode
+     * @param string $gateway (Stripe/Sagepay)
      * @throws DatabaseException
      */
-    static function insertRefundRecord($reservationId, $bookingRef, $firstName, $lastName, $email, $amount, $description, $txnId, $vendorTxCode) {
+    static function insertRefundRecord($reservationId, $bookingRef, $firstName, $lastName, $email, $amount, $description, $txnId, $vendorTxCode, $gateway) {
         global $wpdb;
         if (false === $wpdb->insert("wp_tx_refund", array(
                         'reservation_id' => $reservationId,
@@ -357,7 +358,7 @@ class LilHotelierDBO {
             }
             
         $refId = $wpdb->insert_id;
-        if (! empty($vendorTxCode)) {
+	    if ( $gateway == "Sagepay" ) {
             if (false === $wpdb->insert("wp_sagepay_tx_refund",
                 array('id' => $refId,
                       'auth_vendor_tx_code' => $vendorTxCode,
@@ -367,7 +368,7 @@ class LilHotelierDBO {
                     throw new DatabaseException($wpdb->last_error);
             }
         }
-        else if (! empty($txnId)) {
+	    else if ( false === empty( $txnId ) ) {
             if (false === $wpdb->insert("wp_stripe_tx_refund",
                 array('id' => $refId, 'cloudbeds_tx_id' => $txnId, 'last_updated_date' => current_time('mysql')),
                 array('%d', '%s', '%s'))) {
@@ -938,16 +939,21 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns previous payments made for bookings to Sagepay.
+     * Returns previous payments made for bookings to Sagepay/Stripe.
      */
-    static function getSagepayPaymentBookingHistory() {
+    static function getPaymentBookingHistory() {
         global $wpdb;
         $resultset = $wpdb->get_results(
             "SELECT t.reservation_id, t.booking_reference, t.first_name, t.last_name, t.email, t.vendor_tx_code, t.payment_amount, a.auth_status, a.auth_status_detail, a.card_type, a.last_4_digits, a.processed_date
                FROM wp_sagepay_transaction t
               INNER JOIN wp_sagepay_tx_auth a ON t.vendor_tx_code = a.vendor_tx_code
               WHERE t.reservation_id IS NOT NULL
-              ORDER BY t.id DESC, a.id DESC
+              UNION ALL 
+             SELECT reservation_id, booking_reference, first_name, last_name, email, vendor_tx_code,  
+                    payment_amount, auth_status, auth_status_detail, card_type, last_4_digits, processed_date
+               FROM wp_stripe_transaction
+              WHERE processed_date IS NOT NULL
+              ORDER BY processed_date DESC
               LIMIT 100" );
 
         if($wpdb->last_error) {
@@ -957,11 +963,11 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns previous invoice payments made to Sagepay.
+     * Returns previous invoice payments made to Sagepay/Stripe.
      * @param int $invoice_id (optional) PK of invoice
      * @param boolean $show_acknowledged (optional) show acknowledged records
      */
-    static function getSagepayPaymentInvoiceHistory($invoice_id = null, $show_acknowledged = FALSE) {
+    static function getPaymentInvoiceHistory($invoice_id = null, $show_acknowledged = FALSE) {
         global $wpdb;
         if($invoice_id != null && !is_numeric($invoice_id)) {
             // probably not the cleanest way to avoid SQL injection...
@@ -988,7 +994,11 @@ class LilHotelierDBO {
                FROM wp_sagepay_transaction tx
               INNER JOIN (SELECT id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.id = tx.invoice_id) 
                LEFT OUTER JOIN wp_sagepay_tx_auth txa ON txa.vendor_tx_code = tx.vendor_tx_code
-              ORDER BY tx.id DESC, txa.id DESC" );
+              UNION ALL 
+             SELECT NULL AS `txn_id`, invoice_id, first_name, last_name, email, vendor_tx_code, payment_amount, NULL as txn_auth_id, auth_status, auth_status_detail, card_type, last_4_digits, processed_date, created_date
+               FROM wp_stripe_transaction tx
+              INNER JOIN (SELECT id FROM wp_invoice $where_clause ORDER BY id DESC LIMIT 100) i ON (i.id = tx.invoice_id)
+              ORDER BY invoice_id DESC" );
         
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);

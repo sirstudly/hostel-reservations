@@ -11,7 +11,7 @@
     <h3>Booking Payment History</h3>
 
     <div class="font-italic">
-        <p>This lists all booking payments made to our payment gateway (Sagepay) <b>outside</b> of Cloudbeds.<br/>
+        <p>This lists all booking payments made to our payment gateway <b>outside</b> of Cloudbeds.<br/>
            This might include payments made to us for a booking after they've booked because:
            <ul>
                <li>we were unable to charge the deposit amount with the card they provided at the time of booking</li>

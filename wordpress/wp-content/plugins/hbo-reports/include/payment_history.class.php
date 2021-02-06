@@ -18,9 +18,9 @@ class PaymentHistoryController extends XslTransform {
      * Reloads the view details.
      */
     function doView() {
-        $this->payments = LilHotelierDBO::getSagepayPaymentBookingHistory();
+        $this->payments = LilHotelierDBO::getPaymentBookingHistory();
     }
-   
+
     /**
      * Adds this object to the DOMDocument/XMLElement specified.
      * See toXml() for details.

@@ -51,7 +51,7 @@ jQuery(document).ready(function(){
             <h3>Invoice Payment History</h3>
 
             <div class="font-italic">
-                <p>This lists all invoice payments made to our payment gateway (Sagepay).<br/>
+                <p>This lists all invoice payments made to our payment gateway.<br/>
                     This might include payments made to us for:
                     <ul>
                         <li>Lost property. Request any shipping costs be paid before posting.</li>
