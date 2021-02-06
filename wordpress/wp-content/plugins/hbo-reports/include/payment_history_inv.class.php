@@ -114,7 +114,7 @@ class PaymentHistoryInvoiceController extends XslTransform {
                         if( !empty($txn->payment_amount)) {
                             $txnRoot->appendChild($domtree->createElement("payment_amount", number_format($txn->payment_amount, 2)));
                         }
-                        if($txn->auth_status == 'OK') {
+                        if($txn->auth_status == 'OK' || $txn->auth_status == 'authorized') {
                             $total_paid += $txn->payment_amount;
                         }
                         $txnsRoot->appendChild($txnRoot);
