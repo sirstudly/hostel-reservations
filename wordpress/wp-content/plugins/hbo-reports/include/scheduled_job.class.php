@@ -33,6 +33,8 @@ abstract class ScheduledJob {
             $result['com.macbackpackers.jobs.CreateSendHogmanayEmailJob'] = 'Send Hogmanay Emails';
             $result['com.macbackpackers.jobs.CreateSendChristmasArrivalEmailJob'] = 'Send Christmas Arrival Emails';
             $result['com.macbackpackers.jobs.CreateSendChristmasLunchEmailJob'] = 'Send Christmas Lunch Emails';
+	        $result['com.macbackpackers.jobs.VerifyAlexaLoggedInJob'] = 'Verify Alexa is Logged in';
+	        $result['com.macbackpackers.jobs.VerifyGoogleAssistantLoggedInJob'] = 'Verify Google Assistant is Logged in';
         }
         return $result;
     }
