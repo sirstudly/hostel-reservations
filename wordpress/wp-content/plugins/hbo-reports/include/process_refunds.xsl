@@ -71,9 +71,14 @@
 
         <div class="row offset-sm-1 col-10 mt-3">
             <h4>What is this page for?</h4>
+        </div>
+        <div class="row offset-sm-1 col-10 mt-3">
             <p>You want to process a partial/full refund for an existing booking and the card details may or may not be present in Cloudbeds.</p>
-
+        </div>
+        <div class="row offset-sm-1 col-10 mt-3">
             <h4>How does it work?</h4>
+        </div>
+        <div class="row offset-sm-1 col-10 mt-3">
             <p>
                Enter the booking reference below and click Submit.
                This will search for the booking and give you any payments made against it so far.
