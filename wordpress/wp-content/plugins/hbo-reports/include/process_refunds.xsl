@@ -83,9 +83,10 @@
                Enter the booking reference below and click Submit.
                This will search for the booking and give you any payments made against it so far.
                Refunds need an existing transaction to be credited against.
-               If the payment was originally done via Cloudbeds, the refund will be processed through Stripe.
-               If it was with <a href="https://pay.macbackpackers.com/">https://pay.macbackpackers.com/</a>,
-               then the refund goes through Sagepay.
+               It is possible to issue refunds directly in Cloudbeds, however, if the payment was done via
+               <a href="https://pay.macbackpackers.com/">https://pay.macbackpackers.com/</a>,
+               the refund needs to be issued through here. Also, no automated emails are sent
+               if you issue the refund in Cloudbeds directly (see below).
             </p>
             <p>
                Note: You can't refund more than what was originally charged. And you can't refund against
