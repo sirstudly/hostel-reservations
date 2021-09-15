@@ -641,9 +641,7 @@ class LilHotelierDBO {
                   JOIN (SELECT %s `selected_date`) const
                  WHERE j.classname = 'com.macbackpackers.jobs.BedCountJob'
                    AND j.status IN ( %s )
-                   -- 7 days is hard-coded in the BedCountJob (number of days to query data from)
-                   AND DATE_ADD(STR_TO_DATE(p.value, '%%Y-%%m-%%d'), INTERVAL -7 DAY ) <= const.selected_date
-                   AND STR_TO_DATE(p.value, '%%Y-%%m-%%d') >= const.selected_date
+                   AND STR_TO_DATE(p.value, '%%Y-%%m-%%d') = const.selected_date
                  ORDER BY j.end_date desc
                  LIMIT 1",
                 $selectedDate->format('Y-m-d'), self::STATUS_COMPLETED ) );
