@@ -26,6 +26,8 @@ class GeneratePaymentLinkController extends XslTransform {
      * Reloads the view details.
      */
     function doView() {
+    	$this->booking = NULL;
+    	$this->invoice_lookup_key = NULL;
     }
    
     /**
@@ -40,27 +42,16 @@ class GeneratePaymentLinkController extends XslTransform {
      */
     function generatePaymentLink($booking_ref, $deposit_only) {
 
-        $response = $this->lookupReservation($booking_ref);
-
-        // sum all rates matching checkin-date
-        $total_deposit = 0;
-        if (! empty($response['booking_rooms'])) {
-            foreach( $response['booking_rooms'] as $room) {
-                $rates = json_decode($room['detailed_rates'], TRUE);
-                foreach ($rates as $rate) {
-                    if( $response['checkin_date'] == $rate['date'] ) {
-                        $total_deposit += $rate['rate'];
-                    }
-                }
-            }
-            $response['amount_first_night'] = $total_deposit;
-        }
-        $this->booking = $response;
-
-        // this is used for generating a short URL
-        $this->booking['lookup_key'] = $this->generateRandomLookupKey(self::LOOKUPKEY_LENGTH);
-        LilHotelierDBO::insertLookupKeyForBooking($response['reservation_id'], $this->booking['lookup_key'],
-            $deposit_only && $total_deposit > 0 ? $total_deposit : null);
+	    $response = $this->loadBooking( $booking_ref );
+	    $amount   = $deposit_only;
+	    if ( $deposit_only === true ) {
+		    $amount = $response['amount_first_night'] ?? 0;
+	    }
+	    // this is used for generating a short URL
+	    $lookup_key = $this->generateRandomLookupKey( self::LOOKUPKEY_LENGTH );
+	    LilHotelierDBO::insertLookupKeyForBooking( $response['reservation_id'], $lookup_key,
+		    $amount > 0 ? $amount : null );
+	    return get_option( "hbo_booking_payments_url" ) . $lookup_key;
     }
 
     /**
@@ -69,7 +60,7 @@ class GeneratePaymentLinkController extends XslTransform {
      * @return JSON response
      * @throws Exception
      */
-    function lookupReservation($booking_identifier) {
+	function lookupReservation( $booking_identifier ) {
         $PROPERTY_ID = get_option('hbo_cloudbeds_property_id');
         $ENDPOINT = "https://hotels.cloudbeds.com/connect/reservations/get_reservation";
         $data = array(
@@ -87,6 +78,32 @@ class GeneratePaymentLinkController extends XslTransform {
         }
         return $response;
     }
+
+	/**
+	 * Loads a cloudbeds booking.
+	 * @param $booking_identifier string cloudbeds booking id as it appears on the page
+	 * @return JSON cloudbeds response (amount_first_night will be populated with the first night details)
+	 * @throws Exception on lookup failure
+	 */
+	function loadBooking( $booking_identifier ) {
+		$response = $this->lookupReservation( $booking_identifier );
+
+		// sum all rates matching checkin-date
+		$total_deposit = 0;
+		if ( ! empty( $response['booking_rooms'] ) ) {
+			foreach ( $response['booking_rooms'] as $room ) {
+				$rates = json_decode( $room['detailed_rates'], true );
+				foreach ( $rates as $rate ) {
+					if ( $response['checkin_date'] == $rate['date'] ) {
+						$total_deposit += $rate['rate'];
+					}
+				}
+			}
+			$response['amount_first_night'] = $total_deposit;
+		}
+		$this->booking = $response;
+		return $response;
+	}
 
     /**
      * Generates a lookup key for a cloudbeds booking so it can be accessed on either
@@ -181,7 +198,6 @@ class GeneratePaymentLinkController extends XslTransform {
             $bookingRoot->appendChild($domtree->createElement('grand_total', number_format($this->booking['grand_total'], 2)));
             $bookingRoot->appendChild($domtree->createElement('balance_due', number_format($this->booking['balance_due'], 2)));
             $bookingRoot->appendChild($domtree->createElement('amount_first_night', number_format($this->booking['amount_first_night'], 2)));
-            $bookingRoot->appendChild($domtree->createElement('payment_url', get_option("hbo_booking_payments_url") . $this->booking['lookup_key']));
             $parentElement->appendChild($bookingRoot);
         }
         if($this->invoice_lookup_key) {

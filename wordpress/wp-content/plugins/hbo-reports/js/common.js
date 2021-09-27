@@ -273,22 +273,55 @@ function submit_manual_charge( bookingRef, amount, note, override_card_details )
 
 //Looks up a booking and generates a new payment link
 //booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
-//deposit_only : boolean (true to pre-populate just the deposit amount, false for total outstanding)
-function generate_payment_link( booking_ref, deposit_only ) {
+//payment_type : one of first_night, balance_due, custom_amount
+//amount : boolean/number (true to pre-populate just the amount of first night, false for total outstanding, or specific custom amount)
+function generate_payment_link( booking_ref, payment_type, amount ) {
 
- jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+    if(payment_type == 'first_night') {
+        amount = true;
+    }
+    else if(payment_type == 'balance_due') {
+        amount = false;
+    }
+    else if (amount != '' && isNaN(parseFloat(amount))) {
+        jQuery('#payment_amount').addClass('form-control is-invalid')
+            .after('<div class="invalid-feedback">Please enter a valid amount (eg. 12.99)</div>');
+        return;
+    }
 
- jQuery.ajax({                                           // Start Ajax Sending
-     url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
-     type:'POST',
-     success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
-     error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
-     data:{
-         ajax_action : 'GENERATE_PAYMENT_LINK',
-         booking_ref : booking_ref,
-         deposit_only : deposit_only
-     }
- });
+    // reset page elements
+    jQuery('#payment_url_block').hide();
+    jQuery('#copied_to_clipboard').hide();
+    jQuery('.is-invalid').removeClass("is-invalid form-control");
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        success: function (data, textStatus) {
+            if (textStatus == 'success') {
+                if (data.paymentUrl) {
+                    jQuery('#payment_url_block').show();
+                    jQuery('#paymentUrl').val(data.paymentUrl);
+                }
+                else if (data.error) {
+                    jQuery('#payment_amount').addClass('is-invalid')
+                        .after('<div class="invalid-feedback">' + data.error + '</div>');
+                }
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            window.status = 'Ajax sending Error status:' + textStatus;
+            alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+            if (XMLHttpRequest.status == 500) {
+                alert('Oops sorry.. we messed up somewhere...');
+            }
+        },
+        data: {
+            ajax_action: 'GENERATE_PAYMENT_LINK',
+            booking_ref: booking_ref,
+            amount: amount
+        }
+    });
 }
 
 //Creates a new invoice payment link
@@ -466,18 +499,44 @@ function delete_scheduled_job( scheduled_job_id ) {
 //booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
 function lookup_booking( booking_ref ) {
 
-jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+    jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
-jQuery.ajax({                                           // Start Ajax Sending
-   url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
-   type:'POST',
-   success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
-   error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
-   data:{
-       ajax_action : 'LOOKUP_BOOKING',
-       booking_ref : booking_ref
-   }
-});
+    jQuery.ajax({                                           // Start Ajax Sending
+       url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+       type:'POST',
+       success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_response').html( data ); },
+       error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+       data:{
+           ajax_action : 'LOOKUP_BOOKING',
+           booking_ref : booking_ref
+       }
+    });
+}
+
+//Looks up a booking for generate payment link page
+//booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
+function lookup_booking_for_generate_payment_link(booking_ref) {
+
+    jQuery('#ajax_response').html('<div style="margin-left:80px;"><img src="' + wpdev_bk_plugin_url + '/img/ajax-loader.gif"></div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        success: function (data, textStatus) {
+            if (textStatus == 'success') jQuery('#ajax_response').html(data);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            window.status = 'Ajax sending Error status:' + textStatus;
+            alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+            if (XMLHttpRequest.status == 500) {
+                alert('Oops sorry.. we messed up somewhere...');
+            }
+        },
+        data: {
+            ajax_action: 'LOOKUP_BOOKING_FOR_GENERATE_PAYMENT_LINK',
+            booking_ref: booking_ref
+        }
+    });
 }
 
 //Shows the refund dialog.

@@ -120,8 +120,12 @@ class AjaxController {
             case 'LOOKUP_BOOKING':
                 $this->lookupBooking();
                 break;
-                
-            case 'SHOW_REFUND_DIALOG':
+
+	        case 'LOOKUP_BOOKING_FOR_GENERATE_PAYMENT_LINK':
+		        $this->lookupBookingForGeneratePaymentLink();
+		        break;
+
+	        case 'SHOW_REFUND_DIALOG':
                 $this->showRefundDialog();
                 break;
                 
@@ -527,31 +531,49 @@ class AjaxController {
         }
     }
 
-    /**
+	/**
+	 * Looks up an existing booking on the GeneratePaymentLink controller.
+	 * Requires POST variables:
+	 *   booking_ref : cloudbeds "identifier"
+	 */
+	function lookupBookingForGeneratePaymentLink() {
+		try {
+			$page = $_SESSION['GENERATE_PAYMENT_LINK_CONTROLLER'];
+			$page->loadBooking( $_POST['booking_ref'] );
+			?>
+            <script type="text/javascript">
+                document.getElementById('ajax_response').innerHTML = <?php echo json_encode($page->toHtml()); ?>;
+                jQuery("#ajax_response").css({ 'color': 'black' });
+            </script>
+			<?php
+		}
+		catch( Exception $e ) {
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+			<?php
+		}
+	}
+
+	/**
      * Looks up an existing booking and generates a new payment link.
      * Requires POST variables:
      *   booking_ref : cloudbeds "identifier"
-     *   deposit_only : true to prepopulate deposit amount, false for total outstanding
+     *   amount : true to prepopulate deposit amount, false for total outstanding, or numeric amount
      */
     function generatePaymentLink() {
+	    header('Content-Type: application/json; charset=utf-8');
         try {
             $paymentLinkPage = new GeneratePaymentLinkController();
-            $paymentLinkPage->generatePaymentLink($_POST['booking_ref'], $_POST['deposit_only'] == 'true' ? true : false);
-            ?>
-            <script type="text/javascript">
-                document.getElementById('ajax_response').innerHTML = <?php echo json_encode($paymentLinkPage->toHtml()); ?>;
-                jQuery("#ajax_response").css({ 'color': 'black' });
-            </script>
-            <?php
+            $paymentUrl = $paymentLinkPage->generatePaymentLink($_POST['booking_ref'],
+                $_POST['amount'] == 'true' ? true : ($_POST['amount'] == 'false' ? false : $_POST['amount']));
+	        echo json_encode( [ 'paymentUrl' => $paymentUrl ] );
         }
         catch( Exception $e ) {
-            ?> 
-            <script type="text/javascript">
-                jQuery("#ajax_response")
-                     .html('<?php echo $e->getMessage(); ?>')
-                     .css({ 'color': 'red' });
-            </script>
-            <?php
+	        echo json_encode( [ 'error' => $e->getMessage() ] );
         }
     }
 

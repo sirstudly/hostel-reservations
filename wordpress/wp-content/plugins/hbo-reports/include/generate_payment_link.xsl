@@ -92,7 +92,7 @@ function copyToClipboard(inputElem, infoMsgElem) {
                 </p>
                 <h3>How does it work?</h3>
                 <p>You have a guest who wants/needs to pay for the remaining balance on their booking.
-                   So, you come here and enter the booking reference below and click Submit.
+                   So, you come here and enter the booking reference below and click Find, then Generate Link.
                    This will then generate a link that you can send to the guest (via email). They click on
                    the link and it redirects to our (very secure) payment portal where they can put it their
                    card details and the amount they want to pay.
@@ -114,13 +114,7 @@ function copyToClipboard(inputElem, infoMsgElem) {
                             Where do I find this?</div>
                     </label>
                     <input id="booking_ref" name="booking_ref" class="regular-text code" type="text" style="margin-left: 25px; margin-right: 10px; width:150px;" size="20" value="{booking_ref}" />
-                    <a class="btn btn-primary" href="javascript:void(0);" onclick="generate_payment_link(document.post_option.booking_ref.value, document.post_option.deposit_chk.checked);">Submit</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="offset-md-1 col-7">
-                    <label class="form_label" for="deposit_chk">Request Deposit Only (first night):</label>
-                    <input id="deposit_chk" name="deposit_chk" type="checkbox" style="margin-left: 25px;"/>
+                    <a class="btn btn-primary" href="javascript:void(0);" onclick="lookup_booking_for_generate_payment_link(document.post_option.booking_ref.value);">Find</a>
                 </div>
             </div>
             <div class="row">
@@ -193,7 +187,7 @@ function copyToClipboard(inputElem, infoMsgElem) {
 
 <xsl:template match="booking">
 
-    <div class="matched_booking">
+    <div class="matched_booking mt-2">
         Booking Ref: <xsl:value-of select="identifier"/><br/>
         <xsl:if test="third_party_identifier != ''">Source Reservation ID: <xsl:value-of select="third_party_identifier"/><br/></xsl:if>
         Guest Name: <xsl:value-of select="name"/><br/>
@@ -207,9 +201,38 @@ function copyToClipboard(inputElem, infoMsgElem) {
         Grand Total: £<xsl:value-of select="grand_total"/><br/>
         Balance Due: £<xsl:value-of select="balance_due"/><br/>
     </div>
-    <div style="margin-top: 20px; margin-left: 100px;">
+    <div class="row mt-2">
+        <div class="offset-md-1 col-10">
+            <label class="form_label">Requested Payment Amount:</label>
+        </div>
+    </div>
+    <xsl:if test="amount_first_night">
+        <div class="row">
+            <div class="offset-md-2 col-10">
+                <input id="payment_1st_night" name="payment_type" type="radio" onclick="document.post_option.payment_amount.value='{amount_first_night}';" value="first_night"/>
+                <label class="form_label pl-3" for="payment_1st_night">First Night (£<xsl:value-of select="amount_first_night"/>)</label>
+            </div>
+        </div>
+    </xsl:if>
+    <xsl:if test="balance_due">
+        <div class="row">
+            <div class="offset-md-2 col-10">
+                <input id="payment_full" name="payment_type" type="radio" onclick="document.post_option.payment_amount.value='{balance_due}';" value="balance_due"/>
+                <label class="form_label pl-3" for="payment_full">Outstanding Balance (£<xsl:value-of select="balance_due"/>)</label>
+            </div>
+        </div>
+    </xsl:if>
+    <div class="row">
+        <div class="offset-md-2 col-10">
+            <input id="payment_custom_amount" name="payment_type" type="radio" value="custom_amount" checked="true"/>
+            <label class="form_label pl-3" for="payment_custom_amount">Custom Amount:</label>
+            <input id="payment_amount" name="payment_amount" class="regular-text code ml-2 mr-2" type="text" style="width:100px; display:inline;" size="20" onfocus="document.getElementById('payment_custom_amount').checked = true;"/>
+            <a class="btn btn-primary" href="javascript:void(0);" onclick="generate_payment_link(document.post_option.booking_ref.value, document.post_option.payment_type.value, document.post_option.payment_amount.value);">Generate Link</a>
+        </div>
+    </div>
+    <div id="payment_url_block" style="margin-top: 20px; margin-left: 100px; display:none;">
         <h4>Help spread the word:</h4>
-        <input id="paymentUrl" type="text" class="regular-text all-copy" readonly="readonly" onclick="copyToClipboard(this, document.getElementById('copied_to_clipboard'))" style="width:400px;" value="{payment_url}"/>
+        <input id="paymentUrl" type="text" class="regular-text all-copy" readonly="readonly" onclick="copyToClipboard(this, document.getElementById('copied_to_clipboard'))" style="width:400px;"/>
         <p id="copied_to_clipboard" style="display: none; color: red;">Copied to clipboard!</p>
     </div>
 </xsl:template>
