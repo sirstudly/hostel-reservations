@@ -20,16 +20,16 @@ class LHReportSettings extends XslTransform {
     function doView() {
         $this->reportSettings = array();
         $this->reportSettings['hbo_lilho_username'] = get_option('hbo_lilho_username');
-        $this->reportSettings['hbo_lilho_password'] = get_option('hbo_lilho_password');
+        $this->reportSettings['hbo_lilho_password'] = htmlspecialchars(stripslashes(get_option('hbo_lilho_password')));
         $this->reportSettings['hbo_lilho_session'] = get_option('hbo_lilho_session');
 	    $this->reportSettings['hbo_cloudbeds_username'] = get_option('hbo_cloudbeds_username');
-	    $this->reportSettings['hbo_cloudbeds_password'] = get_option('hbo_cloudbeds_password');
+	    $this->reportSettings['hbo_cloudbeds_password'] = htmlspecialchars(stripslashes(get_option('hbo_cloudbeds_password')));
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
-        $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
+        $this->reportSettings['hbo_hw_password'] = htmlspecialchars(stripslashes(get_option('hbo_hw_password')));
 	    $this->reportSettings['hbo_bdc_username'] = get_option('hbo_bdc_username');
-	    $this->reportSettings['hbo_bdc_password'] = get_option('hbo_bdc_password');
+	    $this->reportSettings['hbo_bdc_password'] = htmlspecialchars(stripslashes(get_option('hbo_bdc_password')));
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
-        $this->reportSettings['hbo_agoda_password'] = get_option('hbo_agoda_password');
+        $this->reportSettings['hbo_agoda_password'] = htmlspecialchars(stripslashes(get_option('hbo_agoda_password')));
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
         $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
         $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
