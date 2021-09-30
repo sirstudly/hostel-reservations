@@ -138,6 +138,7 @@ class LHReportSettings extends XslTransform {
 
        update_option( "hbo_bdc_username", $username );
        update_option( "hbo_bdc_password", $password );
+	   delete_option( "hbo_bdc_lasturl" );
    }
 
 	/**
