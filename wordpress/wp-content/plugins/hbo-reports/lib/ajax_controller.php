@@ -61,11 +61,15 @@ class AjaxController {
                 $this->saveHostelworldSettings();
                 break;
 
-            case 'SAVE_AGODA_SETTINGS':
-                $this->saveAgodaSettings();
-                break;
+	        case 'SAVE_BDC_SETTINGS':
+		        $this->saveBdcSettings();
+		        break;
 
-            case 'SAVE_GROUP_BOOKINGS_REPORT_SETTINGS':
+	        case 'SAVE_AGODA_SETTINGS':
+		        $this->saveAgodaSettings();
+		        break;
+
+	        case 'SAVE_GROUP_BOOKINGS_REPORT_SETTINGS':
                 $this->saveGroupBookingsReportSettings();
                 break;
 
@@ -342,39 +346,72 @@ class AjaxController {
     }
 
     /**
-     * Updates the username, password for Agoda.
+     * Updates the username, password for BDC.
      * Requires POST variables:
-     *   username : agoda username
-     *   password : agoda password
+     *   username : bdc username
+     *   password : bdc password
      */
-    function saveAgodaSettings() {
+    function saveBdcSettings() {
         try {
             $settingsPage = new LHReportSettings();
-            $settingsPage->saveAgodaSettings( 
+            $settingsPage->saveBdcSettings(
                 $_POST['username'], $_POST['password'] );
 
             ?> 
             <script type="text/javascript">
-                jQuery("#ajax_respond_agoda")
+                jQuery("#ajax_respond_bdc")
                      .html('Settings saved successfully.')
                      .css({ 'color': 'green' });
-                jQuery("#btn_save_agoda").prop( "disabled", false );
+                jQuery("#btn_save_bdc").prop( "disabled", false );
             </script>
             <?php
         }
         catch( Exception $e ) {
             ?> 
             <script type="text/javascript">
-                jQuery("#ajax_respond_agoda")
+                jQuery("#ajax_respond_bdc")
                      .html('<?php echo $e->getMessage(); ?>')
                      .css({ 'color': 'red' });
-                jQuery("#btn_save_agoda").prop( "disabled", false );
+                jQuery("#btn_save_bdc").prop( "disabled", false );
             </script>
             <?php
         }
     }
 
-    /**
+	/**
+	 * Updates the username, password for Agoda.
+	 * Requires POST variables:
+	 *   username : agoda username
+	 *   password : agoda password
+	 */
+	function saveAgodaSettings() {
+		try {
+			$settingsPage = new LHReportSettings();
+			$settingsPage->saveAgodaSettings(
+				$_POST['username'], $_POST['password'] );
+
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_agoda")
+                    .html('Settings saved successfully.')
+                    .css({ 'color': 'green' });
+                jQuery("#btn_save_agoda").prop( "disabled", false );
+            </script>
+			<?php
+		}
+		catch( Exception $e ) {
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_agoda")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+                jQuery("#btn_save_agoda").prop( "disabled", false );
+            </script>
+			<?php
+		}
+	}
+
+	/**
      * Updates the settings for the group bookings report.
      * Requires POST variables:
      *   group_booking_size : group size in report

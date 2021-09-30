@@ -167,6 +167,26 @@ function save_hostelworld_settings( username, password ) {
     });
 }
 
+// saves the login details for bdc
+// username : bdc username
+// password : bdc password
+function save_bdc_settings( username, password ) {
+
+    jQuery('#ajax_respond_bdc').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_bdc').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_BDC_SETTINGS',
+            username : username,
+            password : password
+        }
+    });
+}
+
 // saves the login details for agoda
 // username : agoda username
 // password : agoda password
@@ -243,6 +263,25 @@ function send_test_response_email( first_name, last_name, recipient_email ) {
             first_name : first_name,
             last_name : last_name,
             recipient_email : recipient_email
+        }
+    });
+}
+
+// shows or hides the password field based on a checkbox field
+// http://www.experts-exchange.com/articles/19779/Passwords-in-HTML-Forms-Allow-the-Client-to-Show-or-Hide.html
+// chkbox_selector : checkbox field
+// password_selector : password field
+function show_hide_password(chkbox_selector, password_selector) {
+    jQuery(chkbox_selector).click(function () {
+        if (jQuery(chkbox_selector).is(":checked")) {
+            jQuery(password_selector).clone()
+                .attr("type", "text").insertAfter(password_selector)
+                .prev().remove();
+        }
+        else {
+            jQuery(password_selector).clone()
+                .attr("type", "password").insertAfter(password_selector)
+                .prev().remove();
         }
     });
 }

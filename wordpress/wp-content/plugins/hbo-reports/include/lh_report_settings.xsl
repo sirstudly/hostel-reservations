@@ -59,53 +59,11 @@ label {
 
 <script type="text/javascript">
 jQuery(document).ready( function(){
-
     // allow user to show/hide passwords
-    // http://www.experts-exchange.com/articles/19779/Passwords-in-HTML-Forms-Allow-the-Client-to-Show-or-Hide.html
-    jQuery("#lh_pwcheck").click(function(){
-        if (jQuery("#lh_pwcheck").is(":checked"))
-        {
-            jQuery("#lilho_password").clone()
-                .attr("type", "text").insertAfter("#lilho_password")
-                .prev().remove();
-        }
-        else
-        {
-            jQuery("#lilho_password").clone()
-                .attr("type","password").insertAfter("#lilho_password")
-                .prev().remove();
-        }
-    });
-
-    jQuery("#hw_pwcheck").click(function(){
-        if (jQuery("#hw_pwcheck").is(":checked"))
-        {
-            jQuery("#hw_password").clone()
-                .attr("type", "text").insertAfter("#hw_password")
-                .prev().remove();
-        }
-        else
-        {
-            jQuery("#hw_password").clone()
-                .attr("type","password").insertAfter("#hw_password")
-                .prev().remove();
-        }
-    });
-
-    jQuery("#agoda_pwcheck").click(function(){
-        if (jQuery("#agoda_pwcheck").is(":checked"))
-        {
-            jQuery("#agoda_password").clone()
-                .attr("type", "text").insertAfter("#agoda_password")
-                .prev().remove();
-        }
-        else
-        {
-            jQuery("#agoda_password").clone()
-                .attr("type","password").insertAfter("#agoda_password")
-                .prev().remove();
-        }
-    });
+    show_hide_password("#lh_pwcheck", "#lilho_password");
+    show_hide_password("#hw_pwcheck", "#hw_password");
+    show_hide_password("#bdc_pwcheck", "#bdc_password");
+    show_hide_password("#agoda_pwcheck", "#agoda_password");
 });
 </script>
     
@@ -208,6 +166,26 @@ jQuery(document).ready( function(){
             <div class="btn-container mb-2">
                 <div style="float: left;" id="ajax_respond_hw"><xsl:comment/><!-- ajax response here--></div>
                 <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value); this.disabled=true;">Save</a>
+            </div>
+        </div>
+
+        <div class="shadow settings-container">
+            <h4>Booking.com</h4>
+            <div class="row">
+                <label class="col-4" for="bdc_username">Username:</label>
+                <input id="bdc_username" name="hbo_bc_username" class="regular-text code col-7" type="text" autocomplete="false" value="{hbo_bdc_username}"/>
+            </div>
+            <div class="row">
+                <label class="col-4" for="bdc_password">Password:</label>
+                <input id="bdc_password" name="hbo_bdc_password" class="regular-text code col-7" type="password" autocomplete="new-password" value="{hbo_bdc_password}" />
+            </div>
+            <div class="row">
+                <input type="checkbox" id="bdc_pwcheck" class="offset-sm-4 mr-2 mt-1" /> Show Password
+            </div>
+
+            <div class="btn-container mb-2">
+                <div style="float: left;" id="ajax_respond_bdc"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_bdc" class="btn btn-primary" style="float: right;" onclick="save_bdc_settings(document.post_option.bdc_username.value, document.post_option.bdc_password.value); this.disabled=true;">Save</a>
             </div>
         </div>
 

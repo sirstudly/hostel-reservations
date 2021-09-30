@@ -24,6 +24,8 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_lilho_session'] = get_option('hbo_lilho_session');
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
+	    $this->reportSettings['hbo_bdc_username'] = get_option('hbo_bdc_username');
+	    $this->reportSettings['hbo_bdc_password'] = get_option('hbo_bdc_password');
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
         $this->reportSettings['hbo_agoda_password'] = get_option('hbo_agoda_password');
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
@@ -49,24 +51,8 @@ class LHReportSettings extends XslTransform {
        update_option( "hbo_lilho_password", $password );
        update_option( "hbo_lilho_session", $lh_session );
 
-       // insert the job and process it; verify the status afterwards
-       $jobId = LilHotelierDBO::insertUpdateLittleHotelierSettingsJob();
-/* DISABLED as we're no longer running on the same server
-       LilHotelierDBO::runProcessorAndWait();
-       $jobStatus = LilHotelierDBO::getStatusOfJob( $jobId );
-
-       if( $jobStatus != LilHotelierDBO::STATUS_COMPLETED ) {
-           error_log( "saveLittleHotelierSettings: Job $jobId is at $jobStatus");
-           if( $jobStatus == LilHotelierDBO::STATUS_FAILED ) {
-               throw new ProcessingException( "Could not login using given credentials. Changes not saved." );
-           }
-           throw new ProcessingException( "Failed to update details. Check log for details." );
-       }
-
-       // if we get to this point, we have validated the login so save it
-       update_option( "hbo_lilho_username", $username );
-       update_option( "hbo_lilho_password", $password );
-*/
+       // insert the job and process it
+       LilHotelierDBO::insertUpdateLittleHotelierSettingsJob();
    }
 
    /**
@@ -133,29 +119,15 @@ class LHReportSettings extends XslTransform {
            throw new ValidationException( "Password cannot be blank" );
        }
 
-/* DISABLED as we're no longer running on the same server
-       // insert the job and process it; verify the status afterwards
-       $jobId = LilHotelierDBO::insertUpdateHostelworldSettingsJob( $username, $password );
-       LilHotelierDBO::runProcessorAndWait();
-       $jobStatus = LilHotelierDBO::getStatusOfJob( $jobId );
-
-       if( $jobStatus != LilHotelierDBO::STATUS_COMPLETED ) {
-           error_log( "saveHostelworldSettings: Job $jobId is at $jobStatus");
-           if( $jobStatus == LilHotelierDBO::STATUS_FAILED ) {
-               throw new ProcessingException( "Could not login using given credentials. Changes not saved." );
-           }
-           throw new ProcessingException( "Failed to update details. Check log for details." );
-       }
-*/
        // if we get to this point, we have validated the login so save it
        update_option( "hbo_hw_username", $username );
        update_option( "hbo_hw_password", $password );
    }
 
    /**
-    * Updates details for Agoda.
+    * Updates details for BDC.
     */
-   function saveAgodaSettings( $username, $password ) {
+   function saveBdcSettings( $username, $password ) {
 
        if( empty( $username )) {
            throw new ValidationException( "Username cannot be blank" );
@@ -164,11 +136,27 @@ class LHReportSettings extends XslTransform {
            throw new ValidationException( "Password cannot be blank" );
        }
 
-       update_option( "hbo_agoda_username", $username );
-       update_option( "hbo_agoda_password", $password );
+       update_option( "hbo_bdc_username", $username );
+       update_option( "hbo_bdc_password", $password );
    }
 
-   /**
+	/**
+	 * Updates details for Agoda.
+	 */
+	function saveAgodaSettings( $username, $password ) {
+
+		if( empty( $username )) {
+			throw new ValidationException( "Username cannot be blank" );
+		}
+		if( empty( $password )) {
+			throw new ValidationException( "Password cannot be blank" );
+		}
+
+		update_option( "hbo_agoda_username", $username );
+		update_option( "hbo_agoda_password", $password );
+	}
+
+	/**
     * Updates details for the Group Bookings report.
     * $groupBookingSize : number of guests for a booking to be considered a "group" (string)
     * $include5guestsIn6bedDorms : boolean (true to include bookings of 5 guests in 6 bed dorms)
