@@ -22,6 +22,8 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_lilho_username'] = get_option('hbo_lilho_username');
         $this->reportSettings['hbo_lilho_password'] = get_option('hbo_lilho_password');
         $this->reportSettings['hbo_lilho_session'] = get_option('hbo_lilho_session');
+	    $this->reportSettings['hbo_cloudbeds_username'] = get_option('hbo_cloudbeds_username');
+	    $this->reportSettings['hbo_cloudbeds_password'] = get_option('hbo_cloudbeds_password');
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = get_option('hbo_hw_password');
 	    $this->reportSettings['hbo_bdc_username'] = get_option('hbo_bdc_username');
@@ -95,7 +97,17 @@ class LHReportSettings extends XslTransform {
    /**
     * Creates a Cloudbeds Login job.
     */
-   function resetCloudbedsLogin() {
+   function resetCloudbedsLogin($username, $password) {
+	   if( empty( $username )) {
+		   throw new ValidationException( "Username cannot be blank" );
+	   }
+	   if( empty( $password )) {
+		   throw new ValidationException( "Password cannot be blank" );
+	   }
+
+	   // if we get to this point, we have validated the login so save it
+	   update_option( "hbo_cloudbeds_username", $username );
+	   update_option( "hbo_cloudbeds_password", $password );
        LilHotelierDBO::insertJobOfType( "com.macbackpackers.jobs.ResetCloudbedsSessionJob" );
    }
 

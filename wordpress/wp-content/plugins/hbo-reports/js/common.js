@@ -121,13 +121,18 @@ function save_cloudbeds_settings( req_headers ) {
 }
 
 //reset the session details for cloudbeds
-function reset_cloudbeds_login() {
+// username : CB username
+// password : CB password
+function reset_cloudbeds_login(username, password) {
  jQuery.ajax({                                           // Start Ajax Sending
      url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
      type:'POST',
+     success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_cb').html( data ); },
      error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
      data:{
-         ajax_action : 'RESET_CLOUDBEDS_LOGIN'
+         ajax_action : 'RESET_CLOUDBEDS_LOGIN',
+         username : username,
+         password : password
      }
  });
 }

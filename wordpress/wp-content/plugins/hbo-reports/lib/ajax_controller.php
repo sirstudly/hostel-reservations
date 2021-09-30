@@ -265,8 +265,15 @@ class AjaxController {
      */
     function resetCloudbedsLogin() {
         try {
-            $settingsPage = new LHReportSettings();
-            $settingsPage->resetCloudbedsLogin();
+	        $settingsPage = new LHReportSettings();
+	        $settingsPage->resetCloudbedsLogin( $_POST['username'], $_POST['password'] );
+
+	        ?>
+            <script type="text/javascript">
+                jQuery("#btn_reset_cloudbeds").hide();
+                jQuery('#cloudbeds_2facode').show();
+            </script>
+	        <?php
         }
         catch( Exception $e ) {
             ?> 

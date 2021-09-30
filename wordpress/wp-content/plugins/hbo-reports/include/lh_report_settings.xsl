@@ -61,6 +61,7 @@ label {
 jQuery(document).ready( function(){
     // allow user to show/hide passwords
     show_hide_password("#lh_pwcheck", "#lilho_password");
+    show_hide_password("#cb_pwcheck", "#cb_password");
     show_hide_password("#hw_pwcheck", "#hw_password");
     show_hide_password("#bdc_pwcheck", "#bdc_password");
     show_hide_password("#agoda_pwcheck", "#agoda_password");
@@ -134,8 +135,19 @@ jQuery(document).ready( function(){
                 <a id="btn_save_cloudbeds" class="btn btn-primary" style="float: right;" onclick="save_cloudbeds_settings(document.post_option.cloudbeds_req_headers.value); this.disabled=true;">Save</a>
             </div>
             <h5>Alternatively:</h5>
+            <div class="row">
+                <label class="offset-3 col-3" for="cb_username">Username:</label>
+                <input id="cb_username" name="hbo_cb_username" class="regular-text code col-5" type="text" autocomplete="false" value="{hbo_cloudbeds_username}"/>
+            </div>
+            <div class="row">
+                <label class="offset-3 col-3" for="cb_password">Password:</label>
+                <input id="cb_password" name="hbo_cb_password" class="regular-text code col-5" type="password" autocomplete="new-password" value="{hbo_cloudbeds_password}" />
+            </div>
+            <div class="row">
+                <input type="checkbox" id="cb_pwcheck" class="offset-6 mr-2 mt-1"/> Show Password
+            </div>
             <div class="btn-container mb-2">
-                <a id="btn_reset_cloudbeds" class="btn btn-primary" style="float: right;" onclick="reset_cloudbeds_login(); jQuery(this).hide(); jQuery('#cloudbeds_2facode').show();">Reset Session</a>
+                <a id="btn_reset_cloudbeds" class="btn btn-primary" style="float: right;" onclick="reset_cloudbeds_login(document.post_option.cb_username.value, document.post_option.cb_password.value);">Reset Session</a>
                 <div id="cloudbeds_2facode" style="display:none;"> 
 	                <div style="float:left;">
 	                    <label for="cb_2fa_code">2FA Code:</label>
