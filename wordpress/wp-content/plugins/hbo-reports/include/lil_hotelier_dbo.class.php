@@ -951,6 +951,7 @@ class LilHotelierDBO {
                     payment_amount, auth_status, auth_status_detail, card_type, last_4_digits, processed_date
                FROM wp_stripe_transaction
               WHERE processed_date IS NOT NULL
+                AND booking_reference IS NOT NULL
               ORDER BY processed_date DESC
               LIMIT 100" );
 
