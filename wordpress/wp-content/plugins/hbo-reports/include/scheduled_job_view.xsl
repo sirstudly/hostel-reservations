@@ -25,11 +25,12 @@
         <div id="ajax_response" style="margin-left: 50px; float:left; margin-top:20px;"><xsl:comment/></div>
         <div style="height:1px;clear:both; margin-top:10px;"><xsl:comment/></div>
         <form name="scheduled_job_form" autocomplete="off" action="" method="post" id="scheduled_job_form">
-            <select style="margin-left: 50px; float: left;" name="classname">
+            <select id="new_job_select" style="margin-left: 50px; float: left;" name="classname">
                 <xsl:apply-templates select="classnamemap/entry"/>
             </select>
             <div style="margin-left: 20px; float:left;">
-                <div class="mb-2">
+                <div id="job_param_div"><xsl:comment/></div>
+                <div id="job_repeat_div" class="mb-2">
                     <input id="radio_repeat_every" type="radio" name="schedule_type" value="repeat_every"/> Repeat Every
                     <input id="repeat_minutes" name="repeat_minutes" type="text" autocomplete="false" style="width:40px;" maxlength="4" value="{repeat_minutes}" onkeypress="jQuery('#radio_repeat_every').click();" />
                     Minutes<br/>
@@ -45,6 +46,29 @@
             <a id="add_job_button" class="btn btn-primary" style="margin-left: 320px; margin-bottom: 15px;" onclick="add_scheduled_job(scheduled_job_form.classname.value, scheduled_job_form.schedule_type.value == 'repeat_every' ? scheduled_job_form.repeat_minutes.value : null, scheduled_job_form.schedule_type.value == 'daily' ? scheduled_job_form.daily_at.value : null); this.style.visibility='hidden';">Add New Job <span class="icon-plus-sign icon-white"></span></a>
             <div id="ajax_loader" style="margin-left: 290px; float:left; display:none;"><xsl:comment/></div>
         </form>
+
+        <script type="text/javascript">
+            var jobs = <xsl:value-of select="jobs_json"/>;
+            function job_selected(classname) {
+                return jobs.find( elem => elem.classname == classname );
+            }
+            function onchange_job(classname) {
+                var job = job_selected(classname);
+                if(job &amp;&amp; job.parameters) {
+                    var html = '';
+                    for(const propname in job.parameters) {
+                        html += '&lt;div&gt;&lt;span class="mb-2" style="width: 110px; display:inline-block;"&gt;' + `${propname}` + '&lt;/span&gt;&lt;input type="text" id="params_' + `${propname}` + '" name="' + `${propname}` + '" value="' + `${job.parameters[propname]}` + '"&gt;&lt;/input&gt;&lt;/div&gt;'
+                    }
+                    jQuery("#job_param_div").html(html);
+                }
+            }
+
+            // pre-populate parameter form fields
+            onchange_job(jQuery("#new_job_select option:selected").val());
+            jQuery("#new_job_select").on('change', function() {
+                onchange_job(this.value);
+            });
+        </script>
 
         <xsl:call-template name="write_inline_js"/>
         <xsl:call-template name="write_inline_css"/>

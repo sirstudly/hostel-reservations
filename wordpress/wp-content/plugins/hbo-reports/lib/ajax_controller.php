@@ -723,8 +723,8 @@ class AjaxController {
     function addScheduledJob() {
         try {
             $jobView = new ScheduledJobViewData();
-            $jobView->addScheduledJob( 
-                $_POST['classname'], $_POST['repeat_every_min'], $_POST['daily_at'] );
+	        $jobView->addScheduledJob(
+                $_POST['classname'], $_POST['repeat_every_min'], $_POST['daily_at'], $_POST['params'] ?? array() );
             $jobView->doView();
 
             ?>

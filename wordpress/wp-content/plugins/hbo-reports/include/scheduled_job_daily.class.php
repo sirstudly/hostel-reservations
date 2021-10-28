@@ -44,23 +44,23 @@ class ScheduledJobDaily extends ScheduledJob {
      * $domtree : DOM document root
      * $parentElement : DOM element where this object will be added
      */
-    function addSelfToDocument($domtree, $parentElement) {
-        $jobRoot = $parentElement->appendChild($domtree->createElement('job'));
-        $jobRoot->appendChild($domtree->createElement('id', $this->jobId));
-        $classnameMap = self::getClassnameMap();
-        $jobRoot->appendChild($domtree->createElement('job-name', 
-            array_key_exists( $this->classname, $classnameMap ) ? $classnameMap[$this->classname] : $this->classname ));
-        $jobRoot->appendChild($domtree->createElement('repeat-daily-at', $this->timeToRun));
-        $jobRoot->appendChild($domtree->createElement('active', $this->active ? "yes" : "no" ));
-        if( isset( $this->lastRunDate )) {
-            $jobRoot->appendChild($domtree->createElement('last_run_date', DateTime::createFromFormat('Y-m-d H:i:s', $this->lastRunDate)->format('D, d M Y H:i:s')));
-        }
-        foreach( $this->params as $key => $value ) {
-            $paramRoot = $jobRoot->appendChild($domtree->createElement('param'));
-            $paramRoot->appendChild($domtree->createElement('name', $key));
-            $paramRoot->appendChild($domtree->createElement('value', $value));
-        }
-    }
+	function addSelfToDocument( $domtree, $parentElement ) {
+		$jobRoot = $parentElement->appendChild( $domtree->createElement( 'job' ) );
+		$jobRoot->appendChild( $domtree->createElement( 'id', $this->jobId ) );
+		$classnameMap = self::getClassnameMap();
+		$jobRoot->appendChild( $domtree->createElement( 'job-name',
+			self::getJobNameForClassname( $classnameMap, $this->classname ) ) );
+		$jobRoot->appendChild( $domtree->createElement( 'repeat-daily-at', $this->timeToRun ) );
+		$jobRoot->appendChild( $domtree->createElement( 'active', $this->active ? "yes" : "no" ) );
+		if ( isset( $this->lastRunDate ) ) {
+			$jobRoot->appendChild( $domtree->createElement( 'last_run_date', DateTime::createFromFormat( 'Y-m-d H:i:s', $this->lastRunDate )->format( 'D, d M Y H:i:s' ) ) );
+		}
+		foreach ( $this->params as $key => $value ) {
+			$paramRoot = $jobRoot->appendChild( $domtree->createElement( 'param' ) );
+			$paramRoot->appendChild( $domtree->createElement( 'name', $key ) );
+			$paramRoot->appendChild( $domtree->createElement( 'value', $value ) );
+		}
+	}
     
 }
 

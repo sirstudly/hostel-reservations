@@ -13,6 +13,17 @@ function are_you_sure( message_question ){
         else         { return false;}
 }
 
+// converts an array of name/value pairs to an indexed array
+function unindexed_array_to_indexed_array(arr) {
+    var indexed_array = {};
+
+    jQuery.map(arr, function (n, i) {
+        indexed_array[n['name']] = n['value'];
+    });
+
+    return indexed_array;
+}
+
 // Display error message directly under a form element
 // element : form element in error
 // errorMessage : message to display
@@ -484,6 +495,7 @@ function add_scheduled_job( classname, repeat_every_min, daily_at ) {
                 jQuery('input[type="text"]').val("");
                 jQuery('input[name="schedule_type"]').removeAttr("checked");
                 jQuery('select[name="classname"]')[0].selectedIndex = 0;
+                onchange_job(jQuery("#new_job_select option:selected").val());
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -499,7 +511,8 @@ function add_scheduled_job( classname, repeat_every_min, daily_at ) {
             ajax_action: 'ADD_SCHEDULED_JOB',
             classname: classname,
             repeat_every_min: repeat_every_min,
-            daily_at: daily_at
+            daily_at: daily_at,
+            params: unindexed_array_to_indexed_array(jQuery('input[id^=params]').serializeArray())
         }
     });
 }

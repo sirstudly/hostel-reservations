@@ -28,70 +28,9 @@ class ScheduledJobViewData extends XslTransform {
     * Only provide one of the following:
     * $repeatMin : number of minutes to repeat
     * $dailyAt : time to run daily (24 hour clock)
+    * $params : array of predefined parameters
     */
-    function addScheduledJob( $classname, $repeatMin, $dailyAt ) {
-        $params = array();
-        if( $classname == 'com.macbackpackers.jobs.ScrapeReservationsBookedOnJob' ) {
-            $params = array( 'booked_on_date' => 'TODAY' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.HousekeepingJob' ) {
-            $params = array( 'selected_date' => 'TODAY' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.AllocationScraperJob' ) {
-            $params = array( 'start_date' => 'TODAY', 'days_ahead' => '140' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.BedCountJob' ) {
-            $params = array( 'selected_date' => 'TODAY-1' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.DbPurgeJob' ) {
-            $params = array( 'days' => '90' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateDepositChargeJob' ) {
-            $params = array( 'days_back' => '1' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreatePrepaidChargeJob' ) {
-            $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateChargeHostelworldLateCancellationJob' ) {
-            $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateSendHogmanayEmailJob' ) {
-            $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateSendChristmasArrivalEmailJob' ) {
-            $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateSendChristmasLunchEmailJob' ) {
-            $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.VerifyAlexaLoggedInJob' ) {
-	        $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.VerifyGoogleAssistantLoggedInJob' ) {
-	        $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateAgodaChargeJob' ) {
-            $params = array( 'days_back' => '7' );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateCopyCardDetailsToCloudbedsJob' ) {
-            $params = array( 'booking_date' => 'TODAY-1', 'days_ahead' => 1 );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob' ) {
-            $params = array( 'booking_date' => 'TODAY-3', 'days_ahead' => 4 );
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateRefreshStripeRefundTransactionJob' ) {
-            $params = array();
-        }
-        elseif( $classname == 'com.macbackpackers.jobs.CreateSendCovidPrestayEmailJob' ) {
-            $params = array( 'days_before' => '3' );
-        }
-        elseif ( $classname == 'com.macbackpackers.jobs.CreateFixedRateLongTermReservationsJob' ) {
-	        $params = array( selected_date => 'TODAY+1', 'days' => 7, 'rate_per_day' => 10 );
-        }
-        else {
-            throw new ValidationException( "Unsupported job type: $classname" );
-        }
-
+    function addScheduledJob( $classname, $repeatMin, $dailyAt, $params = array() ) {
         if( false === empty( $repeatMin )) {
             $this->addScheduledJobRepeatForever( $classname, $params, $repeatMin );
         }
@@ -166,20 +105,21 @@ class ScheduledJobViewData extends XslTransform {
      * $domtree : DOM document root
      * $parentElement : DOM element where this object will be added
      */
-    function addSelfToDocument( $domtree, $parentElement ) {
-        $classnameMapRoot = $parentElement->appendChild($domtree->createElement('classnamemap'));
-        foreach( ScheduledJob::getClassnameMap() as $key => $value ) {
-            $entryRoot = $classnameMapRoot->appendChild($domtree->createElement('entry'));
-            $entryRoot->appendChild($domtree->createElement('classname', $key));
-            $entryRoot->appendChild($domtree->createElement('selectionname', $value));
-        }
+	function addSelfToDocument( $domtree, $parentElement ) {
+		$classnameMapRoot = $parentElement->appendChild( $domtree->createElement( 'classnamemap' ) );
+		foreach ( ScheduledJob::getClassnameMap() as $job ) {
+			$entryRoot = $classnameMapRoot->appendChild( $domtree->createElement( 'entry' ) );
+			$entryRoot->appendChild( $domtree->createElement( 'classname', $job['classname'] ) );
+			$entryRoot->appendChild( $domtree->createElement( 'selectionname', $job['name'] ) );
+		}
+		$parentElement->appendChild( $domtree->createElement( 'jobs_json', json_encode( ScheduledJob::getClassnameMap() ) ) );
 
-        if ( $this->jobSchedules ) {
-            foreach( $this->jobSchedules as $record ) {
-                $record->addSelfToDocument($domtree, $parentElement);
-            }
-        }
-    }
+		if ( $this->jobSchedules ) {
+			foreach ( $this->jobSchedules as $record ) {
+				$record->addSelfToDocument( $domtree, $parentElement );
+			}
+		}
+	}
     
     /** 
      * Generates XML for this view.
