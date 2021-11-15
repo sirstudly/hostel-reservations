@@ -24,6 +24,13 @@ class ProcessRefundsController extends XslTransform {
             throw new ValidationException("You cannot refund more than what was charged");
         }
 
+	    if ( isset( $txn['gateway_name'] ) && $txn['gateway_name'] == 'Sagepay' ) {
+		    throw new ValidationException(
+			    "This was originally processed thru Sagepay. We have closed "
+			    . "our account with them so you&apos;ll need to request their credit/debit "
+			    . "card again and do a manual refund through the POS terminal." );
+	    }
+
         LilHotelierDBO::insertRefundRecord(
             $this->booking['reservation_id'], 
             $this->booking['identifier'],
