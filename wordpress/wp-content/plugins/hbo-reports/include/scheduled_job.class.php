@@ -70,6 +70,14 @@ abstract class ScheduledJob {
 		    'classname'  => 'com.macbackpackers.jobs.CreateFixedRateLongTermReservationsJob',
 		    'name'       => 'Create Long-Term Reservations Job',
 		    'parameters' => [ 'selected_date' => 'TODAY+1', 'days' => '7', 'rate_per_day' => '10' ]
+	    ], [
+		    'classname'  => 'com.macbackpackers.jobs.CreateSendGroupBookingApprovalRequiredEmailJob',
+		    'name'       => 'Send Group Booking Approval Required Job',
+		    'parameters' => [ 'booking_date' => 'TODAY-3' ]
+	    ], [
+		    'classname'  => 'com.macbackpackers.jobs.CreateSendGroupBookingPaymentReminderEmailJob',
+		    'name'       => 'Send Group Booking Payment Reminder Job',
+		    'parameters' => [ 'days_before' => '7' ]
 	    ] );
 
 	    if ( strpos( get_option( 'siteurl' ), 'castlerock' ) !== false
