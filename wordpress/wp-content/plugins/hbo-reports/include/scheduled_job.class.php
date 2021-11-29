@@ -78,6 +78,10 @@ abstract class ScheduledJob {
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendGroupBookingPaymentReminderEmailJob',
 		    'name'       => 'Send Group Booking Payment Reminder Job',
 		    'parameters' => [ 'days_before' => '7' ]
+	    ], [
+		    'classname'  => 'com.macbackpackers.jobs.CreateSendBulkEmailJob',
+		    'name'       => 'Send Bulk Email Job',
+		    'parameters' => [ 'email_template' => 'Email Template Name Here', 'checkin_date_start' => '2021-11-30', 'checkin_date_end' => '2021-12-20' ]
 	    ] );
 
 	    if ( strpos( get_option( 'siteurl' ), 'castlerock' ) !== false
