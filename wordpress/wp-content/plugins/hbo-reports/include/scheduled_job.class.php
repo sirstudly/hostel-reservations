@@ -83,6 +83,10 @@ abstract class ScheduledJob {
 		    'name'       => 'Send Bulk Email Job',
 		    'parameters' => [ 'email_template' => '', 'stay_date_start' => '', 'stay_date_end' => '',
 		                      'checkin_date_start' => 'TODAY+1', 'checkin_date_end' => '2021-12-20', 'statuses' => 'confirmed,not_confirmed' ]
+	    ], [
+		    'classname'  => 'com.macbackpackers.jobs.CreateChargeHogmanayBookingJob',
+		    'name'       => 'Charge Hogmanay Bookings Job',
+		    'parameters' => []
 	    ] );
 
 	    if ( strpos( get_option( 'siteurl' ), 'castlerock' ) !== false
