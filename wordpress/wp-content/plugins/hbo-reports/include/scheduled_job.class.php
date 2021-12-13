@@ -84,6 +84,10 @@ abstract class ScheduledJob {
 		    'parameters' => [ 'email_template' => '', 'stay_date_start' => '', 'stay_date_end' => '',
 		                      'checkin_date_start' => 'TODAY+1', 'checkin_date_end' => '2021-12-20', 'statuses' => 'confirmed,not_confirmed' ]
 	    ], [
+		    'classname'  => 'com.macbackpackers.jobs.CreateSendHogmanayAdvancedPaymentEmailJob',
+		    'name'       => 'Send Hogmanay Payment Reminder Email',
+		    'parameters' => []
+	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateChargeHogmanayBookingJob',
 		    'name'       => 'Charge Hogmanay Bookings Job',
 		    'parameters' => []
