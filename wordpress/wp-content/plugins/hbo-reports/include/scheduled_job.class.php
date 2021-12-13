@@ -81,24 +81,13 @@ abstract class ScheduledJob {
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendBulkEmailJob',
 		    'name'       => 'Send Bulk Email Job',
-		    'parameters' => [ 'email_template' => 'Email Template Name Here', 'checkin_date_start' => '2021-11-30', 'checkin_date_end' => '2021-12-20' ]
+		    'parameters' => [ 'email_template' => '', 'stay_date_start' => '', 'stay_date_end' => '',
+		                      'checkin_date_start' => 'TODAY+1', 'checkin_date_end' => '2021-12-20', 'statuses' => 'confirmed,not_confirmed' ]
 	    ] );
 
 	    if ( strpos( get_option( 'siteurl' ), 'castlerock' ) !== false
 	         || strpos( get_option( 'siteurl' ), 'localhost' ) !== false ) { // for testing
 		    array_push( $result, [
-			    'classname'  => 'com.macbackpackers.jobs.CreateSendHogmanayEmailJob',
-			    'name'       => 'Send Hogmanay Emails',
-			    'parameters' => []
-		    ], [
-			    'classname'  => 'com.macbackpackers.jobs.CreateSendChristmasArrivalEmailJob',
-			    'name'       => 'Send Christmas Arrival Emails',
-			    'parameters' => []
-		    ], [
-			    'classname'  => 'com.macbackpackers.jobs.CreateSendChristmasLunchEmailJob',
-			    'name'       => 'Send Christmas Lunch Emails',
-			    'parameters' => []
-		    ], [
 			    'classname'  => 'com.macbackpackers.jobs.VerifyAlexaLoggedInJob',
 			    'name'       => 'Verify Alexa is Logged in',
 			    'parameters' => []

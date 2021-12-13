@@ -57,7 +57,7 @@
                 if(job &amp;&amp; job.parameters) {
                     var html = '';
                     for(const propname in job.parameters) {
-                        html += '&lt;div&gt;&lt;span class="mb-2" style="width: 110px; display:inline-block;"&gt;' + `${propname}` + '&lt;/span&gt;&lt;input type="text" id="params_' + `${propname}` + '" name="' + `${propname}` + '" value="' + `${job.parameters[propname]}` + '"&gt;&lt;/input&gt;&lt;/div&gt;'
+                        html += '&lt;div&gt;&lt;span class="mb-2" style="width: 160px; display:inline-block;"&gt;' + `${propname}` + '&lt;/span&gt;&lt;input type="text" id="params_' + `${propname}` + '" name="' + `${propname}` + '" value="' + `${job.parameters[propname]}` + '"&gt;&lt;/input&gt;&lt;/div&gt;'
                     }
                     jQuery("#job_param_div").html(html);
                 }
