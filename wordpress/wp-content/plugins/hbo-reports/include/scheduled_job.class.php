@@ -81,8 +81,11 @@ abstract class ScheduledJob {
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendBulkEmailJob',
 		    'name'       => 'Send Bulk Email Job',
-		    'parameters' => [ 'email_template' => '', 'stay_date_start' => '', 'stay_date_end' => '',
-		                      'checkin_date_start' => 'TODAY+1', 'checkin_date_end' => '2021-12-20', 'statuses' => 'confirmed,not_confirmed' ]
+		    'parameters' => [ 'email_template' => '',
+		                      'booking_date_start' => '', 'booking_date_end' => '',
+		                      'stay_date_start' => '', 'stay_date_end' => '',
+		                      'checkin_date_start' => 'TODAY+1', 'checkin_date_end' => '2021-12-20',
+		                      'statuses' => 'confirmed,not_confirmed' ]
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendHogmanayAdvancedPaymentEmailJob',
 		    'name'       => 'Send Hogmanay Payment Reminder Email',
