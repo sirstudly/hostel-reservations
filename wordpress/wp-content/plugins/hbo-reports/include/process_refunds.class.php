@@ -90,7 +90,7 @@ class ProcessRefundsController extends XslTransform {
 
         // identify any manually entered txn records
 	    foreach ( $this->booking['transactions']['records'] as &$tx ) {
-		    if ( $tx['paid'] && strpos( $tx['notes'], "VendorTxCode:" ) !== false && floatval( $tx['debit'] ) > 0 ) {
+		    if ( $tx['paid'] && strpos( $tx['notes'], "VendorTxCode:" ) !== false && floatval( $tx['debit_not_formated'] ) > 0 ) {
 			    $tx['vendor_tx_code'] = substr( $tx['notes'], 14, strpos( $tx['notes'], ',' ) - 14 );
 			    $tx['gateway_name']   = strpos( $tx['notes'], "Gateway: STRIPE" ) !== false ? "Stripe" : "Sagepay";
 		    }
@@ -197,7 +197,7 @@ class ProcessRefundsController extends XslTransform {
                     if($this->booking['channel_name'] == 'Booking.com' && $this->booking['channel_payment_type'] == 'Channel') {
                         $txnRoot->appendChild($domtree->createElement('is_vcc', 'true'));
                     }
-                    if (floatval($txn['debit']) > 0) {
+                    if (floatval($txn['debit_not_formated']) > 0) {
                         if (isset($txn['gateway_name']) && $txn['gateway_name'] == 'Stripe' && $txn['refunded_value'] != $txn['paid']) {
                             $txnRoot->appendChild($domtree->createElement('is_refundable', 'true'));
                         }
@@ -205,7 +205,7 @@ class ProcessRefundsController extends XslTransform {
                             $txnRoot->appendChild($domtree->createElement('is_refundable', 'true'));
                         }
                     }
-                    if (floatval($txn['debit']) <= 0) {
+                    if (floatval($txn['debit_not_formated']) <= 0) {
                         $txnRoot->appendChild($domtree->createElement('is_refund', 'true'));
                     }
                 }
