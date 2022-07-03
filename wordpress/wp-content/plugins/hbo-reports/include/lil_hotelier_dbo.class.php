@@ -23,7 +23,7 @@ class LilHotelierDBO {
             "SELECT r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, 
                     IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
-                    CASE WHEN c.lh_status != 'checked_in' THEN 'EMPTY'
+                    CASE WHEN c.lh_status = 'confirmed' THEN 'EMPTY' -- not checked-in
                          WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
                          WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0
                            -- don't do a 3-day change if they're checking out the following day
