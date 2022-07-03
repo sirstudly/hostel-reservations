@@ -23,7 +23,8 @@ class LilHotelierDBO {
             "SELECT r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, 
                     IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
-                    CASE WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
+                    CASE WHEN c.lh_status != 'checked_in' THEN 'EMPTY'
+                         WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
                          WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0
                            -- don't do a 3-day change if they're checking out the following day
                           AND DATEDIFF(IFNULL( c2.checkout_date, c.checkout_date ), constants.selected_date) > 1 THEN '3 DAY CHANGE'
@@ -44,8 +45,8 @@ class LilHotelierDBO {
                 AND c2.guest_name = c.guest_name
               WHERE r.room_type NOT IN ('LT_MALE', 'LT_FEMALE', 'LT_MIXED', 'OVERFLOW')
                 AND r.active_yn = 'Y'
-              GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, constants.selected_date,
-                       c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
+              GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, c.lh_status,
+                       constants.selected_date, c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
               ORDER BY IF(r.room = 'TMNT', 'T3MNT', r.room), r.bed_name",
               $selectedDate->format('Y-m-d'), $jobId));
 
