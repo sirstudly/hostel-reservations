@@ -43,9 +43,9 @@ abstract class ScheduledJob {
 		    'name'       => 'Charge Pre-Paid Bookings',
 		    'parameters' => []
 	    ], [
-		    'classname'  => 'com.macbackpackers.jobs.CreateAgodaChargeJob',
-		    'name'       => 'Charge Past Agoda Bookings',
-		    'parameters' => [ 'days_back' => '7' ]
+		    'classname'  => 'com.macbackpackers.jobs.CreatePrepaidRefundJob',
+		    'name'       => 'Refund Pre-Paid Bookings',
+		    'parameters' => []
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateChargeHostelworldLateCancellationJob',
 		    'name'       => 'Charge HWL Late Cancellations',
@@ -62,10 +62,6 @@ abstract class ScheduledJob {
 		    'classname'  => 'com.macbackpackers.jobs.CreateRefreshStripeRefundTransactionJob',
 		    'name'       => 'Refresh Pending Refunds (Stripe)',
 		    'parameters' => []
-	    ], [
-		    'classname'  => 'com.macbackpackers.jobs.CreateSendCovidPrestayEmailJob',
-		    'name'       => 'Send Covid Pre-Stay Email',
-		    'parameters' => [ 'days_before' => '1' ]
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateFixedRateLongTermReservationsJob',
 		    'name'       => 'Create Long-Term Reservations Job',
