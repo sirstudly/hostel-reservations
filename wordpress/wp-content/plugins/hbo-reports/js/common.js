@@ -243,6 +243,24 @@ function save_group_bookings_report_settings( group_booking_size, include_5_gues
     });
 }
 
+// saves housekeeping report settings
+// bedsheet_change_days : number of days to change bedsheets on a continuous stay (null/blank to disable)
+function save_housekeeping_report_settings( bedsheet_change_days ) {
+
+    jQuery('#ajax_respond_bedsheets_change_after_days').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_bedsheets_change_after_days').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_HOUSEKEEPING_REPORT_SETTINGS',
+            bedsheet_change_days : bedsheet_change_days
+        }
+    });
+}
+
 // saves the email template for guest checkouts
 // email_subject : email subject
 // email_template : raw (HTML) email template

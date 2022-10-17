@@ -18,16 +18,19 @@ class LilHotelierDBO {
     static function fetchBedSheetsFrom($selectedDate, $jobId) {
         global $wpdb;
 
-        // query all our resources (in order)
-        $resultset = $wpdb->get_results($wpdb->prepare(
+	    $n_day_change = get_option('hbo_bedsheets_change_after_days');
+	    $n_day_change = empty( $n_day_change ) ? 1000 : $n_day_change; // set to an arbitrarily large value if not defined so it doesn't kick in
+
+	    // query all our resources (in order)
+		$resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, 
                     IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
                     MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
                     CASE WHEN c.lh_status = 'confirmed' THEN 'EMPTY' -- not checked-in
                          WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
-                         WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), 3) = 0
-                           -- don't do a 3-day change if they're checking out the following day
-                          AND DATEDIFF(IFNULL( c2.checkout_date, c.checkout_date ), constants.selected_date) > 1 THEN '3 DAY CHANGE'
+                         WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), %d) = 0
+                           -- don't do a N-day change if they're checking out the following day
+                          AND DATEDIFF(IFNULL( c2.checkout_date, c.checkout_date ), constants.selected_date) > 1 THEN 'N DAY CHANGE'
                          WHEN IFNULL( c2.checkout_date, c.checkout_date ) > constants.selected_date THEN 'NO CHANGE'
                          ELSE 'EMPTY' END AS bedsheet
                FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
@@ -48,7 +51,7 @@ class LilHotelierDBO {
               GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, c.lh_status,
                        constants.selected_date, c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
               ORDER BY IF(r.room = 'TMNT', 'T3MNT', r.room), r.bed_name",
-              $selectedDate->format('Y-m-d'), $jobId));
+		      $n_day_change, $selectedDate->format('Y-m-d'), $jobId));
 
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);

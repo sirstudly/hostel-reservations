@@ -243,7 +243,24 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-    <xsl:if test="starts-with(hbo_lilho_username, '__DISABLED__castlerock')">
+        <div class="shadow settings-container">
+            <h4>Housekeeping</h4>
+            <div class="row">
+                <label class="col-7" for="bedsheets_change_after_days">Change Bedsheets After:</label>
+                <input id="bedsheets_change_after_days" name="hbo_bedsheets_change_after_days" class="regular-text code col-3 mr-1" type="text" value="{hbo_bedsheets_change_after_days}"/> days
+            </div>
+
+            <div class="row mb-1">
+                <div class="col-11 mr-1" /> (blank to disable)
+            </div>
+
+            <div class="btn-container mb-2 mr-4">
+                <div style="float: left;" id="ajax_respond_bedsheets_change_after_days"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_bedsheets_change_after_days" class="btn btn-primary" style="float: right;" onclick="save_housekeeping_report_settings(document.post_option.bedsheets_change_after_days.value); this.disabled=true;">Save</a>
+            </div>
+        </div>
+
+        <xsl:if test="starts-with(hbo_lilho_username, '__DISABLED__castlerock')">
         <div class="shadow settings-container-lg">
             <h3>Checked-out Guest Response Email (Template)</h3> 
             <p>If present, the following will be replaced in the subject/body: <br/>

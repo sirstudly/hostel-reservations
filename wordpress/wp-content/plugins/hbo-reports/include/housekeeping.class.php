@@ -115,14 +115,14 @@ class HouseKeeping extends XslTransform {
      * &$bedcounts: the array to update
      * $bed: the current bedsheet record [resultset] we're looking at
      * $roomMatch: the regex matching string for the "room"
-     * $arrayKey: the array key to update if a CHANGE or 3 DAY CHANGE appears in $bed
+     * $arrayKey: the array key to update if a CHANGE or N DAY CHANGE appears in $bed
      */
     function update_bedsheets_to_change( &$bedcounts, $bed, $roomMatch, $arrayKey ) {
         if( preg_match( $roomMatch, $bed->room )) {
             if( !isset( $bedcounts[$arrayKey] )) {
                 $bedcounts[$arrayKey] = 0;
             }
-            if( $bed->bedsheet == 'CHANGE' || $bed->bedsheet == '3 DAY CHANGE' ) {
+            if( $bed->bedsheet == 'CHANGE' || $bed->bedsheet == 'N DAY CHANGE' ) {
                 if( $bed->room_type == 'TWIN' || $bed->room_type == 'DBL'
                         || $bed->room_type == 'TRIPLE' || $bed->room_type == 'QUAD' ) {
                     $bedcounts[$arrayKey] += $bed->capacity; // increment by capacity of private room
@@ -169,6 +169,7 @@ class HouseKeeping extends XslTransform {
         }
 
         if ( $this->bedsheetView ) {
+	        $n_day_change = get_option('hbo_bedsheets_change_after_days');
             foreach( $this->bedsheetView as $bed ) {
                 $bedRoot = $parentElement->appendChild($domtree->createElement('bed'));
                 $bedRoot->appendChild($domtree->createElement('room', $bed->room));
@@ -178,7 +179,7 @@ class HouseKeeping extends XslTransform {
                 $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date));
                 $bedRoot->appendChild($domtree->createElement('checkout_date', $bed->checkout_date));
                 $bedRoot->appendChild($domtree->createElement('data_href', $bed->data_href));
-                $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet));
+                $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet == 'N DAY CHANGE' && false === empty($n_day_change) ? "$n_day_change DAY CHANGE": $bed->bedsheet));
             }
         }
 

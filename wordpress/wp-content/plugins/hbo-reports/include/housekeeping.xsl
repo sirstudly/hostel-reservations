@@ -30,7 +30,7 @@
     font-size: 100%;
 }
 
-.badge-3daychange {
+.badge-ndaychange {
     color: #fff;
     background-color: #C87F5B;
     font-size: 100%;
@@ -195,8 +195,8 @@
                     <xsl:if test="bedsheet = 'CHANGE'">
                         <xsl:text>badge-change</xsl:text>
                     </xsl:if>
-                    <xsl:if test="bedsheet = '3 DAY CHANGE'">
-                        <xsl:text>badge-3daychange</xsl:text>
+                    <xsl:if test="contains(bedsheet, 'DAY CHANGE')">
+                        <xsl:text>badge-ndaychange</xsl:text>
                     </xsl:if>
                     <xsl:if test="bedsheet = 'NO CHANGE'">
                         <xsl:text>badge-nochange</xsl:text>
@@ -207,7 +207,7 @@
                 </xsl:attribute>
                 <xsl:value-of select="bedsheet"/>
             </span>
-            <xsl:if test="contains(data_href, 'room_closures') and ( bedsheet = 'CHANGE' or bedsheet = '3 DAY CHANGE' )">
+            <xsl:if test="contains(data_href, 'room_closures') and contains(bedsheet, 'CHANGE')">
                 * Room closure. Please manually check this.
             </xsl:if>
         </td>

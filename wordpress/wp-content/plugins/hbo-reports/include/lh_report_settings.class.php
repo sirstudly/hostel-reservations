@@ -32,6 +32,7 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_agoda_password'] = htmlspecialchars(stripslashes(get_option('hbo_agoda_password')));
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
         $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
+	    $this->reportSettings['hbo_bedsheets_change_after_days'] = get_option('hbo_bedsheets_change_after_days');
         $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
         $this->reportSettings['hbo_guest_email_template'] = esc_textarea(stripslashes(get_option('hbo_guest_email_template')));
    }
@@ -190,7 +191,25 @@ class LHReportSettings extends XslTransform {
        update_option( "hbo_include_5_guests_in_6bed_dorm", $include5guestsIn6bedDorms ? 'true' : 'false' );
    }
 
-   /**
+	/**
+	 * Updates details for the Housekeeping report.
+	 * $bedsheet_change_days : number of days to change bedsheets on a continuous stay (null/blank to disable)
+	 */
+	function saveHousekeepingReportSettings( $bedsheet_change_days ) {
+
+		if ( false === empty( $bedsheet_change_days )) {
+			if ( ctype_digit( $bedsheet_change_days ) === false ) {
+				throw new ValidationException( "Bedsheet change days must be a number" );
+			}
+			else if ( intval( $bedsheet_change_days ) <= 0 || intval( $bedsheet_change_days ) >= 100 ) {
+				throw new ValidationException( "Bedsheet change days must be between 1 and 100" );
+			}
+		}
+
+		update_option( "hbo_bedsheets_change_after_days", empty( $bedsheet_change_days ) ? null : $bedsheet_change_days );
+	}
+
+	/**
     * Updates email template for all guests marked as checked-out.
     * $emailSubject : email subject
     * $emailTemplate : raw (HTML) template of guest email to send (string)

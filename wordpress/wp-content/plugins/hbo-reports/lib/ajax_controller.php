@@ -73,7 +73,11 @@ class AjaxController {
                 $this->saveGroupBookingsReportSettings();
                 break;
 
-            case 'SAVE_CHECKOUT_EMAIL_TEMPLATE':
+	        case 'SAVE_HOUSEKEEPING_REPORT_SETTINGS':
+		        $this->saveHousekeepingReportSettings();
+		        break;
+
+	        case 'SAVE_CHECKOUT_EMAIL_TEMPLATE':
                 $this->saveCheckoutEmailTemplate();
                 break;
 
@@ -450,7 +454,37 @@ class AjaxController {
         }
     }
 
-    /**
+	/**
+	 * Updates the settings for the housekeeping report.
+	 * Requires POST variables:
+	 *   bedsheet_change_days : number of days to change bedsheets on a continuous stay (null/blank to disable)
+	 */
+	function saveHousekeepingReportSettings() {
+		try {
+			$settingsPage = new LHReportSettings();
+			$settingsPage->saveHousekeepingReportSettings( $_POST['bedsheet_change_days'] );
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_bedsheets_change_after_days")
+                    .html('Settings saved successfully.')
+                    .css({ 'color': 'green' });
+                jQuery("#btn_save_bedsheets_change_after_days").prop( "disabled", false );
+            </script>
+			<?php
+		}
+		catch( Exception $e ) {
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_bedsheets_change_after_days")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+                jQuery("#btn_save_bedsheets_change_after_days").prop( "disabled", false );
+            </script>
+			<?php
+		}
+	}
+
+	/**
      * Updates the email template for guests marked as checked-out.
      * Requires POST variables:
      *   email_template : raw (HTML) of email template
