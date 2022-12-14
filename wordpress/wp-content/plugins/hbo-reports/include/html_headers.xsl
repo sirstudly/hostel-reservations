@@ -31,7 +31,7 @@
     <xsl:if test="siteicon != ''">
         <link rel="icon" href="{siteicon}" />
     </xsl:if>
-    <script type="text/javascript" src="{pluginurl}/js/common.js?v=20221017"><xsl:comment/></script>
+    <script type="text/javascript" src="{pluginurl}/js/common.js?v=20221213"><xsl:comment/></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"><xsl:comment/></script>
 
     <!-- C S S -->

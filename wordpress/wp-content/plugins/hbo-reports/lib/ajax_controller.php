@@ -149,7 +149,11 @@ class AjaxController {
                 $this->generateBookingURL();
                 break;
 
-            default:
+	        case 'RESUBMIT_INCOMPLETE_JOB':
+		        $this->resubmitIncompleteJob();
+		        break;
+
+	        default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
         endswitch;
@@ -920,6 +924,33 @@ class AjaxController {
             <?php
         }
     }
+
+	/**
+	 * Changes the job status back to submitted.
+	 * Requires POST variables:
+	 *   job_id : PK of job to resubmit
+	 */
+	function resubmitIncompleteJob() {
+		try {
+			$jobHistoryPage = new LHJobHistory();
+			$jobHistoryPage->resubmitIncompleteJob( $_POST['job_id'] );
+
+			?>
+            <script type="text/javascript">
+                location.reload();
+            </script>
+			<?php
+		}
+		catch( Exception $e ) {
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+			<?php
+		}
+	}
 }
 
 ?>

@@ -698,3 +698,29 @@ function generate_booking_url(booking_identifier) {
         }
     });
 }
+
+// changes the job status back to submitted
+// job_id : PK of job to resubmit
+function resubmit_incomplete_job(job_id) {
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        success: function (data, textStatus){
+            if( textStatus == 'success') {
+                jQuery('#ajax_response').html( data );
+            }
+        },
+        error:function (XMLHttpRequest, textStatus, errorThrown){
+            window.status = 'Ajax sending Error status:'+ textStatus;
+            alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+            if (XMLHttpRequest.status == 500) {
+                alert('Oops sorry.. we messed up somewhere...');
+            }
+        },
+        data: {
+            ajax_action: 'RESUBMIT_INCOMPLETE_JOB',
+            job_id: job_id
+        }
+    });
+}

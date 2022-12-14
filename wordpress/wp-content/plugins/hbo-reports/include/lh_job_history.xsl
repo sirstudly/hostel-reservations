@@ -17,6 +17,7 @@
             <div class="col-md-auto mt-2 ml-2"><h2>Job History</h2></div>
         </div>
     </div>
+    <div id="ajax_response"/>
 
     <div class="card text-center">
         <div class="card-body">
@@ -72,7 +73,18 @@
                 </xsl:otherwise>
             </xsl:choose>
         </td>
-        <td><xsl:value-of select="status"/></td>
+        <td><xsl:value-of select="status"/><xsl:if test="status = 'failed' or status = 'aborted'">
+            <a href="javascript:void(0)" style="margin-left: 10px;">
+                <xsl:attribute name="onclick">
+                    resubmit_incomplete_job(<xsl:value-of select="job_id"/>);
+                </xsl:attribute>
+                <img width="16px">
+                    <xsl:attribute name="src">
+                        <xsl:value-of select="homeurl"/>/wp-content/plugins/hbo-reports/img/refresh.svg
+                    </xsl:attribute>
+                </img>
+            </a>
+        </xsl:if></td>
         <td><xsl:value-of select="start_date"/></td>
         <td><xsl:value-of select="end_date"/></td>
         <td><xsl:if test="log_file"><a><xsl:attribute name="href"><xsl:value-of select="log_file"/></xsl:attribute>job-<xsl:value-of select="job_id"/>.log</a></xsl:if></td>
