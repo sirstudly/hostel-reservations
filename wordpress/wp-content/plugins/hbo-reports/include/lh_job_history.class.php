@@ -28,18 +28,19 @@ class LHJobHistory extends XslTransform {
        }
    }
 
-	/**
-	 * Changes the job status back to submitted.
-	 * $job_id : PK of job
-	 * @throws DatabaseException
-	 * @throws ValidationException
-	 */
-   function resubmitIncompleteJob($job_id) {
-	   if (empty($job_id)) {
-		   throw new ValidationException("Job ID cannot be blank.");
-	   }
-		LilHotelierDBO::resubmitIncompleteJob($job_id);
-   }
+    /**
+     * Changes the job status back to submitted.
+     * $job_id : PK of job
+     * @throws DatabaseException
+     * @throws ValidationException
+     */
+    function resubmitIncompleteJob($job_id) {
+        if (empty($job_id)) {
+            throw new ValidationException("Job ID cannot be blank.");
+        }
+        LilHotelierDBO::resubmitIncompleteJob($job_id);
+        LilHotelierDBO::runProcessor();
+    }
 
     /**
      * Adds this object to the DOMDocument/XMLElement specified.

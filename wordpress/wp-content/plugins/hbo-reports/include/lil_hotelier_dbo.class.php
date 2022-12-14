@@ -1357,25 +1357,25 @@ class LilHotelierDBO {
         return $jobParams;
     }
 
-	/**
-	 * Changes the status of a job back to submitted.
-	 * $jobId : PK of Job
-	 */
-	static function resubmitIncompleteJob( $jobId ) {
-		global $wpdb;
-		$returnval = $wpdb->update(
-			"wp_lh_jobs",
-			array( 'last_updated_date' => current_time('mysql', 1),
-			       'status' => self::STATUS_SUBMITTED),
-			array( 'job_id' => $jobId ) );
+    /**
+     * Changes the status of a job back to submitted.
+     * $jobId : PK of Job
+     */
+    static function resubmitIncompleteJob( $jobId ) {
+        global $wpdb;
+        $returnval = $wpdb->update(
+            "wp_lh_jobs",
+            array( 'last_updated_date' => current_time('mysql', 1),
+                   'status' => self::STATUS_SUBMITTED),
+            array( 'job_id' => $jobId ) );
 
-		if (false === $returnval) {
-			throw new DatabaseException("Error occurred during UPDATE");
-		}
-		if (0 === $returnval) {
-			throw new DatabaseException("Job ID $jobId does not exist?");
-		}
-	}
+        if (false === $returnval) {
+            throw new DatabaseException("Error occurred during UPDATE");
+        }
+        if (0 === $returnval) {
+            throw new DatabaseException("Job ID $jobId does not exist?");
+        }
+    }
 
 	/**
      * Executes the processor in the background from the command line.
