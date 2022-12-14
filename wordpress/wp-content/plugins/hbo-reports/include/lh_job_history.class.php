@@ -51,6 +51,7 @@ class LHJobHistory extends XslTransform {
 
         $logDirectory = get_option( 'hbo_log_directory' );
         $logDirectoryUrl = get_option( 'hbo_log_directory_url' );
+	    $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
         foreach( $this->history as $record ) {
             $recordRoot = $parentElement->appendChild($domtree->createElement('record'));
             $recordRoot->appendChild($domtree->createElement('job_id', $record->job_id));

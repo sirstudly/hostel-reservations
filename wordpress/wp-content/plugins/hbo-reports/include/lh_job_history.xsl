@@ -79,9 +79,7 @@
                     resubmit_incomplete_job(<xsl:value-of select="job_id"/>);
                 </xsl:attribute>
                 <img width="16px">
-                    <xsl:attribute name="src">
-                        <xsl:value-of select="homeurl"/>/wp-content/plugins/hbo-reports/img/refresh.svg
-                    </xsl:attribute>
+                    <xsl:attribute name="src"><xsl:value-of select="/view/pluginurl"/>/img/refresh.svg</xsl:attribute>
                 </img>
             </a>
         </xsl:if></td>
