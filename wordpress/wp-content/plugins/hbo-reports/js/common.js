@@ -570,6 +570,44 @@ function delete_scheduled_job( scheduled_job_id ) {
     });
 }
 
+// saves a new or updates an existing blacklist entry
+// id : PK of blacklist entry (optional)
+// firstname : first name
+// lastname : last name
+// email : email (optional)
+function save_blacklist( id, firstname, lastname, email ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_BLACKLIST',
+            id : id,
+            first_name : firstname,
+            last_name : lastname,
+            email : email
+        }
+    });
+}
+
+// edits a blacklist entry
+// id : PK of blacklist entry
+function edit_blacklist( id ) {
+
+    jQuery.ajax({                                           // Start Ajax Sending
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#post_option').html( data ) ;},
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'EDIT_BLACKLIST',
+            id : id
+        }
+    });
+}
+
 //Looks up a booking
 //booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
 function lookup_booking( booking_ref ) {

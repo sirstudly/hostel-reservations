@@ -153,7 +153,15 @@ class AjaxController {
 		        $this->resubmitIncompleteJob();
 		        break;
 
-	        default:
+            case 'EDIT_BLACKLIST':
+                $this->editBlacklist();
+                break;
+
+            case 'SAVE_BLACKLIST':
+                $this->saveBlacklist();
+                break;
+
+            default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
         endswitch;
@@ -940,6 +948,59 @@ class AjaxController {
                 location.reload();
             </script>
             <?php
+        }
+        catch( Exception $e ) {
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Saves/updates a blacklist entry.
+     * Requires POST variables:
+     *    id : PK of blacklist entry (optional; set for updating an existing entry)
+     *    first_name
+     *    last_name
+     *    email
+     */
+    function saveBlacklist() {
+        try {
+            $blacklistPage = new Blacklist();
+            $blacklistPage->saveBlacklistEntry( $_POST['first_name'], $_POST['last_name'], $_POST['email'],
+                isset($_POST['id']) && $_POST['id'] > 0 ? $_POST['id'] : 0 );
+            ?>
+            <script type="text/javascript">
+                location.reload();
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Flags a blacklist entry for editing.
+     * Requires POST variables:
+     *    id : PK of blacklist entry
+     */
+    function editBlacklist() {
+        try {
+            $blacklistPage = new Blacklist();
+            $blacklistPage->editBlacklistEntry( $_POST['id'] );
+            $blacklistPage->doView(); // re-query db
+            echo $blacklistPage->toHtml(); // regenerate blacklist table
         }
         catch( Exception $e ) {
             ?>

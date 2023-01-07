@@ -37,6 +37,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('view_log_url', get_option('hbo_view_log_url')));
         $xmlRoot->appendChild($domtree->createElement('job_history_url', get_option('hbo_job_history_url')));
         $xmlRoot->appendChild($domtree->createElement('job_scheduler_url', get_option('hbo_job_scheduler_url')));
+        $xmlRoot->appendChild($domtree->createElement('blacklist_url', get_option('hbo_blacklist_url')));
         $xmlRoot->appendChild($domtree->createElement('online_checkin_url', get_option('hbo_online_checkin_url')));
         $xmlRoot->appendChild($domtree->createElement('redirect_to_url', get_option('hbo_redirect_to_url')));
         $xmlRoot->appendChild($domtree->createElement('log_directory', get_option('hbo_log_directory')));
@@ -65,6 +66,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_report_settings_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_job_history_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_job_scheduler_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_blacklist_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_online_checkin_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_redirect_to_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_view_log_url');

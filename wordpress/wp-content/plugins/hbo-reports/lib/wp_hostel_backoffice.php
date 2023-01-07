@@ -60,6 +60,7 @@ class WP_HostelBackoffice {
         add_option('hbo_log_directory_url', '/__SITENAME__/view-log/?job_id=');
         add_option('hbo_job_history_url', 'admin/job-history');
         add_option('hbo_job_scheduler_url', 'admin/job-scheduler');
+        add_option('hbo_blacklist_url', 'admin/blacklist');
         add_option('hbo_online_checkin_url', 'online-checkin');
         add_option('hbo_group_booking_size', '6');
         add_option('hbo_include_5_guests_in_6bed_dorm', 'true');
@@ -84,6 +85,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_log_directory_url');
         delete_option('hbo_job_history_url');
         delete_option('hbo_job_scheduler_url');
+        delete_option('hbo_blacklist_url');
         delete_option('hbo_manual_charge_url');
         delete_option('hbo_generate_payment_link_url');
         delete_option('hbo_payment_history_url');
@@ -177,6 +179,15 @@ class WP_HostelBackoffice {
     }
 
     /**
+     * Write the contents of the Blacklisting page.
+     */
+    function content_of_blacklist_page() {
+        $s = new Blacklist();
+        $s->doView();
+        echo $s->toHtml();
+    }
+
+    /**
      * Downloads the bedcounts page as a CSV file
      */
     function download_bedcounts_page_as_csv() {
@@ -232,6 +243,7 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
         $this->do_redirect_for_page(get_option('hbo_job_history_url'), 'job-history.php');
         $this->do_redirect_for_page(get_option('hbo_job_scheduler_url'), 'job-scheduler.php');
+        $this->do_redirect_for_page(get_option('hbo_blacklist_url'), 'blacklist.php');
         $this->do_redirect_for_page(get_option('hbo_manual_charge_url'), 'manual-charge.php');
         $this->do_redirect_for_page(get_option('hbo_generate_payment_link_url'), 'generate-payment-link.php');
         $this->do_redirect_for_page(get_option('hbo_payment_history_url'), 'payment-history.php');

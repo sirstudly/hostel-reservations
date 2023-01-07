@@ -126,6 +126,15 @@ Tested WordPress Versions: 4.6
     if (file_exists(HBO_PLUGIN_DIR. '/include/scheduled_job_view.class.php')) 
         { require_once(HBO_PLUGIN_DIR. '/include/scheduled_job_view.class.php' ); }
 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/blacklist_alias.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/blacklist_alias.class.php' ); }
+
+    if (file_exists(HBO_PLUGIN_DIR. '/include/blacklist_entry.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/blacklist_entry.class.php' ); }
+
+    if (file_exists(HBO_PLUGIN_DIR. '/include/blacklist.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/blacklist.class.php' ); }
+
     if (file_exists(HBO_PLUGIN_DIR. '/include/payment_history.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/payment_history.class.php' ); }
 

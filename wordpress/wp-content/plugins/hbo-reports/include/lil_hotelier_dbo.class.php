@@ -5,10 +5,29 @@
  */
 class LilHotelierDBO {
 
+    private static $INSTANCE = null;
+    private $SHARED_DB = null;
     const STATUS_COMPLETED = 'completed';
     const STATUS_SUBMITTED = 'submitted';
     const STATUS_PROCESSING = 'processing';
     const STATUS_FAILED = 'failed';
+
+    // prevent outside instantiation
+    private function __construct() {
+        $this->SHARED_DB = new wpdb(SHARED_DB_USER, SHARED_DB_PASSWORD, SHARED_DB_NAME, SHARED_DB_HOST);
+    }
+
+    // The object is created from within the class itself
+    // only if the class has no instance.
+    /**
+     * @return LilHotelierDBO
+     */
+    public static function getInstance() {
+        if (self::$INSTANCE == null) {
+            self::$INSTANCE = new LilHotelierDBO();
+        }
+        return LilHotelierDBO::$INSTANCE;
+    }
 
     /**
      * Returns all bedsheet data for the given date.
@@ -1396,6 +1415,63 @@ class LilHotelierDBO {
         if (substr(php_uname(), 0, 7) != "Windows" && false === empty($process_cmd)) {
             $command = "$process_cmd > /dev/null 2>&1";
             exec( $command );
+        }
+    }
+
+    /**
+     * Returns list of blacklisted guests.
+     * @return array [BlacklistEntry]
+     * @throws DatabaseException
+     */
+    function getBlacklist() {
+        $resultset = $this->SHARED_DB->get_results(
+            "SELECT id, first_name, last_name, email 
+               FROM hbo_blacklist
+           ORDER BY last_name, first_name, email");
+
+        if($this->SHARED_DB->last_error) {
+            throw new DatabaseException($this->SHARED_DB->last_error);
+        }
+
+        $blacklist = array();
+        foreach( $resultset as $record ) {
+            $blacklist[] = new BlacklistEntry($record->id, $record->first_name, $record->last_name, $record->email);
+        }
+        return $blacklist;
+    }
+
+    /**
+     * Inserts/Updates an entry in the blacklist table.
+     * @param $id null or zero for new record, existing id to update
+     * @param $first_name
+     * @param $last_name
+     * @param $email
+     *
+     * @return void
+     * @throws DatabaseException
+     */
+    function saveBlacklistEntry($id, $first_name, $last_name, $email) {
+        if ($id) {
+            $returnval = $this->SHARED_DB->update( "hbo_blacklist",
+                array( 'last_updated_date' => current_time('mysql', 1),
+                       'first_name' => $first_name,
+                       'last_name' => $last_name,
+                       'email' => $email),
+                array( 'id' => $id ) );
+
+            if (false === $returnval) {
+                throw new DatabaseException("Error occurred during UPDATE");
+            }
+        }
+        else {
+            if (false === $this->SHARED_DB->insert( "hbo_blacklist",
+                    array( 'first_name' => $first_name,
+                           'last_name' => $last_name,
+                           'email' => $email ),
+                    array( '%s', '%s', '%s' ))) {
+                error_log($this->SHARED_DB->last_error." executing sql: " . $this->SHARED_DB->last_query);
+                throw new DatabaseException( $this->SHARED_DB->last_error );
+            }
         }
     }
 }
