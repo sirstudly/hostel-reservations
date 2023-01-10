@@ -1425,9 +1425,12 @@ class LilHotelierDBO {
      */
     function getBlacklist() {
         $resultset = $this->SHARED_DB->get_results(
-            "SELECT id, first_name, last_name, email 
-               FROM hbo_blacklist
-           ORDER BY last_name, first_name, email");
+            "SELECT alias_id, blacklist_id, first_name, last_name, email FROM (
+                SELECT NULL AS alias_id, id AS blacklist_id, first_name, last_name, email FROM hbo_blacklist
+                 UNION ALL
+                SELECT id AS alias_id, blacklist_id, first_name, last_name, email FROM hbo_blacklist_alias WHERE deleted_date IS NULL
+            ) t
+            ORDER BY CASE WHEN alias_id IS NULL THEN blacklist_id ELSE (blacklist_id + 0.1) END, last_name, first_name, email");
 
         if($this->SHARED_DB->last_error) {
             throw new DatabaseException($this->SHARED_DB->last_error);
@@ -1435,14 +1438,19 @@ class LilHotelierDBO {
 
         $blacklist = array();
         foreach( $resultset as $record ) {
-            $blacklist[] = new BlacklistEntry($record->id, $record->first_name, $record->last_name, $record->email);
+            if($record->alias_id) {
+                $blacklist[] = new BlacklistAlias($record->alias_id, $record->blacklist_id, $record->first_name, $record->last_name, $record->email);
+            }
+            else {
+                $blacklist[] = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email );
+            }
         }
         return $blacklist;
     }
 
     /**
      * Inserts/Updates an entry in the blacklist table.
-     * @param $id null or zero for new record, existing id to update
+     * @param $id int null or zero for new record, existing id to update
      * @param $first_name
      * @param $last_name
      * @param $email
@@ -1472,6 +1480,58 @@ class LilHotelierDBO {
                 error_log($this->SHARED_DB->last_error." executing sql: " . $this->SHARED_DB->last_query);
                 throw new DatabaseException( $this->SHARED_DB->last_error );
             }
+        }
+    }
+
+    /**
+     * Inserts a new blacklist alias for an existing blacklist entry.
+     * @param $id int PK of blacklist entry
+     * @param $first_name
+     * @param $last_name
+     * @param $email
+     *
+     * @return void
+     * @throws DatabaseException
+     */
+    function saveBlacklistAlias($id, $first_name, $last_name, $email) {
+        $rowcount = $this->SHARED_DB->get_var($this->SHARED_DB->prepare(
+            "SELECT COUNT(1)
+               FROM hbo_blacklist
+              WHERE id = %d", $id));
+
+        if($this->SHARED_DB->last_error) {
+            throw new DatabaseException($this->SHARED_DB->last_error);
+        }
+
+        if ($rowcount == 0) {
+            throw new DatabaseException( "Unable to find blacklist id $id" );
+        }
+
+        if (false === $this->SHARED_DB->insert( "hbo_blacklist_alias",
+                array( 'blacklist_id' => $id,
+                       'first_name' => $first_name,
+                       'last_name' => $last_name,
+                       'email' => $email ),
+                array( '%d', '%s', '%s', '%s' ))) {
+            error_log($this->SHARED_DB->last_error." executing sql: " . $this->SHARED_DB->last_query);
+            throw new DatabaseException( $this->SHARED_DB->last_error );
+        }
+    }
+
+    /**
+     * Deletes an existing blacklist alias.
+     * @param $alias_id int PK of blacklist alias
+     *
+     * @return void
+     * @throws DatabaseException
+     */
+    function deleteBlacklistAlias($alias_id) {
+        $returnval = $this->SHARED_DB->update( "hbo_blacklist_alias",
+            array( 'deleted_date' => current_time('mysql', 1)),
+            array( 'id' => $alias_id ));
+
+        if (false === $returnval) {
+            throw new DatabaseException("Error occurred during UPDATE");
         }
     }
 }

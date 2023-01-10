@@ -7,6 +7,7 @@ class Blacklist extends XslTransform {
 
     var $blacklist;  // array() of blacklist entry
     var $editingId; // set if we're currently editing an entry
+    var $addAliasForId; // PK of blacklist entry if we're adding a new alias
 
     /**
      * Default constructor.
@@ -33,11 +34,26 @@ class Blacklist extends XslTransform {
     }
 
     /**
-     * Updates details for little hotelier.
+     * Make the intention of adding an alias. Display a blank line under the blacklist entry.
+     * @param $id int PK of blacklist entry
+     * @return void
+     */
+    function addAlias($id) {
+        $this->addAliasForId = $id;
+    }
+
+    /**
+     * Save/updates a new or existing blacklist entry.
+     * @param $firstname
+     * @param $lastname
+     * @param $email
+     * @param $id int PK of blacklist entry (optional)
+     *
+     * @return void
      * @throws DatabaseException
      * @throws ValidationException
      */
-   function saveBlacklistEntry( $firstname, $lastname, $email, $id = 0 ) {
+    function saveBlacklistEntry( $firstname, $lastname, $email, $id = 0 ) {
 
        if( empty( $firstname )) {
            throw new ValidationException( "First name cannot be blank" );
@@ -50,8 +66,54 @@ class Blacklist extends XslTransform {
        }
 
        LilHotelierDBO::getInstance()->saveBlacklistEntry($id, $firstname, $lastname, $email);
-       $this->editingId = null; // unset variable once we've successfully saved
-   }
+//       $this->editingId = null; // unset variable once we've successfully saved
+    }
+
+    /**
+     * Saves a new blacklist alias.
+     * @param $id int PK of blacklist entry
+     * @param $firstname
+     * @param $lastname
+     * @param $email
+     *
+     * @return void
+     * @throws DatabaseException
+     * @throws ValidationException
+     */
+    function saveBlacklistAlias( $id, $firstname, $lastname, $email ) {
+
+        if( empty( $id )) {
+            throw new ValidationException( "ID cannot be blank" );
+        }
+        if( empty( $firstname )) {
+            throw new ValidationException( "First name cannot be blank" );
+        }
+        if( empty( $lastname )) {
+            throw new ValidationException( "Last name cannot be blank" );
+        }
+        if( FALSE === empty( $email ) && FALSE === strpos($email, "@") ) {
+            throw new ValidationException( "This doesn\'t look like a valid email address" );
+        }
+
+        LilHotelierDBO::getInstance()->saveBlacklistAlias($id, $firstname, $lastname, $email);
+    }
+
+    /**
+     * Deletes an existing blacklist alias.
+     * @param $alias_id int PK of blacklist alias
+     *
+     * @return void
+     * @throws DatabaseException
+     * @throws ValidationException
+     */
+    function deleteBlacklistAlias( $alias_id ) {
+
+        if( empty( $alias_id )) {
+            throw new ValidationException( "Alias ID cannot be blank" );
+        }
+
+        LilHotelierDBO::getInstance()->deleteBlacklistAlias($alias_id);
+    }
 
     /**
      * Adds this object to the DOMDocument/XMLElement specified.
@@ -62,19 +124,25 @@ class Blacklist extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {
 
         $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
-        if ($this->editingId) {
-            $parentElement->appendChild($domtree->createElement('editing_id', $this->editingId));
+        if ($this->editingId || $this->addAliasForId) {
+            $parentElement->appendChild($domtree->createElement('reload_table_only', 'true'));
         }
         $blacklistRoot = $parentElement->appendChild($domtree->createElement('blacklist'));
         if ( $this->blacklist ) {
             foreach ($this->blacklist as $entry) {
-                $entryElem = $blacklistRoot->appendChild( $domtree->createElement("entry") );
-                $entryElem->appendChild($domtree->createElement("id", $entry->id));
+                $entryElem = $blacklistRoot->appendChild($domtree->createElement("entry"));
+                $entryElem->appendChild($domtree->createElement("blacklist_id", $entry->blacklist_id));
+                if (isset($entry->alias_id)) {
+                    $entryElem->appendChild( $domtree->createElement( "alias_id", $entry->alias_id ));
+                }
                 $entryElem->appendChild($domtree->createElement("first_name", htmlspecialchars($entry->first_name)));
                 $entryElem->appendChild($domtree->createElement("last_name", htmlspecialchars($entry->last_name)));
                 $entryElem->appendChild($domtree->createElement("email", htmlspecialchars($entry->email)));
-                if ($entry->id == $this->editingId) {
+                if (FALSE === isset($entry->alias_id) && $entry->blacklist_id == $this->editingId) {
                     $entryElem->appendChild($domtree->createElement("editing", "true"));
+                }
+                if (FALSE === isset($entry->alias_id) && $entry->blacklist_id == $this->addAliasForId) {
+                    $entryElem->appendChild($domtree->createElement("add_alias", "true"));
                 }
             }
         }

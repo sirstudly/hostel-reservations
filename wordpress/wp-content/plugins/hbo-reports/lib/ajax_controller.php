@@ -161,6 +161,18 @@ class AjaxController {
                 $this->saveBlacklist();
                 break;
 
+            case 'ADD_BLACKLIST_ALIAS':
+                $this->addBlacklistAlias();
+                break;
+
+            case 'SAVE_BLACKLIST_ALIAS':
+                $this->saveBlacklistAlias();
+                break;
+
+            case 'DELETE_BLACKLIST_ALIAS':
+                $this->deleteBlacklistAlias();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -1001,6 +1013,84 @@ class AjaxController {
             $blacklistPage->editBlacklistEntry( $_POST['id'] );
             $blacklistPage->doView(); // re-query db
             echo $blacklistPage->toHtml(); // regenerate blacklist table
+        }
+        catch( Exception $e ) {
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Adds a blank row to an existing blacklist entry.
+     * Requires POST variables:
+     *    id : PK of blacklist entry
+     */
+    function addBlacklistAlias() {
+        try {
+            $blacklistPage = new Blacklist();
+            $blacklistPage->addAlias( $_POST['id'] );
+            $blacklistPage->doView(); // re-query db
+            echo $blacklistPage->toHtml(); // regenerate blacklist table
+        }
+        catch( Exception $e ) {
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Saves a new blacklist alias.
+     * Requires POST variables:
+     *    id : PK of blacklist entry
+     *    first_name
+     *    last_name
+     *    email
+     */
+    function saveBlacklistAlias() {
+        try {
+            $blacklistPage = new Blacklist();
+            $blacklistPage->saveBlacklistAlias( $_POST['id'], $_POST['first_name'], $_POST['last_name'], $_POST['email']);
+            ?>
+            <script type="text/javascript">
+                location.reload();
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_response")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Deletes an existing blacklist alias.
+     * Requires POST variables:
+     *    alias_id : PK of blacklist alias
+     */
+    function deleteBlacklistAlias() {
+        try {
+            $blacklistPage = new Blacklist();
+            $blacklistPage->deleteBlacklistAlias( $_POST['alias_id'] );
+            ?>
+            <script type="text/javascript">
+                location.reload();
+            </script>
+            <?php
         }
         catch( Exception $e ) {
             ?>
