@@ -36,6 +36,7 @@
                 <th scope="col">First Name</th>
                 <th scope="col">Last Name</th>
                 <th scope="col">Email</th>
+                <th scope="col">Notes</th>
                 <th scope="col">Actions</th>
             </thead>
             <tbody>
@@ -52,10 +53,11 @@
 
 <xsl:template name="new_blacklist_entry">
     <tr>
-        <td><input id="new_first_name" name="new_first_name" class="regular-text code col-3 form-control" type="text" value=""/></td>
-        <td><input id="new_last_name" name="new_last_name" class="regular-text code col-3 form-control" type="text" value=""/></td>
-        <td><input id="new_email" name="new_email" class="regular-text code col-3 form-control" type="text" value=""/></td>
-        <td><a id="btn_save_blacklist" class="btn btn-primary" onclick="save_blacklist(0, document.post_option.new_first_name.value, document.post_option.new_last_name.value, document.post_option.new_email.value); this.disabled=true;">Add</a></td>
+        <td><input id="new_first_name" name="new_first_name" class="regular-text code col-3 form-control" type="text" style="min-width: 100%" value=""/></td>
+        <td><input id="new_last_name" name="new_last_name" class="regular-text code col-3 form-control" type="text" style="min-width: 100%" value=""/></td>
+        <td><input id="new_email" name="new_email" class="regular-text code col-3 form-control" type="text" style="min-width: 100%" value=""/></td>
+        <td><textarea id="new_notes" name="new_notes" class="regular-text code col-3 form-control" style="min-width: 100%" value=""/></td>
+        <td><a id="btn_save_blacklist" class="btn btn-primary" onclick="save_blacklist(0, document.post_option.new_first_name.value, document.post_option.new_last_name.value, document.post_option.new_email.value, document.post_option.new_notes.value); this.disabled=true;">Add</a></td>
     </tr>
 </xsl:template>
 
@@ -63,10 +65,11 @@
     <xsl:choose>
         <xsl:when test="editing = 'true'">
             <tr>
-                <td><input id="edit_first_name" name="edit_first_name" class="regular-text code col-3 form-control" type="text"><xsl:attribute name="value"><xsl:value-of select="first_name"/></xsl:attribute></input></td>
-                <td><input id="edit_last_name" name="edit_last_name" class="regular-text code col-3 form-control" type="text"><xsl:attribute name="value"><xsl:value-of select="last_name"/></xsl:attribute></input></td>
-                <td><input id="edit_email" name="edit_email" class="regular-text code col-3 form-control" type="text"><xsl:attribute name="value"><xsl:value-of select="email"/></xsl:attribute></input></td>
-                <td><a class="btn btn-primary"><xsl:attribute name="onclick">save_blacklist(<xsl:value-of select="blacklist_id"/>, document.post_option.edit_first_name.value, document.post_option.edit_last_name.value, document.post_option.edit_email.value); this.disabled=true;</xsl:attribute>Save</a>
+                <td><input id="edit_first_name" name="edit_first_name" class="regular-text code col-3 form-control" type="text" style="min-width: 100%"><xsl:attribute name="value"><xsl:value-of select="first_name"/></xsl:attribute></input></td>
+                <td><input id="edit_last_name" name="edit_last_name" class="regular-text code col-3 form-control" type="text" style="min-width: 100%"><xsl:attribute name="value"><xsl:value-of select="last_name"/></xsl:attribute></input></td>
+                <td><input id="edit_email" name="edit_email" class="regular-text code col-3 form-control" type="text" style="min-width: 100%"><xsl:attribute name="value"><xsl:value-of select="email"/></xsl:attribute></input></td>
+                <td><textarea id="edit_notes" name="edit_notes" class="regular-text code col-3 form-control" style="min-width: 100%"><xsl:value-of select="notes"/></textarea></td>
+                <td><a class="btn btn-primary"><xsl:attribute name="onclick">save_blacklist(<xsl:value-of select="blacklist_id"/>, document.post_option.edit_first_name.value, document.post_option.edit_last_name.value, document.post_option.edit_email.value, document.post_option.edit_notes.value); this.disabled=true;</xsl:attribute>Save</a>
                     <a class="btn btn-primary ml-2" onclick="location.reload()">Cancel</a>
                 </td>
             </tr>
@@ -76,6 +79,7 @@
                 <td><div><xsl:if test="alias_id"><xsl:attribute name="class">ml-3</xsl:attribute></xsl:if><xsl:value-of select="first_name"/></div></td>
                 <td><div><xsl:if test="alias_id"><xsl:attribute name="class">ml-3</xsl:attribute></xsl:if><xsl:value-of select="last_name"/></div></td>
                 <td><div><xsl:if test="alias_id"><xsl:attribute name="class">ml-3</xsl:attribute></xsl:if><xsl:value-of select="email"/></div></td>
+                <td><xsl:value-of select="notes_readonly" disable-output-escaping="yes"/></td>
                 <td>
                     <xsl:choose>
                         <xsl:when test="alias_id">
@@ -90,9 +94,10 @@
             </tr>
             <xsl:if test="add_alias = 'true'">
                 <tr>
-                    <td><input id="alias_first_name" name="alias_first_name" class="regular-text code col-3 form-control" type="text" value=""/></td>
-                    <td><input id="alias_last_name" name="alias_last_name" class="regular-text code col-3 form-control" type="text" value=""/></td>
-                    <td><input id="alias_email" name="alias_email" class="regular-text code col-3 form-control" type="text" value=""/></td>
+                    <td><input id="alias_first_name" name="alias_first_name" class="regular-text code col-3 form-control" type="text" style="min-width: 100%" value=""/></td>
+                    <td><input id="alias_last_name" name="alias_last_name" class="regular-text code col-3 form-control" type="text" style="min-width: 100%" value=""/></td>
+                    <td><input id="alias_email" name="alias_email" class="regular-text code col-3 form-control" type="text" style="min-width: 100%" value=""/></td>
+                    <td><!-- notes not required --></td>
                     <td><a class="btn btn-primary"><xsl:attribute name="onclick">save_blacklist_alias(<xsl:value-of select="blacklist_id"/>, document.post_option.alias_first_name.value, document.post_option.alias_last_name.value, document.post_option.alias_email.value); this.disabled=true;</xsl:attribute>Save Alias</a>
                         <a class="btn btn-primary ml-2" onclick="location.reload()">Cancel</a>
                     </td>

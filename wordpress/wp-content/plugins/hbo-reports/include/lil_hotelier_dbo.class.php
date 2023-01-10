@@ -1425,10 +1425,10 @@ class LilHotelierDBO {
      */
     function getBlacklist() {
         $resultset = $this->SHARED_DB->get_results(
-            "SELECT alias_id, blacklist_id, first_name, last_name, email FROM (
-                SELECT NULL AS alias_id, id AS blacklist_id, first_name, last_name, email FROM hbo_blacklist
+            "SELECT alias_id, blacklist_id, first_name, last_name, email, notes FROM (
+                SELECT NULL AS alias_id, id AS blacklist_id, first_name, last_name, email, notes FROM hbo_blacklist
                  UNION ALL
-                SELECT id AS alias_id, blacklist_id, first_name, last_name, email FROM hbo_blacklist_alias WHERE deleted_date IS NULL
+                SELECT id AS alias_id, blacklist_id, first_name, last_name, email, NULL AS notes FROM hbo_blacklist_alias WHERE deleted_date IS NULL
             ) t
             ORDER BY CASE WHEN alias_id IS NULL THEN blacklist_id ELSE (blacklist_id + 0.1) END, last_name, first_name, email");
 
@@ -1442,7 +1442,7 @@ class LilHotelierDBO {
                 $blacklist[] = new BlacklistAlias($record->alias_id, $record->blacklist_id, $record->first_name, $record->last_name, $record->email);
             }
             else {
-                $blacklist[] = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email );
+                $blacklist[] = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email, $record->notes );
             }
         }
         return $blacklist;
@@ -1454,20 +1454,23 @@ class LilHotelierDBO {
      * @param $first_name
      * @param $last_name
      * @param $email
+     * @param $notes
      *
      * @return void
      * @throws DatabaseException
      */
-    function saveBlacklistEntry($id, $first_name, $last_name, $email) {
+    function saveBlacklistEntry($id, $first_name, $last_name, $email, $notes) {
         if ($id) {
             $returnval = $this->SHARED_DB->update( "hbo_blacklist",
                 array( 'last_updated_date' => current_time('mysql', 1),
                        'first_name' => $first_name,
                        'last_name' => $last_name,
-                       'email' => $email),
+                       'email' => $email,
+                       'notes' => $notes),
                 array( 'id' => $id ) );
 
             if (false === $returnval) {
+                error_log($this->SHARED_DB->last_error." executing sql: " . $this->SHARED_DB->last_query);
                 throw new DatabaseException("Error occurred during UPDATE");
             }
         }
@@ -1475,9 +1478,10 @@ class LilHotelierDBO {
             if (false === $this->SHARED_DB->insert( "hbo_blacklist",
                     array( 'first_name' => $first_name,
                            'last_name' => $last_name,
-                           'email' => $email ),
-                    array( '%s', '%s', '%s' ))) {
-                error_log($this->SHARED_DB->last_error." executing sql: " . $this->SHARED_DB->last_query);
+                           'email' => $email,
+                           'notes' => $notes),
+                    array( '%s', '%s', '%s', '%s' ))) {
+                error_log($this->SHARED_DB->last_error . " executing sql: " . $this->SHARED_DB->last_query);
                 throw new DatabaseException( $this->SHARED_DB->last_error );
             }
         }
@@ -1513,7 +1517,7 @@ class LilHotelierDBO {
                        'last_name' => $last_name,
                        'email' => $email ),
                 array( '%d', '%s', '%s', '%s' ))) {
-            error_log($this->SHARED_DB->last_error." executing sql: " . $this->SHARED_DB->last_query);
+            error_log($this->SHARED_DB->last_error . " executing sql: " . $this->SHARED_DB->last_query);
             throw new DatabaseException( $this->SHARED_DB->last_error );
         }
     }
@@ -1531,6 +1535,7 @@ class LilHotelierDBO {
             array( 'id' => $alias_id ));
 
         if (false === $returnval) {
+            error_log($this->SHARED_DB->last_error . " executing sql: " . $this->SHARED_DB->last_query);
             throw new DatabaseException("Error occurred during UPDATE");
         }
     }

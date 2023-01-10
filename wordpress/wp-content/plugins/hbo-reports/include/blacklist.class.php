@@ -53,7 +53,7 @@ class Blacklist extends XslTransform {
      * @throws DatabaseException
      * @throws ValidationException
      */
-    function saveBlacklistEntry( $firstname, $lastname, $email, $id = 0 ) {
+    function saveBlacklistEntry( $id, $firstname, $lastname, $email, $notes ) {
 
        if( empty( $firstname )) {
            throw new ValidationException( "First name cannot be blank" );
@@ -65,8 +65,7 @@ class Blacklist extends XslTransform {
            throw new ValidationException( "This doesn\'t look like a valid email address" );
        }
 
-       LilHotelierDBO::getInstance()->saveBlacklistEntry($id, $firstname, $lastname, $email);
-//       $this->editingId = null; // unset variable once we've successfully saved
+       LilHotelierDBO::getInstance()->saveBlacklistEntry($id, $firstname, $lastname, $email, $notes);
     }
 
     /**
@@ -138,6 +137,10 @@ class Blacklist extends XslTransform {
                 $entryElem->appendChild($domtree->createElement("first_name", htmlspecialchars($entry->first_name)));
                 $entryElem->appendChild($domtree->createElement("last_name", htmlspecialchars($entry->last_name)));
                 $entryElem->appendChild($domtree->createElement("email", htmlspecialchars($entry->email)));
+                if (isset($entry->notes)) {
+                    $entryElem->appendChild( $domtree->createElement( "notes", htmlspecialchars( $entry->notes ) ) );
+                    $entryElem->appendChild( $domtree->createElement( "notes_readonly", nl2br( stripslashes( htmlspecialchars( $entry->notes ) ) ) ) );
+                }
                 if (FALSE === isset($entry->alias_id) && $entry->blacklist_id == $this->editingId) {
                     $entryElem->appendChild($domtree->createElement("editing", "true"));
                 }

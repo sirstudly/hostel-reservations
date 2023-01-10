@@ -575,7 +575,8 @@ function delete_scheduled_job( scheduled_job_id ) {
 // firstname : first name
 // lastname : last name
 // email : email (optional)
-function save_blacklist( id, firstname, lastname, email ) {
+// notes : (optional)
+function save_blacklist( id, firstname, lastname, email, notes ) {
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
@@ -587,7 +588,8 @@ function save_blacklist( id, firstname, lastname, email ) {
             id : id,
             first_name : firstname,
             last_name : lastname,
-            email : email
+            email : email,
+            notes: notes
         }
     });
 }

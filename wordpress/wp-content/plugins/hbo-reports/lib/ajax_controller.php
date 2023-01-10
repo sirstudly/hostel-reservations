@@ -979,12 +979,13 @@ class AjaxController {
      *    first_name
      *    last_name
      *    email
+     *    notes
      */
     function saveBlacklist() {
         try {
             $blacklistPage = new Blacklist();
-            $blacklistPage->saveBlacklistEntry( $_POST['first_name'], $_POST['last_name'], $_POST['email'],
-                isset($_POST['id']) && $_POST['id'] > 0 ? $_POST['id'] : 0 );
+            $blacklistPage->saveBlacklistEntry( isset($_POST['id']) && $_POST['id'] > 0 ? $_POST['id'] : 0,
+                $_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['notes']);
             ?>
             <script type="text/javascript">
                 location.reload();
