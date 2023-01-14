@@ -7,7 +7,6 @@ class Blacklist extends XslTransform {
 
     var $blacklist;  // array() of blacklist entry
     var $editingId; // set if we're currently editing an entry
-    var $addAliasForId; // PK of blacklist entry if we're adding a new alias
 
     /**
      * Default constructor.
@@ -17,29 +16,13 @@ class Blacklist extends XslTransform {
     }
 
     /**
-     * Updates the view using the current selection date.
+     * Updates the view.
+     *
+     * @param int|null $editingId (optional) PK of blacklist entry currently being edited
      */
-    function doView() {
-        $this->blacklist = array();
+    function doView( int $editingId = null ) {
         $this->blacklist = LilHotelierDBO::getInstance()->getBlacklist();
-   }
-
-    /**
-     * Marks the given ID as currently editing.
-     * @param $id blacklist entry id
-     * @return void
-     */
-    function editBlacklistEntry($id) {
-        $this->editingId = $id;
-    }
-
-    /**
-     * Make the intention of adding an alias. Display a blank line under the blacklist entry.
-     * @param $id int PK of blacklist entry
-     * @return void
-     */
-    function addAlias($id) {
-        $this->addAliasForId = $id;
+        $this->editingId = $editingId;
     }
 
     /**
@@ -122,30 +105,28 @@ class Blacklist extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
 
-        $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
-        if ($this->editingId || $this->addAliasForId) {
-            $parentElement->appendChild($domtree->createElement('reload_table_only', 'true'));
-        }
-        $blacklistRoot = $parentElement->appendChild($domtree->createElement('blacklist'));
+        $parentElement->appendChild( $domtree->createElement( 'property_manager', get_option( 'hbo_property_manager' ) ) );
+        $blacklistRoot = $parentElement->appendChild( $domtree->createElement( 'blacklist' ) );
         if ( $this->blacklist ) {
-            foreach ($this->blacklist as $entry) {
-                $entryElem = $blacklistRoot->appendChild($domtree->createElement("entry"));
-                $entryElem->appendChild($domtree->createElement("blacklist_id", $entry->blacklist_id));
-                if (isset($entry->alias_id)) {
-                    $entryElem->appendChild( $domtree->createElement( "alias_id", $entry->alias_id ));
+            foreach ( $this->blacklist as $entry ) {
+                $entryElem = $blacklistRoot->appendChild( $domtree->createElement( "entry" ) );
+                if ($this->editingId == $entry->blacklist_id) {
+                    $entryElem->setAttribute('editing', 'true');
                 }
-                $entryElem->appendChild($domtree->createElement("first_name", htmlspecialchars($entry->first_name)));
-                $entryElem->appendChild($domtree->createElement("last_name", htmlspecialchars($entry->last_name)));
-                $entryElem->appendChild($domtree->createElement("email", htmlspecialchars($entry->email)));
-                if (isset($entry->notes)) {
+                $entryElem->appendChild( $domtree->createElement( "blacklist_id", $entry->blacklist_id ) );
+                $entryElem->appendChild( $domtree->createElement( "first_name", htmlspecialchars( $entry->first_name ) ) );
+                $entryElem->appendChild( $domtree->createElement( "last_name", htmlspecialchars( $entry->last_name ) ) );
+                $entryElem->appendChild( $domtree->createElement( "email", htmlspecialchars( $entry->email ) ) );
+                if ( isset( $entry->notes ) ) {
                     $entryElem->appendChild( $domtree->createElement( "notes", htmlspecialchars( $entry->notes ) ) );
                     $entryElem->appendChild( $domtree->createElement( "notes_readonly", nl2br( stripslashes( htmlspecialchars( $entry->notes ) ) ) ) );
                 }
-                if (FALSE === isset($entry->alias_id) && $entry->blacklist_id == $this->editingId) {
-                    $entryElem->appendChild($domtree->createElement("editing", "true"));
-                }
-                if (FALSE === isset($entry->alias_id) && $entry->blacklist_id == $this->addAliasForId) {
-                    $entryElem->appendChild($domtree->createElement("add_alias", "true"));
+                foreach ( $entry->aliases as $alias ) {
+                    $aliasElem = $entryElem->appendChild( $domtree->createElement( "alias" ) );
+                    $aliasElem->appendChild( $domtree->createElement( "alias_id", $alias->alias_id ) );
+                    $aliasElem->appendChild( $domtree->createElement( "first_name", htmlspecialchars( $alias->first_name ) ) );
+                    $aliasElem->appendChild( $domtree->createElement( "last_name", htmlspecialchars( $alias->last_name ) ) );
+                    $aliasElem->appendChild( $domtree->createElement( "email", htmlspecialchars( $alias->email ) ) );
                 }
             }
         }

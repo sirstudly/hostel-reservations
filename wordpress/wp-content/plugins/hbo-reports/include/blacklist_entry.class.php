@@ -7,6 +7,7 @@ class BlacklistEntry {
     var $last_name;
     var $email;
     var $notes;
+    var $aliases = array();
 
     /**
      * Default constructor.
@@ -21,6 +22,10 @@ class BlacklistEntry {
 
     function add_image($image) {
 
+    }
+
+    function add_alias($alias) {
+        $this->aliases[] = new BlacklistAlias($alias->alias_id, $alias->blacklist_id, $alias->first_name, $alias->last_name, $alias->email);
     }
 
 }

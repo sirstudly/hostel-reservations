@@ -153,16 +153,8 @@ class AjaxController {
 		        $this->resubmitIncompleteJob();
 		        break;
 
-            case 'EDIT_BLACKLIST':
-                $this->editBlacklist();
-                break;
-
             case 'SAVE_BLACKLIST':
                 $this->saveBlacklist();
-                break;
-
-            case 'ADD_BLACKLIST_ALIAS':
-                $this->addBlacklistAlias();
                 break;
 
             case 'SAVE_BLACKLIST_ALIAS':
@@ -986,65 +978,26 @@ class AjaxController {
             $blacklistPage = new Blacklist();
             $blacklistPage->saveBlacklistEntry( isset($_POST['id']) && $_POST['id'] > 0 ? $_POST['id'] : 0,
                 $_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['notes']);
-            ?>
-            <script type="text/javascript">
-                location.reload();
-            </script>
-            <?php
-        }
-        catch( Exception $e ) {
-            ?>
-            <script type="text/javascript">
-                jQuery("#ajax_response")
-                    .html('<?php echo $e->getMessage(); ?>')
-                    .css({ 'color': 'red' });
-            </script>
-            <?php
-        }
-    }
 
-    /**
-     * Flags a blacklist entry for editing.
-     * Requires POST variables:
-     *    id : PK of blacklist entry
-     */
-    function editBlacklist() {
-        try {
-            $blacklistPage = new Blacklist();
-            $blacklistPage->editBlacklistEntry( $_POST['id'] );
-            $blacklistPage->doView(); // re-query db
-            echo $blacklistPage->toHtml(); // regenerate blacklist table
-        }
-        catch( Exception $e ) {
+            // saving existing entry; stay on modal dialog
+            if (isset($_POST['id']) && $_POST['id'] > 0) {
             ?>
-            <script type="text/javascript">
-                jQuery("#ajax_response")
-                    .html('<?php echo $e->getMessage(); ?>')
-                    .css({ 'color': 'red' });
-            </script>
+                <div style="color:green">Save Successful.</div>
             <?php
-        }
-    }
+            }
+            else {
+                // new blacklist entry; reload page
+                ?>
+                    <script type="text/javascript">
+                        location.reload()
+                    </script>
+                <?php
+            }
 
-    /**
-     * Adds a blank row to an existing blacklist entry.
-     * Requires POST variables:
-     *    id : PK of blacklist entry
-     */
-    function addBlacklistAlias() {
-        try {
-            $blacklistPage = new Blacklist();
-            $blacklistPage->addAlias( $_POST['id'] );
-            $blacklistPage->doView(); // re-query db
-            echo $blacklistPage->toHtml(); // regenerate blacklist table
         }
         catch( Exception $e ) {
             ?>
-            <script type="text/javascript">
-                jQuery("#ajax_response")
-                    .html('<?php echo $e->getMessage(); ?>')
-                    .css({ 'color': 'red' });
-            </script>
+                <div style="color:red"><?= $e->getMessage(); ?></div>
             <?php
         }
     }
@@ -1060,18 +1013,20 @@ class AjaxController {
     function saveBlacklistAlias() {
         try {
             $blacklistPage = new Blacklist();
-            $blacklistPage->saveBlacklistAlias( $_POST['id'], $_POST['first_name'], $_POST['last_name'], $_POST['email']);
+            $blacklistPage->saveBlacklistAlias( $_POST['id'], $_POST['first_name'], $_POST['last_name'], $_POST['email'] );
+            $blacklistPage->doView( $_POST['id'] );
             ?>
             <script type="text/javascript">
-                location.reload();
+                jQuery("div.edit-blacklist[data-blacklist-id=<?=$_POST['id']?>]")
+                    .html(<?= json_encode($blacklistPage->toHtml()); ?>)
             </script>
             <?php
         }
         catch( Exception $e ) {
             ?>
             <script type="text/javascript">
-                jQuery("#ajax_response")
-                    .html('<?php echo $e->getMessage(); ?>')
+                jQuery("#ajax_response-<?=$_POST['id']?>")
+                    .html('<?= $e->getMessage(); ?>')
                     .css({ 'color': 'red' });
             </script>
             <?php
@@ -1081,23 +1036,26 @@ class AjaxController {
     /**
      * Deletes an existing blacklist alias.
      * Requires POST variables:
+     *    blacklist_id : PK of blacklist entry
      *    alias_id : PK of blacklist alias
      */
     function deleteBlacklistAlias() {
         try {
             $blacklistPage = new Blacklist();
             $blacklistPage->deleteBlacklistAlias( $_POST['alias_id'] );
+            $blacklistPage->doView( $_POST['blacklist_id'] );
             ?>
             <script type="text/javascript">
-                location.reload();
+                jQuery("div.edit-blacklist[data-blacklist-id=<?=$_POST['blacklist_id']?>]")
+                    .html(<?= json_encode($blacklistPage->toHtml()); ?>)
             </script>
             <?php
         }
         catch( Exception $e ) {
             ?>
             <script type="text/javascript">
-                jQuery("#ajax_response")
-                    .html('<?php echo $e->getMessage(); ?>')
+                jQuery("#ajax_response-<?=$_POST['blacklist_id']?>")
+                    .html('<?= $e->getMessage(); ?>')
                     .css({ 'color': 'red' });
             </script>
             <?php

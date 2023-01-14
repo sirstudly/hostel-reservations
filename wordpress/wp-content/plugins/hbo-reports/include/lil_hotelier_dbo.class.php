@@ -1424,26 +1424,31 @@ class LilHotelierDBO {
      * @throws DatabaseException
      */
     function getBlacklist() {
-        $resultset = $this->SHARED_DB->get_results(
-            "SELECT alias_id, blacklist_id, first_name, last_name, email, notes FROM (
-                SELECT NULL AS alias_id, id AS blacklist_id, first_name, last_name, email, notes FROM hbo_blacklist
-                 UNION ALL
-                SELECT id AS alias_id, blacklist_id, first_name, last_name, email, NULL AS notes FROM hbo_blacklist_alias WHERE deleted_date IS NULL
-            ) t
-            ORDER BY CASE WHEN alias_id IS NULL THEN blacklist_id ELSE (blacklist_id + 0.1) END, last_name, first_name, email");
+        $entry_rs = $this->SHARED_DB->get_results(
+            "SELECT id AS blacklist_id, first_name, last_name, email, notes FROM hbo_blacklist
+             ORDER BY blacklist_id, last_name, first_name, email");
+
+        if($this->SHARED_DB->last_error) {
+            throw new DatabaseException($this->SHARED_DB->last_error);
+        }
+
+        $alias_rs = $this->SHARED_DB->get_results(
+            "SELECT id AS alias_id, blacklist_id, first_name, last_name, email
+               FROM hbo_blacklist_alias WHERE deleted_date IS NULL");
 
         if($this->SHARED_DB->last_error) {
             throw new DatabaseException($this->SHARED_DB->last_error);
         }
 
         $blacklist = array();
-        foreach( $resultset as $record ) {
-            if($record->alias_id) {
-                $blacklist[] = new BlacklistAlias($record->alias_id, $record->blacklist_id, $record->first_name, $record->last_name, $record->email);
+        foreach ( $entry_rs as $record ) {
+            $entry = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email, $record->notes );
+            foreach ( $alias_rs as $alias ) {
+                if ( $alias->blacklist_id == $record->blacklist_id ) {
+                    $entry->add_alias( $alias );
+                }
             }
-            else {
-                $blacklist[] = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email, $record->notes );
-            }
+            $blacklist[] = $entry;
         }
         return $blacklist;
     }

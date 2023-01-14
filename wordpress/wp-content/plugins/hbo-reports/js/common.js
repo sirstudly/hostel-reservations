@@ -581,7 +581,7 @@ function save_blacklist( id, firstname, lastname, email, notes ) {
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
         type:'POST',
-        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response').html( data ) ;},
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery(id ? '#ajax_response-' + id : '#ajax_response').html( data );},
         error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
             ajax_action : 'SAVE_BLACKLIST',
@@ -590,38 +590,6 @@ function save_blacklist( id, firstname, lastname, email, notes ) {
             last_name : lastname,
             email : email,
             notes: notes
-        }
-    });
-}
-
-// edits a blacklist entry
-// id : PK of blacklist entry
-function edit_blacklist( id ) {
-
-    jQuery.ajax({                                           // Start Ajax Sending
-        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
-        type:'POST',
-        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#post_option').html( data ) ;},
-        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
-        data:{
-            ajax_action : 'EDIT_BLACKLIST',
-            id : id
-        }
-    });
-}
-
-// adds an empty row for a new alias to an existing blacklist entry
-// id : PK of blacklist entry
-function add_blacklist_alias( id ) {
-
-    jQuery.ajax({                                           // Start Ajax Sending
-        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
-        type:'POST',
-        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#post_option').html( data ) ;},
-        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
-        data:{
-            ajax_action : 'ADD_BLACKLIST_ALIAS',
-            id : id
         }
     });
 }
@@ -636,7 +604,7 @@ function save_blacklist_alias( id, firstname, lastname, email ) {
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
         type:'POST',
-        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response').html( data ) ;},
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response-' + id).html( data );},
         error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
             ajax_action : 'SAVE_BLACKLIST_ALIAS',
@@ -649,19 +617,43 @@ function save_blacklist_alias( id, firstname, lastname, email ) {
 }
 
 // Deletes an existing blacklist alias
+// blacklist_id : PK of blacklist entry
 // alias_id : PK of blacklist alias
-function delete_blacklist_alias( alias_id ) {
+function delete_blacklist_alias( blacklist_id, alias_id ) {
 
     jQuery.ajax({                                           // Start Ajax Sending
         url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
         type:'POST',
-        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response').html( data ) ;},
+        success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response-' + blacklist_id).html( data ) ;},
         error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
             ajax_action : 'DELETE_BLACKLIST_ALIAS',
+            blacklist_id : blacklist_id,
             alias_id : alias_id
         }
     });
+}
+
+function upload_blacklist_image( files ) {
+
+    // Check file selected or not
+    if (files.length > 0) {
+        jQuery.ajax({
+            url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+            type: 'POST',
+            data:{
+                ajax_action : 'UPLOAD_BLACKLIST_IMAGE',
+                file : files[0]
+            },
+            contentType: false,
+            processData: false,
+            success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response').html( data ) ;},
+            error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        });
+    }
+    else {
+        alert("Please select a file.");
+    }
 }
 
 //Looks up a booking
