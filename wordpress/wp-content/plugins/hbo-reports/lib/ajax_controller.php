@@ -165,6 +165,10 @@ class AjaxController {
                 $this->deleteBlacklistAlias();
                 break;
 
+            case 'UPLOAD_BLACKLIST_IMAGE':
+                $this->uploadBlacklistImage();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
@@ -1043,6 +1047,34 @@ class AjaxController {
         try {
             $blacklistPage = new Blacklist();
             $blacklistPage->deleteBlacklistAlias( $_POST['alias_id'] );
+            $blacklistPage->doView( $_POST['blacklist_id'] );
+            ?>
+            <script type="text/javascript">
+                jQuery("div.edit-blacklist[data-blacklist-id=<?=$_POST['blacklist_id']?>]")
+                    .html(<?= json_encode($blacklistPage->toHtml()); ?>)
+            </script>
+            <?php
+        }
+        catch( Exception $e ) {
+            ?>
+            <script type="text/javascript">
+                jQuery("#ajax_response-<?=$_POST['blacklist_id']?>")
+                    .html('<?= $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+            </script>
+            <?php
+        }
+    }
+
+    /**
+     * Uploads an image for the given blacklist.
+     * Requires POST variables:
+     *
+     */
+    function uploadBlacklistImage() {
+        try {
+            $blacklistPage = new Blacklist();
+            $blacklistPage->uploadBlacklistImage( $_POST['blacklist_id'], $_FILES['file']['name'], $_FILES['file']['tmp_name'] );
             $blacklistPage->doView( $_POST['blacklist_id'] );
             ?>
             <script type="text/javascript">

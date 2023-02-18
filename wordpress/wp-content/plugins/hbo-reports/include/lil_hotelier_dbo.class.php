@@ -1428,15 +1428,23 @@ class LilHotelierDBO {
             "SELECT id AS blacklist_id, first_name, last_name, email, notes FROM hbo_blacklist
              ORDER BY blacklist_id, last_name, first_name, email");
 
-        if($this->SHARED_DB->last_error) {
-            throw new DatabaseException($this->SHARED_DB->last_error);
+        if ( $this->SHARED_DB->last_error ) {
+            throw new DatabaseException( $this->SHARED_DB->last_error );
         }
 
         $alias_rs = $this->SHARED_DB->get_results(
             "SELECT id AS alias_id, blacklist_id, first_name, last_name, email
                FROM hbo_blacklist_alias WHERE deleted_date IS NULL");
 
-        if($this->SHARED_DB->last_error) {
+        if ( $this->SHARED_DB->last_error ) {
+            throw new DatabaseException( $this->SHARED_DB->last_error );
+        }
+
+        $mugshot_rs = $this->SHARED_DB->get_results(
+            "SELECT id AS mugshot_id, blacklist_id, filename
+               FROM hbo_blacklist_mugshot WHERE deleted_date IS NULL");
+
+        if ( $this->SHARED_DB->last_error ) {
             throw new DatabaseException($this->SHARED_DB->last_error);
         }
 
@@ -1446,6 +1454,11 @@ class LilHotelierDBO {
             foreach ( $alias_rs as $alias ) {
                 if ( $alias->blacklist_id == $record->blacklist_id ) {
                     $entry->add_alias( $alias );
+                }
+            }
+            foreach ( $mugshot_rs as $mugshot ) {
+                if ( $mugshot->blacklist_id == $record->blacklist_id ) {
+                    $entry->add_mugshot( $mugshot );
                 }
             }
             $blacklist[] = $entry;
@@ -1495,27 +1508,15 @@ class LilHotelierDBO {
     /**
      * Inserts a new blacklist alias for an existing blacklist entry.
      * @param $id int PK of blacklist entry
-     * @param $first_name
-     * @param $last_name
-     * @param $email
+     * @param $first_name string
+     * @param $last_name string
+     * @param $email string|null
      *
      * @return void
      * @throws DatabaseException
      */
-    function saveBlacklistAlias($id, $first_name, $last_name, $email) {
-        $rowcount = $this->SHARED_DB->get_var($this->SHARED_DB->prepare(
-            "SELECT COUNT(1)
-               FROM hbo_blacklist
-              WHERE id = %d", $id));
-
-        if($this->SHARED_DB->last_error) {
-            throw new DatabaseException($this->SHARED_DB->last_error);
-        }
-
-        if ($rowcount == 0) {
-            throw new DatabaseException( "Unable to find blacklist id $id" );
-        }
-
+    function saveBlacklistAlias( $id, $first_name, $last_name, $email ) {
+        $this->validateBlacklistId( $id );
         if (false === $this->SHARED_DB->insert( "hbo_blacklist_alias",
                 array( 'blacklist_id' => $id,
                        'first_name' => $first_name,
@@ -1544,6 +1545,45 @@ class LilHotelierDBO {
             throw new DatabaseException("Error occurred during UPDATE");
         }
     }
-}
 
-?>
+    /**
+     * Saves a reference to the recently uploaded image for a blacklist entry.
+     * @param $id int PK of blacklist entry
+     * @param $filename string name of file on local filesystem
+     *
+     * @return void
+     * @throws DatabaseException
+     */
+    function saveBlacklistImage( $id, $filename ) {
+        $this->validateBlacklistId( $id );
+        if (false === $this->SHARED_DB->insert( "hbo_blacklist_mugshot",
+                array( 'blacklist_id' => $id,
+                       'filename' => $filename ),
+                array( '%d', '%s' ))) {
+            error_log($this->SHARED_DB->last_error . " executing sql: " . $this->SHARED_DB->last_query);
+            throw new DatabaseException( $this->SHARED_DB->last_error );
+        }
+    }
+
+    /**
+     * Verifies the blacklist_id exists.
+     * @param $id int PK of blacklist entry
+     *
+     * @return void
+     * @throws DatabaseException if blacklist does not exist
+     */
+    function validateBlacklistId( $id ) {
+        $rowcount = $this->SHARED_DB->get_var($this->SHARED_DB->prepare(
+            "SELECT COUNT(1)
+               FROM hbo_blacklist
+              WHERE id = %d", $id));
+
+        if($this->SHARED_DB->last_error) {
+            throw new DatabaseException($this->SHARED_DB->last_error);
+        }
+
+        if ($rowcount == 0) {
+            throw new DatabaseException( "Unable to find blacklist id $id" );
+        }
+    }
+}

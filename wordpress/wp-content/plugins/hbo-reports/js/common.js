@@ -634,20 +634,25 @@ function delete_blacklist_alias( blacklist_id, alias_id ) {
     });
 }
 
-function upload_blacklist_image( files ) {
+// Uploads a new image for a given blacklist entry
+// blacklist_id : PK of blacklist entry
+// files : array of (one) file to upload
+function upload_blacklist_image( blacklist_id, files ) {
 
     // Check file selected or not
     if (files.length > 0) {
+        const fd = new FormData();
+        fd.append('file',files[0]);
+        fd.append('ajax_action', 'UPLOAD_BLACKLIST_IMAGE');
+        fd.append('blacklist_id', blacklist_id);
         jQuery.ajax({
             url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
             type: 'POST',
-            data:{
-                ajax_action : 'UPLOAD_BLACKLIST_IMAGE',
-                file : files[0]
-            },
+            data: fd,
+            cache: false,
             contentType: false,
             processData: false,
-            success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response').html( data ) ;},
+            success: function (data, textStatus){if( textStatus == 'success')   jQuery('#ajax_response-' + blacklist_id).html( data ) ;},
             error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         });
     }

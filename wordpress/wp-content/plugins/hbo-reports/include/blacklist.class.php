@@ -98,6 +98,42 @@ class Blacklist extends XslTransform {
     }
 
     /**
+     * Saves the image to the upload folder.
+     *
+     * @param $blacklist_id int PK of blacklist entry
+     * @param $filename String name of file on remote filesystem
+     * @param $tmp_filename String name of file on local filesystem
+     *
+     * @return void
+     * @throws ValidationException on invalid file type
+     * @throws DatabaseException
+     */
+    function uploadBlacklistImage( $blacklist_id, $filename, $tmp_filename ) {
+
+        $savedFileName = "$blacklist_id $filename";
+        $targetLocation = "upload/$savedFileName";
+        $imageFileType = pathinfo($targetLocation,PATHINFO_EXTENSION);
+        $imageFileType = strtolower($imageFileType);
+
+        // Valid extensions
+        $valid_extensions = array("jpg","jpeg","png");
+
+        // Check file extension
+        if ( in_array( strtolower( $imageFileType ), $valid_extensions ) ) {
+            // Upload file
+            if ( move_uploaded_file( $tmp_filename, $targetLocation ) ) {
+                LilHotelierDBO::getInstance()->saveBlacklistImage( $blacklist_id, $savedFileName );
+            }
+            else {
+                throw new ValidationException("Failed to save file to $targetLocation!");
+            }
+        }
+        else {
+            throw new ValidationException("Unsupported file type. Only JPG, JPEG, PNG images are supported.");
+        }
+    }
+
+    /**
      * Adds this object to the DOMDocument/XMLElement specified.
      * See toXml() for details.
      * $domtree : DOM document root
@@ -128,6 +164,11 @@ class Blacklist extends XslTransform {
                     $aliasElem->appendChild( $domtree->createElement( "last_name", htmlspecialchars( $alias->last_name ) ) );
                     $aliasElem->appendChild( $domtree->createElement( "email", htmlspecialchars( $alias->email ) ) );
                 }
+                foreach ( $entry->mugshots as $mugshot ) {
+                    $mugshotElem = $entryElem->appendChild( $domtree->createElement( "mugshot" ) );
+                    $mugshotElem->appendChild( $domtree->createElement( "mugshot_id", $mugshot->mugshot_id ) );
+                    $mugshotElem->appendChild( $domtree->createElement( "filename", $mugshot->filename ) );
+                }
             }
         }
     }
@@ -145,9 +186,9 @@ class Blacklist extends XslTransform {
         // create a dom document with encoding utf8
         $domtree = new DOMDocument('1.0', 'UTF-8');
         $xmlRoot = $domtree->appendChild($domtree->createElement('view'));
+        $xmlRoot->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
         $this->addSelfToDocument($domtree, $xmlRoot);
         $xml = $domtree->saveXML();
-error_log($xml);
         return $xml;
     }
     

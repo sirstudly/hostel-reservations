@@ -8,6 +8,7 @@ class BlacklistEntry {
     var $email;
     var $notes;
     var $aliases = array();
+    var $mugshots = array();
 
     /**
      * Default constructor.
@@ -20,12 +21,12 @@ class BlacklistEntry {
         $this->notes = $notes;
     }
 
-    function add_image($image) {
-
-    }
-
     function add_alias($alias) {
         $this->aliases[] = new BlacklistAlias($alias->alias_id, $alias->blacklist_id, $alias->first_name, $alias->last_name, $alias->email);
+    }
+
+    function add_mugshot($mugshot) {
+        $this->mugshots[] = new BlacklistMugshot($mugshot->mugshot_id, $mugshot->blacklist_id, $mugshot->filename);
     }
 
 }
