@@ -83,7 +83,9 @@ class LHUnpaidDepositReport extends XslTransform {
                     $recordRoot->appendChild($domtree->createElement('booked_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->getTimestamp()));
                 }
                 $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
-                $recordRoot->appendChild($domtree->createElement('notes', str_replace(array("\r\n", "\n", "\r"), "<br/>", htmlspecialchars($record->notes))));
+                if ( isset( $record->notes ) ) {
+                    $recordRoot->appendChild($domtree->createElement('notes', str_replace(array("\r\n", "\n", "\r"), "<br/>", htmlspecialchars($record->notes))));
+                }
                 $recordRoot->appendChild($domtree->createElement('created_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->created_date)->format('D, d M Y H:i:s')));
             }
         }

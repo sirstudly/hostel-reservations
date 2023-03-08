@@ -109,7 +109,9 @@ class PaymentHistoryInvoiceController extends XslTransform {
                         }
                         // processed_date is actually the date the processor sends out the email
                         // we want to display the date the transaction was made
-                        $txnRoot->appendChild($domtree->createElement("processed_date", $txn->created_date));
+                        if ( isset( $txn->created_date ) ) {
+                            $txnRoot->appendChild( $domtree->createElement( "processed_date", $txn->created_date ) );
+                        }
                             
                         if( !empty($txn->payment_amount)) {
                             $txnRoot->appendChild($domtree->createElement("payment_amount", number_format($txn->payment_amount, 2)));

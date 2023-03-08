@@ -151,13 +151,14 @@ class LHGuestCommentsReportData extends XslTransform {
                 }
                 $recordRoot->appendChild($domtree->createElement('num_guests', $record->num_guests));
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
-                if( $record->notes ) {
+                if ( isset( $record->notes ) ) {
                     $recordRoot->appendChild($domtree->createElement('notes', htmlspecialchars($record->notes)));
                 }
-                $recordRoot->appendChild($domtree->createElement('comments', htmlspecialchars(preg_replace( '/<br *\/>/si', ' ', $record->comments ), ENT_XML1, "UTF-8" )));
-
-                if( $record->acknowledged_date ) {
-                    $recordRoot->appendChild($domtree->createElement('acknowledged_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
+                if ( isset( $record->comments ) ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'comments', htmlspecialchars( preg_replace( '/<br *\/>/si', ' ', $record->comments ), ENT_XML1, "UTF-8" ) ) );
+                }
+                if( isset( $record->acknowledged_date ) ) {
+                    $recordRoot->appendChild($domtree->createElement('acknowledged_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->acknowledged_date)->format('D, d M Y')));
                 }
             }
         }

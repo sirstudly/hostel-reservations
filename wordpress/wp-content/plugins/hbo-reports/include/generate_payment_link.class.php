@@ -184,7 +184,7 @@ class GeneratePaymentLinkController extends XslTransform {
         }
         // payment description is 80 characters max
         $parentElement->appendChild($domtree->createElement('payment_description_max_length', 80 - (strlen(get_option("hbo_sagepay_transaction_description")) + self::LOOKUPKEY_LENGTH + 1)));
-        if($this->booking) {
+        if ( isset( $this->booking ) ) {
             $bookingRoot = $parentElement->appendChild($domtree->createElement('booking'));
             $bookingRoot->appendChild($domtree->createElement('identifier', $this->booking['identifier']));
             $bookingRoot->appendChild($domtree->createElement('third_party_identifier', $this->booking['third_party_identifier']));

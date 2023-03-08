@@ -86,7 +86,9 @@ class LHGroupBookingsReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('payment_outstanding', $record->payment_outstanding));
                 $recordRoot->appendChild($domtree->createElement('num_guests', $record->num_guests));
                 $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
-                $recordRoot->appendChild($domtree->createElement('notes', str_replace(array("\r\n", "\n", "\r"), "<br/>", htmlspecialchars($record->notes))));
+                if ( isset( $record->notes ) ) {
+                    $recordRoot->appendChild($domtree->createElement('notes', str_replace(array("\r\n", "\n", "\r"), "<br/>", htmlspecialchars($record->notes))));
+                }
                 $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
             }
         }
