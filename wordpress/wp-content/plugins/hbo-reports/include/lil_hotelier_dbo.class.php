@@ -819,7 +819,14 @@ class LilHotelierDBO {
                      GROUP BY CRC32(hsh_room_type) -- some weirdness with MariaDB here
                      ORDER BY capacity";
         }
-         
+        else {
+            // for paid beds, the "paid" category doesn't need to be "checked-in"
+            $sql = "SELECT room, capacity, room_type, num_empty, num_staff,
+                           IF(room = 'PB', num_paid + num_noshow, num_paid) AS num_paid,
+                           IF(room = 'PB', 0, num_noshow) AS num_noshow
+                     FROM ( $sql ) bc";
+        }
+
         $resultset = $wpdb->get_results($wpdb->prepare(
             $sql, $selectedDate->format('Y-m-d H:i:s'), $allocJobId ));
 
