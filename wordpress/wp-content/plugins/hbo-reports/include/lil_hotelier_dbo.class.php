@@ -782,9 +782,9 @@ class LilHotelierDBO {
                     IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_paid * capacity, num_paid) `num_paid`, 
                     IF(room_type IN ('DBL','TRIPLE','QUAD','TWIN'), num_noshow * capacity, num_noshow) `num_noshow`
               FROM (
-               -- room 30 is split into separate rooms for some reason; collapse them
-               SELECT IF(p.room_type = 'OVERFLOW', '30', p.room) `room`, IF(p.room_type = 'OVERFLOW', 7, p.capacity) `capacity`, p.room_type,
-                      SUM(IF(p.reservation_id IS NULL AND p.room_type != 'OVERFLOW', 1, 0)) `num_empty`,
+               -- room 30/paid beds is split into separate rooms for some reason; collapse them
+               SELECT IF(p.room_type = 'PAID BEDS', 'PB', p.room) `room`, IF(p.room_type = 'PAID BEDS', 8, p.capacity) `capacity`, p.room_type,
+                      SUM(IF(p.reservation_id IS NULL AND p.room_type != 'PAID BEDS', 1, 0)) `num_empty`,
                       SUM(IF(p.reservation_id = 0, 1, 0)) `num_staff`, 
                       SUM(IF(p.lh_status IN ('checked-in', 'checked-out', 'checked_in', 'checked_out') AND p.reservation_id > 0, 1, 0)) `num_paid`, 
                       SUM(IF(IFNULL(p.lh_status, '') NOT IN ('checked-in', 'checked-out', 'checked_in', 'checked_out') AND p.reservation_id > 0, 1, 0)) `num_noshow`
@@ -798,15 +798,15 @@ class LilHotelierDBO {
                             AND cal.checkout_date > const.selection_date
                        ) c 
                        -- if unallocated (room_id = null), then ignore this join field and match on room_type_id
-                       ON IFNULL(c.room_id, rm.id) = rm.id AND IFNULL(c.room, 'Unallocated') = rm.room AND c.room_type_id = rm.room_type_id
-					WHERE rm.active_yn = 'Y' OR rm.room_type = 'OVERFLOW' OR rm.room = 'Unallocated'
+                       ON IFNULL(c.room_id, rm.id) = rm.id AND IFNULL(IF(c.room LIKE 'PB(%', 'PB', c.room), 'Unallocated') = rm.room AND c.room_type_id = rm.room_type_id
+					WHERE rm.active_yn = 'Y' OR rm.room_type = 'PAID BEDS' OR rm.room = 'Unallocated'
               ) p
-             GROUP BY IF(p.room_type = 'OVERFLOW', '30', p.room), p.capacity, p.room_type
+             GROUP BY IF(p.room_type = 'PAID BEDS', 'PB', p.room), p.capacity, p.room_type
           ) t
-          -- only include OVERFLOW or Unallocated if we have something to report
-         WHERE (room_type != 'OVERFLOW' AND room != 'Unallocated')
+          -- only include Unallocated if we have something to report
+         WHERE room != 'Unallocated'
           -- 2018-06-17: don't include unallocated anymore; throws off count in cloudbeds
-          --  OR ((room_type = 'OVERFLOW' OR room = 'Unallocated') AND (num_staff > 0 OR num_paid > 0 OR num_noshow > 0))
+          --  OR ((room_type = 'PAID BEDS' OR room = 'Unallocated') AND (num_staff > 0 OR num_paid > 0 OR num_noshow > 0))
          ORDER BY room";
 
         // HSH bedcounts are actually by room type
