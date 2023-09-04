@@ -33,8 +33,8 @@ abstract class AbstractBedCounts extends XslTransform {
             $this->lastCompletedAllocScraperJob = null;
         }
         else {
-            $this->bedcountData = LilHotelierDBO::getBedcountReport($this->selectionDate, $allocJobRec->job_id);
-            $this->lastCompletedAllocScraperJob = $allocJobRec->end_date;
+            $this->bedcountData                 = LilHotelierDBO::getBedcountReport( $this->selectionDate );
+            $this->lastCompletedAllocScraperJob = empty( $this->bedcountData ) ? null : $this->bedcountData[0]->created_date;
         }
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
         $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
