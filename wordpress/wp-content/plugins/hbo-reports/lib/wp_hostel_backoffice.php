@@ -201,8 +201,14 @@ class WP_HostelBackoffice {
             header('Pragma: public');
 
             // generate the CSV file and terminate
-            $bc = new BedCountsCSV( DateTime::createFromFormat(
-                    '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('UTC')));
+            if( strpos(get_option('hbo_lilho_username'), 'castlerock') === 0 ) {
+                $bc = new BedCountsCSVNew( DateTime::createFromFormat(
+                    '!Y-m-d', $_POST['selectiondate'], new DateTimeZone( 'UTC' ) ) );
+            }
+            else {
+                $bc = new BedCountsCSV( DateTime::createFromFormat(
+                    '!Y-m-d', $_POST['selectiondate'], new DateTimeZone( 'UTC' ) ) );
+            }
             $bc->updateBedcounts();
             echo $bc->toCSV();
 

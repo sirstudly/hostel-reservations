@@ -29,6 +29,8 @@ class HtmlHeaders extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('pluginfilename', HBO_PLUGIN_FILENAME));
         $xmlRoot->appendChild($domtree->createElement('locale', 'en_US'));  // hard-coded for now
         $xmlRoot->appendChild($domtree->createElement('siteicon', get_option('hbo_siteicon_url')));
+        global $wp;
+        $xmlRoot->appendChild($domtree->createElement('currenturl', home_url(add_query_arg(array(), $wp->request))));
         return $domtree->saveXML();
     }
 

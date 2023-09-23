@@ -87,13 +87,22 @@ Tested WordPress Versions: 4.6
     if (file_exists(HBO_PLUGIN_DIR. '/include/lh_abstract_bedcounts.class.php')) 
         { require_once(HBO_PLUGIN_DIR. '/include/lh_abstract_bedcounts.class.php' ); }
 
-    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_bedcounts.class.php')) 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_abstract_bedcounts_new.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/lh_abstract_bedcounts_new.class.php' ); }
+
+    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_bedcounts.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/lh_bedcounts.class.php' ); }
 
-    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_bedcounts_csv.class.php')) 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_bedcounts_new.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/lh_bedcounts_new.class.php' ); }
+
+    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_bedcounts_csv.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/lh_bedcounts_csv.class.php' ); }
 
-    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_guest_comments_report_data.class.php')) 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_bedcounts_csv_new.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/lh_bedcounts_csv_new.class.php' ); }
+
+    if (file_exists(HBO_PLUGIN_DIR. '/include/lh_guest_comments_report_data.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/lh_guest_comments_report_data.class.php' ); }
 
     if (file_exists(HBO_PLUGIN_DIR. '/include/lh_guest_comments_report.class.php')) 

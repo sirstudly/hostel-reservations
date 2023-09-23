@@ -9,7 +9,12 @@
             '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('Europe/London'));
     }
 
-    $bc = new BedCounts( $selectionDate );
+    if( strpos(get_option('hbo_lilho_username'), 'castlerock') === 0 ) {
+        $bc = new BedCountsNew( $selectionDate );
+    }
+    else {
+        $bc = new BedCounts( $selectionDate );
+    }
 
     if (isset($_POST['bedcount_job']) && trim($_POST['bedcount_job']) == 'true' ) {
         $bc->submitRefreshJob();

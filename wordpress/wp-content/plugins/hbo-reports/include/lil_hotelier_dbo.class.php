@@ -790,6 +790,38 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns bedcount report.
+     *
+     * @param $fromDate DateTime selection date start (inclusive)
+     * @param $toDate DateTime selection date end (exclusive)
+     *
+     * @throws DatabaseException
+     */
+    static function getBedcountReportWeekly( DateTime $fromDate, DateTime $toDate ) {
+        global $wpdb;
+
+        $sql = "SELECT report_date, room, capacity, room_type, num_empty, num_staff, num_paid, num_noshow, created_date
+                  FROM wp_lh_bedcounts
+                 WHERE report_date >= %s AND report_date < %s";
+
+        if( get_option('blogname') == 'High Street Hostel Bookings' ) {
+            $sql .= " ORDER BY capacity, report_date";
+        }
+        else {
+            $sql .= " ORDER BY room, report_date";
+        }
+
+        $resultset = $wpdb->get_results( $wpdb->prepare(
+            $sql, $fromDate->format( 'Y-m-d' ), $toDate->format( 'Y-m-d' ) ) );
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset;
+    }
+
+    /**
      * Returns the date of the last booking diffs job that
      * ran succesfully for the given date or null if none found.
      *
