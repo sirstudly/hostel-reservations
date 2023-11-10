@@ -41,7 +41,7 @@
                                         <td><input id="redirect_to_url"  name="hbo_redirect_to_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{redirect_to_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
-                                        <th scope="row"><label for="reports_url">Split Room Reservation Report</label></th>
+                                        <th scope="row"><label for="hbo_split_room_report_url">Split Room Reservation Report</label></th>
                                         <td><input id="hbo_split_room_report_url"  name="hbo_split_room_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{split_room_report_url}" /></td>
                                     </tr>  
                                     <tr valign="top">
@@ -59,7 +59,11 @@
                                     <tr valign="top">
                                         <th scope="row"><label for="guest_comments_report_url">Guest Comments</label></th>
                                         <td><input id="guest_comments_report_url"  name="hbo_guest_comments_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{guest_comments_report_url}" /></td>
-                                    </tr>  
+                                    </tr>
+                                    <tr valign="top">
+                                        <th scope="row"><label for="hbo_bottom_bunks_report_url">Bottom Bunks Report</label></th>
+                                        <td><input id="hbo_bottom_bunks_report_url"  name="hbo_bottom_bunks_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{bottom_bunks_report_url}" /></td>
+                                    </tr>
                                     <tr valign="top">
                                         <th scope="row"><label for="manual_charge_url">Manual Charges</label></th>
                                         <td><input id="manual_charge_url"  name="hbo_manual_charge_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{manual_charge_url}" /></td>
@@ -119,7 +123,11 @@
                                     <tr valign="top">
                                         <th scope="row"><label for="run_processor_cmd">Run Processor Command</label></th>
                                         <td><input id="run_processor_cmd"  name="hbo_run_processor" class="regular-text code" type="text" style="width:350px;" size="145" value="{run_processor_cmd}" /></td>
-                                    </tr>  
+                                    </tr>
+                                    <tr valign="top">
+                                        <th scope="row"><label for="reports_help_url">Reports Help</label></th>
+                                        <td><input id="reports_help_url"  name="hbo_reports_help_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{reports_help_url}" /></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

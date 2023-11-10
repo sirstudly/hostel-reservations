@@ -26,6 +26,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('unpaid_deposit_report_url', get_option('hbo_unpaid_deposit_report_url')));
         $xmlRoot->appendChild($domtree->createElement('group_bookings_report_url', get_option('hbo_group_bookings_report_url')));
         $xmlRoot->appendChild($domtree->createElement('guest_comments_report_url', get_option('hbo_guest_comments_report_url')));
+        $xmlRoot->appendChild($domtree->createElement('bottom_bunks_report_url', get_option('hbo_bottom_bunks_report_url')));
         $xmlRoot->appendChild($domtree->createElement('bedcounts_url', get_option('hbo_bedcounts_url')));
         $xmlRoot->appendChild($domtree->createElement('manual_charge_url', get_option('hbo_manual_charge_url')));
         $xmlRoot->appendChild($domtree->createElement('generate_payment_link_url', get_option('hbo_generate_payment_link_url')));
@@ -43,6 +44,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('log_directory', get_option('hbo_log_directory')));
         $xmlRoot->appendChild($domtree->createElement('log_directory_url', get_option('hbo_log_directory_url')));
         $xmlRoot->appendChild($domtree->createElement('run_processor_cmd', get_option('hbo_run_processor_cmd')));
+        $xmlRoot->appendChild($domtree->createElement('reports_help_url', get_option('hbo_reports_help_url')));
     }
 
     /**
@@ -56,6 +58,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_unpaid_deposit_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_group_bookings_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_guest_comments_report_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_bottom_bunks_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_bedcounts_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_manual_charge_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_generate_payment_link_url');
@@ -73,6 +76,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_log_directory_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_run_processor_cmd');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_reports_help_url');
     }
 
     /**

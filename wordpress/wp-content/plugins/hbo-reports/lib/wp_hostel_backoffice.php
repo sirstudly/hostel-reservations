@@ -47,6 +47,7 @@ class WP_HostelBackoffice {
         add_option('hbo_group_bookings_report_url', 'reports/group-bookings');
         add_option('hbo_bedcounts_url', 'reports/bedcounts');
         add_option('hbo_guest_comments_report_url', 'reports/guest-comments');
+        add_option('hbo_bottom_bunks_report_url', 'reports/bottom-bunks-report');
         add_option('hbo_manual_charge_url', 'reports/manual-charge');
         add_option('hbo_generate_payment_link_url', 'payments/generate-payment-link');
         add_option('hbo_payment_history_url', 'payments/payment-history');
@@ -54,6 +55,7 @@ class WP_HostelBackoffice {
         add_option('hbo_process_refunds_url', 'payments/process-refunds');
         add_option('hbo_refund_history_url', 'payments/refund-history');
         add_option('hbo_report_settings_url', 'admin/report-settings');
+        add_option('hbo_reports_help_url', 'reports');
         add_option('hbo_redirect_to_url', 'redirect-to');
         add_option('hbo_view_log_url', 'view-log');
         add_option('hbo_log_directory', 'logs');
@@ -78,7 +80,9 @@ class WP_HostelBackoffice {
         delete_option('hbo_group_bookings_report_url');
         delete_option('hbo_bedcounts_url');
         delete_option('hbo_guest_comments_report_url');
+        delete_option('hbo_bottom_bunks_report_url');
         delete_option('hbo_report_settings_url');
+        delete_option('hbo_reports_help_url');
         delete_option('hbo_redirect_to_url');
         delete_option('hbo_view_log_url');
         delete_option('hbo_log_directory');
@@ -245,6 +249,7 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_group_bookings_report_url'), 'group-bookings.php');
         $this->do_redirect_for_page(get_option('hbo_bedcounts_url'), 'bedcounts.php');
         $this->do_redirect_for_page(get_option('hbo_guest_comments_report_url'), 'guest-comments.php');
+        $this->do_redirect_for_page(get_option('hbo_bottom_bunks_report_url'), 'bottom-bunks-report.php');
         $this->do_redirect_for_page(get_option('hbo_report_settings_url'), 'report-settings.php');
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
         $this->do_redirect_for_page(get_option('hbo_job_history_url'), 'job-history.php');
@@ -258,6 +263,8 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_refund_history_url'), 'refund-history.php');
         $this->do_redirect_for_page(get_option('hbo_online_checkin_url'), 'online-checkin.php');
         $this->do_redirect_for_page(get_option('hbo_view_log_url'), 'view-log.php');
+        $this->do_redirect_for_page(get_option('hbo_reports_help_url'), 'reports-help.php');
+        $this->do_redirect_for_page('help', 'reports-help.php');
     }
 
     /**

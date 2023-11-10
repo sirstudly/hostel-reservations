@@ -255,6 +255,37 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns report where a booking has a note indicating bottom bunk/bed but not assigned to a bottom bed/bunk.
+     * @throws DatabaseException
+     */
+    static function getBottomBunksReport() {
+        global $wpdb;
+        $allocScraperJobId = LilHotelierDBO::getLastCompletedAllocationScraperJobId();
+        if ( $allocScraperJobId == null ) {
+            return array();
+        }
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT DISTINCT reservation_id, room, bed_name, guest_name, checkin_date, checkout_date, data_href, lh_status, 
+                             booking_reference, booking_source, booked_date, eta, viewed_yn, notes
+               FROM wp_lh_calendar
+              WHERE job_id = %d
+                AND reservation_id IN 
+                    ( SELECT DISTINCT c.reservation_id FROM wp_lh_calendar c
+                       WHERE c.job_id = %d
+                         AND (LOWER(c.notes) LIKE '%bottom bunk%' OR LOWER(c.notes) LIKE '%lower bunk%'
+                                OR LOWER(c.notes) LIKE '%bottom bed%' OR LOWER(c.notes) LIKE '%lower bed%')
+                         AND MOD(CAST(SUBSTR(c.bed_name, 1, 2) AS UNSIGNED), 2) > 0) -- odd numbers are top bunks
+              ORDER BY checkin_date",
+            $allocScraperJobId, $allocScraperJobId));
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset;
+    }
+
+    /**
      * Confirms a guest comment has been looked at.
      * $reservationId : ID of LH reservation
      */
@@ -548,6 +579,33 @@ class LilHotelierDBO {
             return null;
         }
         return $rec->end_date;
+    }
+
+    /**
+     * Returns the ID of the last allocation scraper job that
+     * ran succesfully.
+     */
+    static function getLastCompletedAllocationScraperJobId() {
+        global $wpdb;
+        $resultset = $wpdb->get_results($wpdb->prepare(
+            "SELECT MAX(job_id) `job_id`
+                  FROM wp_lh_jobs 
+                 WHERE classname = 'com.macbackpackers.jobs.AllocationScraperJob'
+                   AND status IN ( %s )",
+            self::STATUS_COMPLETED ));
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        // guaranteed null or int
+        $rec = array_shift($resultset);
+
+        // if null, then no job exists
+        if( $rec->job_id == null) {
+            return null;
+        }
+        return $rec->job_id;
     }
 
     /**

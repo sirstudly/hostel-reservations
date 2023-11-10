@@ -174,11 +174,11 @@ class HouseKeeping extends XslTransform {
                 $bedRoot = $parentElement->appendChild($domtree->createElement('bed'));
                 $bedRoot->appendChild($domtree->createElement('room', $bed->room));
                 $bedRoot->appendChild($domtree->createElement('room_type', in_array($bed->room_type, array("F", "M", "MX")) ? $bed->capacity . $bed->room_type : $bed->room_type));
-                $bedRoot->appendChild($domtree->createElement('bed_name', htmlspecialchars(html_entity_decode($bed->bed_name, ENT_COMPAT, "UTF-8" ))));
-                $bedRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($bed->guest_name, ENT_COMPAT, "UTF-8" ))));
-                $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date));
-                $bedRoot->appendChild($domtree->createElement('checkout_date', $bed->checkout_date));
-                $bedRoot->appendChild($domtree->createElement('data_href', $bed->data_href));
+                $bedRoot->appendChild($domtree->createElement('bed_name', htmlspecialchars(html_entity_decode($bed->bed_name ?? "", ENT_COMPAT, "UTF-8" ))));
+                $bedRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($bed->guest_name ?? "", ENT_COMPAT, "UTF-8" ))));
+                $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date ?? ""));
+                $bedRoot->appendChild($domtree->createElement('checkout_date', $bed->checkout_date ?? ""));
+                $bedRoot->appendChild($domtree->createElement('data_href', $bed->data_href ?? ""));
                 $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet == 'N DAY CHANGE' && false === empty($n_day_change) ? "$n_day_change DAY CHANGE": $bed->bedsheet));
             }
         }
