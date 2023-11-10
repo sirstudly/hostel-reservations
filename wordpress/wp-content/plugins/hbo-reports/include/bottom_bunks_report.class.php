@@ -82,12 +82,11 @@ class BottomBunksReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('status', $record->lh_status));
                 $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
                 $recordRoot->appendChild($domtree->createElement('booking_source', htmlspecialchars(html_entity_decode($record->booking_source, ENT_COMPAT, "UTF-8" ))));
-                if( $record->booked_date ) {
-                    $recordRoot->appendChild($domtree->createElement('booked_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
-                    $recordRoot->appendChild($domtree->createElement('booked_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->getTimestamp()));
-                }
                 if ( isset( $record->notes ) ) {
                     $recordRoot->appendChild( $domtree->createElement( 'notes', htmlspecialchars( $record->notes ) ) );
+                }
+                if ( isset( $record->comments ) ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'comments', htmlspecialchars( $record->comments ) ) );
                 }
             }
         }

@@ -99,7 +99,7 @@
                 <th scope="col">Room/Bed Name</th>
                 <th scope="col">Checkin Date</th>
                 <th scope="col">Checkout Date</th>
-                <th scope="col">Booked Date</th>
+                <th scope="col">Comments</th>
                 <th scope="col">Notes</th>
             </tr>
         </thead>
@@ -136,7 +136,7 @@
         <td class="text-left" style="width: 120px;"><xsl:value-of select="room"/><xsl:text> </xsl:text><xsl:value-of select="bed_name"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
-        <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
+        <td class="text-left"><xsl:value-of select="comments"/></td>
         <td class="text-left" style="max-width: 300px;"><xsl:value-of select="notes"/></td>
     </tr>
 </xsl:template>
