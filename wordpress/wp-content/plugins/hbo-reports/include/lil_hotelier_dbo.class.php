@@ -589,12 +589,16 @@ class LilHotelierDBO {
      */
     static function getLastCompletedAllocationScraperJobId() {
         global $wpdb;
-        $resultset = $wpdb->get_results($wpdb->prepare(
+        $resultset = $wpdb->get_results(
             "SELECT MAX(job_id) `job_id`
-                  FROM wp_lh_jobs 
+                  FROM wp_lh_jobs j
                  WHERE classname = 'com.macbackpackers.jobs.AllocationScraperJob'
-                   AND status IN ( %s )",
-            self::STATUS_COMPLETED ));
+                   AND status IN ( 'completed' )
+                   AND NOT EXISTS(
+                       SELECT 1 FROM wp_lh_jobs j1 LEFT OUTER JOIN wp_lh_job_param p1 ON j1.job_id = p1.job_id
+                        WHERE classname = 'com.macbackpackers.jobs.CloudbedsAllocationScraperWorkerJob'
+                          AND status IN ( 'submitted', 'processing' )
+                          AND p1.name = 'allocation_scraper_job_id' AND p1.value = j.job_id)");
 
         if($wpdb->last_error) {
             throw new DatabaseException($wpdb->last_error);
