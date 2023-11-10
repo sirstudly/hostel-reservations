@@ -266,14 +266,16 @@ class LilHotelierDBO {
         }
         $resultset = $wpdb->get_results($wpdb->prepare(
             "SELECT DISTINCT reservation_id, room, bed_name, guest_name, checkin_date, checkout_date, data_href, lh_status, 
-                             booking_reference, booking_source, booked_date, eta, viewed_yn, notes
+                             booking_reference, booking_source, booked_date, eta, viewed_yn, notes, comments
                FROM wp_lh_calendar
               WHERE job_id = %d
                 AND reservation_id IN 
                     ( SELECT DISTINCT c.reservation_id FROM wp_lh_calendar c
                        WHERE c.job_id = %d
                          AND (LOWER(c.notes) LIKE '%bottom bunk%' OR LOWER(c.notes) LIKE '%lower bunk%'
-                                OR LOWER(c.notes) LIKE '%bottom bed%' OR LOWER(c.notes) LIKE '%lower bed%')
+                                OR LOWER(c.notes) LIKE '%bottom bed%' OR LOWER(c.notes) LIKE '%lower bed%'
+                                OR LOWER(c.comments) LIKE '%bottom bunk%' OR LOWER(c.comments) LIKE '%lower bunk%'
+                                OR LOWER(c.comments) LIKE '%bottom bed%' OR LOWER(c.comments) LIKE '%lower bed%')
                          AND MOD(CAST(SUBSTR(c.bed_name, 1, 2) AS UNSIGNED), 2) > 0) -- odd numbers are top bunks
               ORDER BY checkin_date",
             $allocScraperJobId, $allocScraperJobId));
