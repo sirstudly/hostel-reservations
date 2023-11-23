@@ -9,7 +9,8 @@
             '!Y-m-d', $_POST['selectiondate'], new DateTimeZone('Europe/London'));
     }
 
-    if( strpos(get_option('hbo_lilho_username'), 'castlerock') === 0 ) {
+    if ( strpos( get_option( 'hbo_lilho_username' ), 'castlerock' ) === 0
+         || strpos( get_option( 'hbo_lilho_username' ), 'royalmile' ) === 0 ) {
         $bc = new BedCountsNew( $selectionDate );
     }
     else {

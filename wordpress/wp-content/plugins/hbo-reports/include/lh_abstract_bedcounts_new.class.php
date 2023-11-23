@@ -87,7 +87,8 @@ abstract class AbstractBedCountsNew extends XslTransform {
         $totals = array();
         foreach ( $this->bedcountData as $row ) {
             // if we're starting a new floor, add in a separator
-            if ( $starting_room != null && substr( $starting_room, 0, 1 ) != substr( $row->room, 0, 1 ) ) {
+            if ( strpos( get_option( 'hbo_lilho_username' ), 'castlerock' ) === 0 && $starting_room != null
+                    && substr( $starting_room, 0, 1 ) != substr( $row->room, 0, 1 ) ) {
                 $xmlRoot->appendChild( $domtree->createElement( 'separator' ) );
             }
 
