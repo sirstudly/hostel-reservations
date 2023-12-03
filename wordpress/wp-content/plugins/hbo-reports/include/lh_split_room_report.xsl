@@ -164,7 +164,7 @@
         jQuery('#multiple_booking_rpt').DataTable({
         "paging": false,
         "searching": false,
-        "order": [[3, 'asc']]
+        "order": [[2, 'asc']]
         });
     </script>
 </xsl:template>
