@@ -185,6 +185,51 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns report where a consecutive bookings for the same guest are in different rooms (for the same room type).
+     */
+    static function getSplitRoomMultipleReservationsReport() {
+        global $wpdb;
+
+        $alloc_scraper_job = self::getLatestJobOfType( "com.macbackpackers.jobs.AllocationScraperJob" );
+
+        if ( ! $alloc_scraper_job ) {
+            return array();
+        }
+        $job_id = $alloc_scraper_job->job_id;
+
+        $resultset = $wpdb->get_results(
+            "SELECT c1.guest_name, c1.booking_reference AS booking_ref_left, c1.data_href AS data_href_left, c1.checkin_date AS checkin_date_left,
+                 c1.checkout_date AS checkout_date_left, c1.booked_date AS booked_date_left,
+                 GROUP_CONCAT(DISTINCT CONCAT(rm1.room, ' ', rm1.bed_name) ORDER BY rm1.room, rm1.bed_name SEPARATOR ', ') AS room_beds_left,
+                 c2.booking_reference AS booking_ref_right, c2.data_href AS data_href_right, c2.checkin_date AS checkin_date_right,
+                 c2.checkout_date AS checkout_date_right, c2.booked_date AS booked_date_right,
+                 GROUP_CONCAT(DISTINCT CONCAT(rm2.room, ' ', rm2.bed_name) ORDER BY rm2.room, rm2.bed_name SEPARATOR ', ') AS room_beds_right
+            FROM (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_calendar WHERE job_id = $job_id AND reservation_id > 0) c1
+            JOIN (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_calendar WHERE job_id = $job_id AND reservation_id > 0) c2
+              ON c1.guest_name = c2.guest_name AND c1.checkout_date = c2.checkin_date
+            JOIN wp_lh_rooms rm1 ON c1.room_id = rm1.id 
+            JOIN wp_lh_rooms rm2 ON c2.room_id = rm2.id 
+           WHERE rm1.room_type NOT IN ('LT_MALE', 'LT_FEMALE')
+             AND rm2.room_type NOT IN ('LT_MALE', 'LT_FEMALE')
+             AND rm1.room_type_id = rm2.room_type_id AND rm1.id <> rm2.id -- different bookings, different room, same room type
+             -- unless the subsequent booking is already booked by that guest (eg 2 beds -> 1 bed)
+             AND NOT EXISTS(
+                 SELECT 1 FROM wp_lh_calendar c1a
+                  WHERE c1a.job_id = $job_id 
+                    AND c1a.guest_name = c1.guest_name
+                    AND c1a.checkout_date = c1.checkout_date 
+                    AND c1a.room_id = c2.room_id)
+           GROUP BY c1.guest_name, c1.booking_reference, c1.data_href, c1.checkin_date, c1.checkout_date, c1.booked_date,
+                    c2.booking_reference, c2.data_href, c2.checkin_date, c2.checkout_date, c2.booked_date");
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset;
+    }
+
+    /**
      * Returns report for all group bookings.
      */
     static function getGroupBookingsReport() {
