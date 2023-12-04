@@ -219,6 +219,13 @@ class LilHotelierDBO {
                     AND c1a.guest_name = c1.guest_name
                     AND c1a.checkout_date = c1.checkout_date 
                     AND c1a.room_id = c2.room_id)
+             -- unless the former booking is already booked by that guest (eg 1 bed -> 2 beds)
+             AND NOT EXISTS(
+                 SELECT 1 FROM wp_lh_calendar c1b
+                  WHERE c1b.job_id = $job_id     
+                    AND c1b.guest_name = c2.guest_name
+                    AND c1b.checkin_date = c2.checkin_date 
+                    AND c1b.room_id = c1.room_id)
            GROUP BY c1.guest_name, c1.booking_reference, c1.data_href, c1.checkin_date, c1.checkout_date, c1.booked_date,
                     c2.booking_reference, c2.data_href, c2.checkin_date, c2.checkout_date, c2.booked_date");
 
