@@ -70,6 +70,9 @@
                 <div class="row">
                     <div class="col-md-auto"><h2>Blacklist</h2></div>
                 </div>
+                <div class="row">
+                    <div class="col-md-auto">Reception will be emailed whenever any bookings are found matching the name(s)/email(s) on this list.</div>
+                </div>
             </div>
             <xsl:apply-templates select="blacklist" />
             <div id="ajax_response"><xsl:comment/><!-- ajax response here--></div>
