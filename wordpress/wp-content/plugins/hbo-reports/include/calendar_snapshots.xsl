@@ -26,7 +26,7 @@
         </div>
 
         <div class="d-flex" style="width:60%; padding-bottom: 30px;">
-            Daily reports take a snapshot of the Cloudbeds calendar 3 months into the future. Select a date to
+            Daily reports take a snapshot of the Cloudbeds calendar 4 months into the future. Select a date to
             see what the calendar looked like at the time!
 
             <div style="padding-left: 20px; padding-top: 20px;">
