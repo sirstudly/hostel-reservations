@@ -27,6 +27,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('group_bookings_report_url', get_option('hbo_group_bookings_report_url')));
         $xmlRoot->appendChild($domtree->createElement('guest_comments_report_url', get_option('hbo_guest_comments_report_url')));
         $xmlRoot->appendChild($domtree->createElement('bottom_bunks_report_url', get_option('hbo_bottom_bunks_report_url')));
+        $xmlRoot->appendChild($domtree->createElement('calendar_snapshots_url', get_option('hbo_calendar_snapshots_url')));
         $xmlRoot->appendChild($domtree->createElement('bedcounts_url', get_option('hbo_bedcounts_url')));
         $xmlRoot->appendChild($domtree->createElement('manual_charge_url', get_option('hbo_manual_charge_url')));
         $xmlRoot->appendChild($domtree->createElement('generate_payment_link_url', get_option('hbo_generate_payment_link_url')));
@@ -59,6 +60,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_group_bookings_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_guest_comments_report_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_bottom_bunks_report_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_calendar_snapshots_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_bedcounts_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_manual_charge_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_generate_payment_link_url');

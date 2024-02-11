@@ -111,6 +111,9 @@ Tested WordPress Versions: 4.6
     if (file_exists(HBO_PLUGIN_DIR. '/include/bottom_bunks_report.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/bottom_bunks_report.class.php' ); }
 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/calendar_snapshots.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/calendar_snapshots.class.php' ); }
+
     if (file_exists(HBO_PLUGIN_DIR. '/include/lh_job_history.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/lh_job_history.class.php' ); }
 

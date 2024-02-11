@@ -164,7 +164,78 @@ class LilHotelierDBO {
 
         return ! empty( $resultset );        
     }
-    
+
+    /**
+     * Returns all room/beds currently configured.
+     * @return mixed resultset
+     * @throws DatabaseException
+     */
+    static function listRoomBeds() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT id, room, bed_name
+               FROM wp_lh_rooms
+              WHERE room NOT IN ('Unallocated', 'PB')
+              ORDER BY room, bed_name" );
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset;
+    }
+
+    /**
+     * Returns all bookings for the given allocation scraper job ID.
+     * @param $allocScraperJobId
+     * @param $startDate
+     * @param $endDate
+     *
+     * @return mixed
+     * @throws DatabaseException
+     */
+    static function getAllBookings( $allocScraperJobId, $startDate, $endDate ) {
+        global $wpdb;
+        $resultset = $wpdb->get_results( $wpdb->prepare(
+            "SELECT DISTINCT reservation_id, room_id, guest_name, email, checkin_date, checkout_date, num_guests, payment_total, 
+                             payment_outstanding, lh_status, booking_reference, booking_source
+               FROM wp_lh_calendar
+              WHERE job_id = %d
+                AND checkin_date <= %s
+                AND checkout_date >= %s
+                AND data_href <> 'room_closures'
+              ORDER BY checkin_date",
+            $allocScraperJobId, $endDate, $startDate ) );
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset;
+    }
+
+    /**
+     * Returns all completed AllocationScraperJobs
+     * @return mixed resultset with job_id, end_date
+     * @throws DatabaseException
+     */
+    static function getAllCompletedAllocationScraperJobIds() {
+        global $wpdb;
+        $resultset = $wpdb->get_results( $wpdb->prepare(
+            "SELECT job_id, end_date
+                  FROM wp_lh_jobs 
+                 WHERE classname IN ('com.macbackpackers.jobs.AllocationScraperJob')
+                   AND status IN ( %s )
+                 ORDER BY end_date DESC",
+            self::STATUS_COMPLETED ) );
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset;
+    }
+
     /**
      * Returns report where a reservation is split between rooms of the same type.
      */

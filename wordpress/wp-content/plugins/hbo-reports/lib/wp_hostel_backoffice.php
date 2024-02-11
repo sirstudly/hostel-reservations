@@ -35,6 +35,32 @@ class WP_HostelBackoffice {
 
         // this handles the "download" action as we need to set the headers before anything is sent
         add_action( 'plugins_loaded', array(&$this, 'download_bedcounts_page_as_csv'));
+
+        // the following routes are for the calendar snapshots page
+        add_action( 'rest_api_init', function () {
+            register_rest_route( 'hbo-reports/v1', '/list-room-beds', array(
+                'methods' => 'GET',
+                'callback' => array(new CalendarSnapshots(), 'list_room_beds'),
+                'permission_callback' => function () {
+                    return '__return_true'; // nothing particularly sensitive here
+                }
+            ) );
+            register_rest_route( 'hbo-reports/v1', '/fetch-all-bookings', array(
+                'methods' => 'GET',
+                'callback' => array(new CalendarSnapshots(), 'fetch_all_bookings'),
+                'args' => array(
+                    'job_id' => array(
+                        'validate_callback' => function($param, $request, $key) {
+                            return is_numeric( $param );
+                        }
+                    ),
+                ),
+                'permission_callback' => function () {
+                    return is_user_logged_in();
+                }
+            ) );
+        } );
+
     }
 
     /**
@@ -48,6 +74,7 @@ class WP_HostelBackoffice {
         add_option('hbo_bedcounts_url', 'reports/bedcounts');
         add_option('hbo_guest_comments_report_url', 'reports/guest-comments');
         add_option('hbo_bottom_bunks_report_url', 'reports/bottom-bunks-report');
+        add_option('hbo_calendar_snapshots_url', 'reports/calendar-snapshots');
         add_option('hbo_manual_charge_url', 'reports/manual-charge');
         add_option('hbo_generate_payment_link_url', 'payments/generate-payment-link');
         add_option('hbo_payment_history_url', 'payments/payment-history');
@@ -81,6 +108,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_bedcounts_url');
         delete_option('hbo_guest_comments_report_url');
         delete_option('hbo_bottom_bunks_report_url');
+        delete_option('hbo_calendar_snapshots_url');
         delete_option('hbo_report_settings_url');
         delete_option('hbo_reports_help_url');
         delete_option('hbo_redirect_to_url');
@@ -250,6 +278,7 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_bedcounts_url'), 'bedcounts.php');
         $this->do_redirect_for_page(get_option('hbo_guest_comments_report_url'), 'guest-comments.php');
         $this->do_redirect_for_page(get_option('hbo_bottom_bunks_report_url'), 'bottom-bunks-report.php');
+        $this->do_redirect_for_page(get_option('hbo_calendar_snapshots_url'), 'calendar-snapshots.php');
         $this->do_redirect_for_page(get_option('hbo_report_settings_url'), 'report-settings.php');
         $this->do_redirect_for_page(get_option('hbo_redirect_to_url'), 'redirect-link.php');
         $this->do_redirect_for_page(get_option('hbo_job_history_url'), 'job-history.php');

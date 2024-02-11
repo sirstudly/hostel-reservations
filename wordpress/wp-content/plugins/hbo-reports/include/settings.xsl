@@ -65,6 +65,10 @@
                                         <td><input id="hbo_bottom_bunks_report_url"  name="hbo_bottom_bunks_report_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{bottom_bunks_report_url}" /></td>
                                     </tr>
                                     <tr valign="top">
+                                        <th scope="row"><label for="hbo_calendar_snapshots_url">Calendar Snapshots</label></th>
+                                        <td><input id="hbo_calendar_snapshots_url"  name="hbo_calendar_snapshots_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{calendar_snapshots_url}" /></td>
+                                    </tr>
+                                    <tr valign="top">
                                         <th scope="row"><label for="manual_charge_url">Manual Charges</label></th>
                                         <td><input id="manual_charge_url"  name="hbo_manual_charge_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{manual_charge_url}" /></td>
                                     </tr>  

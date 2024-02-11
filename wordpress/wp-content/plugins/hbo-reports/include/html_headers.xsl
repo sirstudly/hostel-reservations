@@ -38,6 +38,9 @@
     <xsl:if test="contains(currenturl, 'bedcounts')">
         <link rel="stylesheet" type="text/css" href="{pluginurl}/css/bedcounts.css?v=20230904"/>
     </xsl:if>
+    <xsl:if test="contains(currenturl, 'calendar-snapshots')">
+        <link rel="stylesheet" type="text/css" href="{pluginurl}/css/tooltips.css?v=20240109"/>
+    </xsl:if>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"><xsl:comment/></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css" />
