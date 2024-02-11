@@ -57,10 +57,10 @@
                     ],
                     resourceOrder: 'title',
                     resources: {
-                        url: '/wp-json/hbo-reports/v1/list-room-beds'
+                        url: '<xsl:value-of select="homeurl"/>/wp-json/hbo-reports/v1/list-room-beds'
                     },
                     events: {
-                        url: '/wp-json/hbo-reports/v1/fetch-all-bookings',
+                        url: '<xsl:value-of select="homeurl"/>/wp-json/hbo-reports/v1/fetch-all-bookings',
                         extraParams: function() {
                             return {
                                 _wpnonce: '<xsl:value-of select="wpnonce"/>',

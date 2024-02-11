@@ -95,6 +95,8 @@ class CalendarSnapshots extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
 
+        $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
+
         // needs to be passed to secured rest endpoints to verify user has been authenticated
         $parentElement->appendChild( $domtree->createElement( 'wpnonce', wp_create_nonce( 'wp_rest' ) ) );
 
