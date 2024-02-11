@@ -50,7 +50,12 @@
                 var calendarEl = document.getElementById('calendar');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-                    initialView: 'resourceTimelineYear',
+                    initialView: 'resourceTimelineMonth',
+                    views: {
+                        resourceTimelineMonth: {
+                            duration: { months: 3 }
+                        }
+                    },
                     slotLabelFormat: [
                         { month: 'long', year: 'numeric' }, // top level of text
                         { weekday: 'short', day: 'numeric' } // lower level of text
