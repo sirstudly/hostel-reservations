@@ -176,6 +176,7 @@ class LilHotelierDBO {
             "SELECT id, room, bed_name
                FROM wp_lh_rooms
               WHERE room NOT IN ('Unallocated', 'PB')
+                AND active_yn = 'Y'
               ORDER BY room, bed_name" );
 
         if ( $wpdb->last_error ) {
