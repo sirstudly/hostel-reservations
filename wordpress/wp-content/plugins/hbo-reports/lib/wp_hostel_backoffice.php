@@ -325,7 +325,6 @@ class WP_HostelBackoffice {
             $page_path = substr( $page_path, 1 );
         }
 
-        error_log("do_redirect_for_page: url is " . $url . " page_path is " . $page_path);
         if ( substr($page_path, 0, strlen($url)) === $url ) {
             $_SESSION['url_path'] = $page_path; // save in session so we can use it later
             $this->do_redirect($this->get_template_path($templatefile));
