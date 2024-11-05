@@ -293,7 +293,9 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_online_checkin_url'), 'online-checkin.php');
         $this->do_redirect_for_page(get_option('hbo_view_log_url'), 'view-log.php');
         $this->do_redirect_for_page(get_option('hbo_reports_help_url'), 'reports-help.php');
-//        $this->do_redirect_for_page('help', 'reports-help.php');
+        if ( post_password_required() && ! is_user_logged_in() ) {
+            auth_redirect(); // redirects to the login if page is password protected and user is not logged in
+        }
     }
 
     /**
