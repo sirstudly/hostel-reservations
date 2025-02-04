@@ -94,6 +94,9 @@ class ProcessRefundsController extends XslTransform {
 			    $tx['vendor_tx_code'] = substr( $tx['notes'], 14, strpos( $tx['notes'], ',' ) - 14 );
 			    $tx['gateway_name']   = strpos( $tx['notes'], "Gateway: STRIPE" ) !== false ? "Stripe" : "Sagepay";
 		    }
+            elseif ( isset( $tx['gateway_name'] ) === false && $tx['gateway'] === 'StripeConnectGateway' ) {
+                $tx['gateway_name'] = 'Stripe';
+            }
 	    }
     }
 
