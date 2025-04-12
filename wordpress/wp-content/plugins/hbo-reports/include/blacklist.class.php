@@ -26,6 +26,27 @@ class Blacklist extends XslTransform {
     }
 
     /**
+     * Returns all the blacklisted guests.
+     * @param WP_REST_Request $request The request object (can get parameters here but not currently used)
+     * @return WP_REST_Response
+     */
+    function getBlacklist( $request ) {
+        $data = LilHotelierDBO::getInstance()->getBlacklist();
+        foreach ( $data as $entry ) {
+            foreach ( $entry->aliases as $alias ) {
+                unset ( $alias->blacklist_id );
+            }
+            foreach ( $entry->mugshots as $mugshot ) {
+                unset( $mugshot->blacklist_id );
+                $mugshot->url = plugins_url('hbo-reports/upload/' . rawurlencode($mugshot->filename));
+            }
+        }
+        $response = new WP_REST_Response( array_values( $data ), 200 );
+        $response->header( 'Content-type', 'application/json' );
+        return $response;
+    }
+
+    /**
      * Save/updates a new or existing blacklist entry.
      * @param $firstname
      * @param $lastname
@@ -172,7 +193,7 @@ class Blacklist extends XslTransform {
             }
         }
     }
-    
+
     /** 
       Generates the following xml:
         <view>

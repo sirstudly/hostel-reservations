@@ -59,6 +59,25 @@ class WP_HostelBackoffice {
                     return is_user_logged_in();
                 }
             ) );
+            register_rest_route( 'hbo-reports/v1', '/blacklist', array(
+                'methods' => 'POST',
+                'callback' => array(new Blacklist(), 'getBlacklist'),
+                'permission_callback' => function ($request) {
+                    // Get the Authorization header
+                    $auth_header = $request->get_header('Authorization');
+
+                    // Check if it's a Bearer token
+                    if (empty($auth_header) || strpos($auth_header, 'Bearer ') !== 0) {
+                        return false;
+                    }
+
+                    // Extract the token (remove 'Bearer ' prefix)
+                    // Validate against the stored API key
+                    $token = substr($auth_header, 7);
+                    $valid_api_key = get_option('hbo_api_key');
+                    return $token === $valid_api_key;
+                }
+            ) );
         } );
 
     }

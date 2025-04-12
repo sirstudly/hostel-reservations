@@ -5,6 +5,7 @@ class BlacklistMugshot {
     var $mugshot_id;
     var $blacklist_id;
     var $filename;
+    var $url;
 
     /**
      * Default constructor.
