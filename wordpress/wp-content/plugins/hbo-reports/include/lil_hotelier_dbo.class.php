@@ -1604,7 +1604,7 @@ class LilHotelierDBO {
      */
     function getBlacklist() {
         $entry_rs = $this->SHARED_DB->get_results(
-            "SELECT id AS blacklist_id, first_name, last_name, email, notes FROM hbo_blacklist
+            "SELECT id AS blacklist_id, first_name, last_name, email, notes, created_date, last_updated_date FROM hbo_blacklist
              ORDER BY blacklist_id, last_name, first_name, email");
 
         if ( $this->SHARED_DB->last_error ) {
@@ -1629,7 +1629,8 @@ class LilHotelierDBO {
 
         $blacklist = array();
         foreach ( $entry_rs as $record ) {
-            $entry = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email, $record->notes );
+            $entry = new BlacklistEntry( $record->blacklist_id, $record->first_name, $record->last_name, $record->email,
+                $record->notes, $record->created_date, $record->last_updated_date );
             foreach ( $alias_rs as $alias ) {
                 if ( $alias->blacklist_id == $record->blacklist_id ) {
                     $entry->add_alias( $alias );
