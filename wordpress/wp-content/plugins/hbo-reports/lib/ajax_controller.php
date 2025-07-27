@@ -1073,6 +1073,28 @@ class AjaxController {
      */
     function uploadBlacklistImage() {
         try {
+            // Check if file was uploaded
+            if (!isset($_FILES['file']) || empty($_FILES['file']['tmp_name'])) {
+                error_log("DEBUG: No file uploaded or tmp_name is empty");
+                throw new Exception("No file was uploaded or file upload failed. Please try again.");
+            }
+            
+            // Check for upload errors
+            if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+                $upload_errors = array(
+                    UPLOAD_ERR_INI_SIZE => "The uploaded file exceeds the upload_max_filesize directive in php.ini. Please resize your image or contact your administrator to increase the limit.",
+                    UPLOAD_ERR_FORM_SIZE => "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form",
+                    UPLOAD_ERR_PARTIAL => "The uploaded file was only partially uploaded",
+                    UPLOAD_ERR_NO_FILE => "No file was uploaded",
+                    UPLOAD_ERR_NO_TMP_DIR => "Missing a temporary folder",
+                    UPLOAD_ERR_CANT_WRITE => "Failed to write file to disk",
+                    UPLOAD_ERR_EXTENSION => "A PHP extension stopped the file upload"
+                );
+                $error_message = isset($upload_errors[$_FILES['file']['error']]) ? $upload_errors[$_FILES['file']['error']] : "Unknown upload error";
+                error_log("DEBUG: Upload error: " . $error_message);
+                throw new Exception("File upload failed: " . $error_message);
+            }
+            
             $blacklistPage = new Blacklist();
             $blacklistPage->uploadBlacklistImage( $_POST['blacklist_id'], $_FILES['file']['name'], $_FILES['file']['tmp_name'] );
             $blacklistPage->doView( $_POST['blacklist_id'] );
@@ -1084,6 +1106,7 @@ class AjaxController {
             <?php
         }
         catch( Exception $e ) {
+            error_log("Exception in uploadBlacklistImage: " . $e->getMessage());
             ?>
             <script type="text/javascript">
                 jQuery("#ajax_response-<?=$_POST['blacklist_id']?>")
