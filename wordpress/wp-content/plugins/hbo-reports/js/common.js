@@ -641,6 +641,13 @@ function upload_blacklist_image( blacklist_id, files ) {
 
     // Check file selected or not
     if (files.length > 0) {
+        // Check file size (10MB = 10 * 1024 * 1024 bytes)
+        const maxFileSize = 10 * 1024 * 1024;
+        if (files[0].size > maxFileSize) {
+            alert("File is too large. Maximum file size is 10MB. Your file is " + Math.round(files[0].size / 1024 / 1024 * 100) / 100 + "MB. Please resize the image or choose a smaller file.");
+            return;
+        }
+
         const fd = new FormData();
         fd.append('file',files[0]);
         fd.append('ajax_action', 'UPLOAD_BLACKLIST_IMAGE');
