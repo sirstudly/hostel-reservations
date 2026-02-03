@@ -102,6 +102,10 @@ abstract class ScheduledJob {
 			    'classname'  => 'com.macbackpackers.jobs.VerifyGoogleAssistantLoggedInJob',
 			    'name'       => 'Verify Google Assistant is Logged in',
 			    'parameters' => []
+            ], [
+                'classname'  => 'com.macbackpackers.jobs.VerifyCastleRockJambotOnlineJob',
+                'name'       => 'Verify Castle Rock Jambot is Online',
+                'parameters' => []
 		    ] );
 	    }
         return $result;
