@@ -183,8 +183,8 @@ class LHReportSettings extends XslTransform {
        if( ctype_digit( $groupBookingSize ) === false ) {
            throw new ValidationException( "Group booking size must be a number" );
        }
-       else if( intval( $groupBookingSize ) < 5 ) {
-           throw new ValidationException( "Group booking size must be greater or equal to 5" );
+       else if( intval( $groupBookingSize ) < 3 ) {
+           throw new ValidationException( "Group booking size must be greater or equal to 3" );
        }
 
        update_option( "hbo_group_booking_size", $groupBookingSize );
