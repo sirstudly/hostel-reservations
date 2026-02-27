@@ -141,14 +141,6 @@ class LHReportSettings extends XslTransform {
     * Updates details for BDC.
     */
    function saveBdcSettings( $username, $password ) {
-
-       if( empty( $username )) {
-           throw new ValidationException( "Username cannot be blank" );
-       }
-       if( empty( $password )) {
-           throw new ValidationException( "Password cannot be blank" );
-       }
-
        update_option( "hbo_bdc_username", $username );
        update_option( "hbo_bdc_password", $password );
 	   delete_option( "hbo_bdc_lasturl" );
