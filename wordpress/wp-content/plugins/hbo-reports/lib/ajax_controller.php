@@ -77,6 +77,10 @@ class AjaxController {
 		        $this->saveHousekeepingReportSettings();
 		        break;
 
+	        case 'SAVE_API_KEY_SETTINGS':
+		        $this->saveApiKeySettings();
+		        break;
+
 	        case 'SAVE_CHECKOUT_EMAIL_TEMPLATE':
                 $this->saveCheckoutEmailTemplate();
                 break;
@@ -499,6 +503,35 @@ class AjaxController {
                     .html('<?php echo $e->getMessage(); ?>')
                     .css({ 'color': 'red' });
                 jQuery("#btn_save_bedsheets_change_after_days").prop( "disabled", false );
+            </script>
+			<?php
+		}
+	}
+
+	/**
+	 * Updates the Internal API Key (Bearer token for select endpoints).
+	 * Requires POST variable: api_key
+	 */
+	function saveApiKeySettings() {
+		try {
+			$settingsPage = new LHReportSettings();
+			$settingsPage->saveApiKeySettings( isset( $_POST['api_key'] ) ? $_POST['api_key'] : '' );
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_api_key")
+                    .html('Settings saved successfully.')
+                    .css({ 'color': 'green' });
+                jQuery("#btn_save_api_key").prop( "disabled", false );
+            </script>
+			<?php
+		}
+		catch( Exception $e ) {
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_api_key")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+                jQuery("#btn_save_api_key").prop( "disabled", false );
             </script>
 			<?php
 		}

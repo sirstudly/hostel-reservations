@@ -33,6 +33,7 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
         $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
 	    $this->reportSettings['hbo_bedsheets_change_after_days'] = get_option('hbo_bedsheets_change_after_days');
+        $this->reportSettings['hbo_api_key'] = get_option('hbo_api_key');
         $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
         $this->reportSettings['hbo_guest_email_template'] = esc_textarea(stripslashes(get_option('hbo_guest_email_template')));
    }
@@ -199,6 +200,14 @@ class LHReportSettings extends XslTransform {
 		}
 
 		update_option( "hbo_bedsheets_change_after_days", empty( $bedsheet_change_days ) ? null : $bedsheet_change_days );
+	}
+
+	/**
+	 * Updates the Internal API Key (Bearer token for select endpoints).
+	 * $api_key : secret key (string, may be empty to clear)
+	 */
+	function saveApiKeySettings( $api_key ) {
+		update_option( 'hbo_api_key', $api_key === null || $api_key === '' ? '' : $api_key );
 	}
 
 	/**

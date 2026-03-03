@@ -261,6 +261,23 @@ function save_housekeeping_report_settings( bedsheet_change_days ) {
     });
 }
 
+// saves Internal API Key (Bearer token for select endpoints)
+function save_api_key_settings( api_key ) {
+
+    jQuery('#ajax_respond_api_key').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_api_key').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SAVE_API_KEY_SETTINGS',
+            api_key : api_key
+        }
+    });
+}
+
 // saves the email template for guest checkouts
 // email_subject : email subject
 // email_template : raw (HTML) email template

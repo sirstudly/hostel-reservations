@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 <!--
@@ -251,7 +251,7 @@ jQuery(document).ready( function(){
             </div>
 
             <div class="row mb-1">
-                <div class="col-11 mr-1" /> (blank to disable)
+                <div class="col-11 mr-1">(blank to disable)</div>
             </div>
 
             <div class="btn-container mb-2 mr-4">
@@ -260,7 +260,23 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-        <xsl:if test="starts-with(hbo_lilho_username, '__DISABLED__castlerock')">
+        <div class="shadow settings-container">
+            <h4>Internal API Key</h4>
+            <div class="row mb-1">
+                <div class="col-11 mr-1">Set this to access report data using a matching Bearer token for select endpoints</div>
+            </div>
+            <div class="row mb-1">
+                <label class="col-3" for="api_key">API Key:</label>
+                <input id="api_key" name="hbo_api_key" class="regular-text code col-8 mr-1" type="text" autocomplete="false" value="{hbo_api_key}"/>
+            </div>
+
+            <div class="btn-container mb-2 mr-4">
+                <div style="float: left;" id="ajax_respond_api_key"><xsl:comment/><!-- ajax response here--></div>
+                <a id="btn_save_api_key" class="btn btn-primary" style="float: right;" onclick="save_api_key_settings(document.post_option.hbo_api_key.value); this.disabled=true;">Save</a>
+            </div>
+        </div>
+
+    <xsl:if test="starts-with(hbo_lilho_username, '__DISABLED__castlerock')">
         <div class="shadow settings-container-lg">
             <h3>Checked-out Guest Response Email (Template)</h3> 
             <p>If present, the following will be replaced in the subject/body: <br/>
