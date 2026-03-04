@@ -90,6 +90,12 @@ abstract class ScheduledJob {
 		    'classname'  => 'com.macbackpackers.jobs.CreateChargeHogmanayBookingJob',
 		    'name'       => 'Charge Hogmanay Bookings Job',
 		    'parameters' => []
+	    ], [
+		    'classname'  => 'com.macbackpackers.jobs.CreateSendGuestRegistrationJob',
+		    'name'       => 'Send Guest Registration Email Job',
+		    'parameters' => [ 'booking_date' => 'TODAY-1',
+							  'min_guests' => '2',
+							  'max_guests' => '4' ]
 	    ] );
 
 	    if ( strpos( get_option( 'siteurl' ), 'castlerock' ) !== false
