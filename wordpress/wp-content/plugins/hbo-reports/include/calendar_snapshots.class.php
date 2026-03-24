@@ -42,9 +42,10 @@ class CalendarSnapshots extends XslTransform {
                 ];
             }
             else {
-                // create parent room and add (child) bed to it
+                // FullCalendar requires unique resource ids. Multiple physical rooms share the same
+                // Cloudbeds unit prefix (id before '-'), so that must not be the parent id.
                 $data[ $row->room ] = [
-                    'id'       => substr( $row->id, 0, strpos( $row->id, '-' ) ), // everything before the first dash
+                    'id'       => 'grp-' . $row->id,
                     'title'    => $row->room,
                     'children' => [[
                         'id'    => $row->id,
