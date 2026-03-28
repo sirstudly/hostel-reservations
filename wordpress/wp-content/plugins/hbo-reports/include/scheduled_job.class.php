@@ -81,7 +81,7 @@ abstract class ScheduledJob {
 		                      'booking_date_start' => '', 'booking_date_end' => '',
 		                      'stay_date_start' => '', 'stay_date_end' => '',
 		                      'checkin_date_start' => 'TODAY+1', 'checkin_date_end' => '2021-12-20',
-		                      'statuses' => 'confirmed,not_confirmed,canceled,checked_in,checked_out,no_show',
+		                      'statuses' => 'confirmed,not_confirmed', # other options: canceled,checked_in,checked_out,no_show
 							  'booking_sources' => 'Booking.com (Hotel Collect Booking),Hostelworld (Hotel Collect Booking)' ]
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendHogmanayAdvancedPaymentEmailJob',
