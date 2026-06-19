@@ -125,15 +125,6 @@ class LHReportSettings extends XslTransform {
     * Updates details for hostelworld.
     */
    function saveHostelworldSettings( $username, $password ) {
-
-       if( empty( $username )) {
-           throw new ValidationException( "Username cannot be blank" );
-       }
-       if( empty( $password )) {
-           throw new ValidationException( "Password cannot be blank" );
-       }
-
-       // if we get to this point, we have validated the login so save it
        update_option( "hbo_hw_username", $username );
        update_option( "hbo_hw_password", $password );
    }
