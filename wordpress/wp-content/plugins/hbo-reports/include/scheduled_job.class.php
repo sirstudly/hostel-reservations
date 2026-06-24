@@ -74,6 +74,10 @@ abstract class ScheduledJob {
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendGroupBookingPaymentReminderEmailJob',
 		    'name'       => 'Send Group Booking Payment Reminder Job',
 		    'parameters' => [ 'days_before' => '7' ]
+        ], [
+            'classname'  => 'com.macbackpackers.jobs.CreateCalculateEdinburghVisitorLevyForBookingJob',
+            'name'       => 'Recalculate Edinburgh Visitor Levy (EVL)',
+            'parameters' => [ 'booking_date_start' => 'TODAY-3', 'booking_date_end' => 'TODAY' ]
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendBulkEmailJob',
 		    'name'       => 'Send Bulk Email Job',
