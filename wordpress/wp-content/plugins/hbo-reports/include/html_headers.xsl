@@ -32,7 +32,7 @@
         <link rel="icon" href="{siteicon}" />
     </xsl:if>
     <script type="text/javascript" src="{pluginurl}/js/common.js?v=20230216"><xsl:comment/></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"><xsl:comment/></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.3.8/js/dataTables.js"><xsl:comment/></script>
 
     <!-- C S S -->
     <xsl:if test="contains(currenturl, 'bedcounts')">
@@ -43,7 +43,7 @@
     </xsl:if>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"><xsl:comment/></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.3.8/css/dataTables.dataTables.css" />
 </xsl:template>
 
 </xsl:stylesheet>

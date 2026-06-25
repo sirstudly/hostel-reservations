@@ -1347,6 +1347,129 @@ class LilHotelierDBO {
     }
 
     /**
+     * Builds WHERE clause and values for job history filters.
+     * $filters : array with optional 'classname' and 'status' keys
+     * Returns array( 'where' => string, 'values' => array )
+     */
+    private static function buildJobHistoryFilterClause( $filters ) {
+        global $wpdb;
+        $clauses = array();
+        $values = array();
+        if ( ! empty( $filters['classname'] ) ) {
+            $clauses[] = 'classname = %s';
+            $values[] = $filters['classname'];
+        }
+        if ( ! empty( $filters['status'] ) ) {
+            $clauses[] = 'status = %s';
+            $values[] = $filters['status'];
+        }
+        $where = count( $clauses ) > 0 ? ' WHERE ' . implode( ' AND ', $clauses ) : '';
+        return array( 'where' => $where, 'values' => $values );
+    }
+
+    /**
+     * Returns total count of wp_lh_jobs records, optionally filtered.
+     * $filters : array with optional 'classname' and 'status' keys
+     */
+    static function getJobHistoryCount( $filters = array() ) {
+        global $wpdb;
+        $filterClause = self::buildJobHistoryFilterClause( $filters );
+        $sql = 'SELECT COUNT(*) FROM wp_lh_jobs' . $filterClause['where'];
+        if ( count( $filterClause['values'] ) > 0 ) {
+            $count = $wpdb->get_var( $wpdb->prepare( $sql, $filterClause['values'] ) );
+        } else {
+            $count = $wpdb->get_var( $sql );
+        }
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        return (int) $count;
+    }
+
+    /**
+     * Returns a page of wp_lh_jobs records in reverse chrono order.
+     * $start : zero-based offset
+     * $length : number of records to return
+     * $filters : array with optional 'classname' and 'status' keys
+     * $orderCol : column name to sort by (job_id, classname, status, start_date, end_date)
+     * $orderDir : ASC or DESC
+     */
+    static function getJobHistoryPage( $start, $length, $filters = array(), $orderCol = 'job_id', $orderDir = 'DESC' ) {
+        global $wpdb;
+        $allowedColumns = array( 'job_id', 'classname', 'status', 'start_date', 'end_date' );
+        if ( ! in_array( $orderCol, $allowedColumns, true ) ) {
+            $orderCol = 'job_id';
+        }
+        $orderDir = strtoupper( $orderDir ) === 'ASC' ? 'ASC' : 'DESC';
+        $filterClause = self::buildJobHistoryFilterClause( $filters );
+        $sql = 'SELECT job_id, classname, status, start_date, end_date
+                  FROM wp_lh_jobs' . $filterClause['where'] .
+               ' ORDER BY ' . $orderCol . ' ' . $orderDir .
+               ' LIMIT %d OFFSET %d';
+        $values = array_merge( $filterClause['values'], array( (int) $length, (int) $start ) );
+        $resultset = $wpdb->get_results( $wpdb->prepare( $sql, $values ) );
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        return $resultset;
+    }
+
+    /**
+     * Returns distinct classnames for job history filter dropdown.
+     */
+    static function getJobHistoryDistinctClassnames() {
+        global $wpdb;
+        $resultset = $wpdb->get_col(
+            'SELECT DISTINCT classname FROM wp_lh_jobs ORDER BY classname' );
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        return $resultset;
+    }
+
+    /**
+     * Returns distinct statuses for job history filter dropdown.
+     */
+    static function getJobHistoryDistinctStatuses() {
+        global $wpdb;
+        $resultset = $wpdb->get_col(
+            'SELECT DISTINCT status FROM wp_lh_jobs ORDER BY status' );
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        return $resultset;
+    }
+
+    /**
+     * Returns job parameters for multiple jobs in a single query.
+     * $jobIds : array of job IDs
+     * Returns array keyed by job_id containing array[name]=value
+     */
+    static function getJobParametersForJobIds( $jobIds ) {
+        global $wpdb;
+        $jobParams = array();
+        if ( empty( $jobIds ) ) {
+            return $jobParams;
+        }
+        $placeholders = implode( ',', array_fill( 0, count( $jobIds ), '%d' ) );
+        $resultset = $wpdb->get_results( $wpdb->prepare(
+            "SELECT job_id, name, value
+               FROM wp_lh_job_param
+              WHERE job_id IN ($placeholders)",
+            $jobIds ) );
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        foreach ( $resultset as $record ) {
+            if ( ! isset( $jobParams[ $record->job_id ] ) ) {
+                $jobParams[ $record->job_id ] = array();
+            }
+            $jobParams[ $record->job_id ][ $record->name ] = $record->value;
+        }
+        return $jobParams;
+    }
+
+    /**
      * Returns the job parameters for the given job
      * $jobId : PK of job
      * Returns array keyed by job parameter name containing value

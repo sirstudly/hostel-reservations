@@ -986,7 +986,11 @@ class AjaxController {
 
             ?>
             <script type="text/javascript">
-                location.reload();
+                if (typeof job_history_table !== 'undefined') {
+                    job_history_table.ajax.reload();
+                } else {
+                    location.reload();
+                }
             </script>
             <?php
         }

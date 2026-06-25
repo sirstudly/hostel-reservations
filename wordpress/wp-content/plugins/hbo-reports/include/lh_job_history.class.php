@@ -5,28 +5,102 @@
  */
 class LHJobHistory extends XslTransform {
 
-    var $history = array();  // array() of wp_lh_jobs records
-    var $jobParams = array(); // array() keyed by job_id containing job parameters array[key]=value
-    const NUM_DAYS_TO_INCLUDE = 99; // number of days in the past to include
-    const MAX_NUM_RECORDS = 500;  // max number of records to display
+    var $classnames = array();
+    var $statuses = array();
+    const JOB_CLASS_PREFIX = 'com.macbackpackers.jobs.';
+    const MAX_PAGE_LENGTH = 500;
 
     /**
      * Default constructor.
      */
     function __construct() {
-        
+
     }
 
    /**
     * Reloads the view details.
     */
    function doView() {
-       $this->history = LilHotelierDBO::getJobHistory( self::NUM_DAYS_TO_INCLUDE, self::MAX_NUM_RECORDS );
-       $this->jobParams = array(); // clear out old data
-       foreach( $this->history as $job ) {
-            $this->jobParams[$job->job_id] = LilHotelierDBO::getJobParameters( $job->job_id );
-       }
+       $this->classnames = LilHotelierDBO::getJobHistoryDistinctClassnames();
+       $this->statuses = LilHotelierDBO::getJobHistoryDistinctStatuses();
    }
+
+    /**
+     * Returns paginated job history as a DataTables-compatible JSON response.
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     * @throws DatabaseException
+     */
+    function fetch_job_history( $request ) {
+        $draw = (int) $request->get_param( 'draw' );
+        $start = max( 0, (int) $request->get_param( 'start' ) );
+        $length = (int) $request->get_param( 'length' );
+        if ( $length <= 0 ) {
+            $length = 100;
+        }
+        $length = min( $length, self::MAX_PAGE_LENGTH );
+
+        $filters = array();
+        $jobName = $request->get_param( 'job_name' );
+        if ( ! empty( $jobName ) ) {
+            $filters['classname'] = $jobName;
+        }
+        $status = $request->get_param( 'status' );
+        if ( ! empty( $status ) ) {
+            $filters['status'] = $status;
+        }
+
+        $orderColumns = array( 'job_id', 'classname', 'status', 'start_date', 'end_date', 'job_id' );
+        $orderColIndex = 0;
+        $orderDir = 'desc';
+        if ( is_array( $request->get_param( 'order' ) ) && count( $request->get_param( 'order' ) ) > 0 ) {
+            $order = $request->get_param( 'order' )[0];
+            $orderColIndex = isset( $order['column'] ) ? (int) $order['column'] : 0;
+            $orderDir = isset( $order['dir'] ) ? $order['dir'] : 'desc';
+        }
+        $orderCol = isset( $orderColumns[ $orderColIndex ] ) ? $orderColumns[ $orderColIndex ] : 'job_id';
+
+        $recordsTotal = LilHotelierDBO::getJobHistoryCount( array() );
+        $recordsFiltered = LilHotelierDBO::getJobHistoryCount( $filters );
+        $rows = LilHotelierDBO::getJobHistoryPage( $start, $length, $filters, $orderCol, $orderDir );
+
+        $jobIds = array_map( function ( $row ) {
+            return $row->job_id;
+        }, $rows );
+        $jobParams = LilHotelierDBO::getJobParametersForJobIds( $jobIds );
+
+        $logDirectory = get_option( 'hbo_log_directory' );
+        $logDirectoryUrl = get_option( 'hbo_log_directory_url' );
+
+        $data = array();
+        foreach ( $rows as $record ) {
+            $shortName = str_replace( self::JOB_CLASS_PREFIX, '', $record->classname );
+            $params = isset( $jobParams[ $record->job_id ] ) ? $jobParams[ $record->job_id ] : array();
+
+            $hasLog = file_exists( $logDirectory . '/job-' . $record->job_id . '.log' )
+                || file_exists( $logDirectory . '/job-' . $record->job_id . '.gz' );
+
+            $data[] = array(
+                'job_id' => (int) $record->job_id,
+                'job_name' => $shortName,
+                'job_params' => $params,
+                'status' => $record->status,
+                'can_resubmit' => in_array( $record->status, array( 'failed', 'aborted' ), true ),
+                'start_date' => $record->start_date ?? '',
+                'end_date' => $record->end_date ?? '',
+                'log_file' => $hasLog ? $logDirectoryUrl . $record->job_id : '',
+            );
+        }
+
+        $response = new WP_REST_Response( array(
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ), 200 );
+        $response->header( 'Content-type', 'application/json' );
+        return $response;
+    }
 
     /**
      * Changes the job status back to submitted.
@@ -50,52 +124,41 @@ class LHJobHistory extends XslTransform {
      */
     function addSelfToDocument($domtree, $parentElement) {
 
-        $logDirectory = get_option( 'hbo_log_directory' );
-        $logDirectoryUrl = get_option( 'hbo_log_directory_url' );
-	    $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
-        foreach( $this->history as $record ) {
-            $recordRoot = $parentElement->appendChild($domtree->createElement('record'));
-            $recordRoot->appendChild($domtree->createElement('job_id', $record->job_id));
-            $recordRoot->appendChild($domtree->createElement('job_name', 
-                str_replace("com.macbackpackers.jobs.", "", $record->classname)));
-            $recordRoot->appendChild($domtree->createElement('status', $record->status));
-            $recordRoot->appendChild($domtree->createElement('start_date', $record->start_date));
-            $recordRoot->appendChild($domtree->createElement('end_date', $record->end_date));
+        $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
+        $parentElement->appendChild($domtree->createElement('pluginurl', HBO_PLUGIN_URL));
+        $parentElement->appendChild($domtree->createElement('log_directory_url', get_option('hbo_log_directory_url')));
+        $parentElement->appendChild($domtree->createElement('wpnonce', wp_create_nonce('wp_rest')));
 
-            // if there were any parameters, include them...
-            if( isset( $this->jobParams[$record->job_id] )) {
-                foreach( $this->jobParams[$record->job_id] as $paramKey => $paramVal ) {
-                    $paramRoot = $recordRoot->appendChild($domtree->createElement('job_param'));
-                    $paramRoot->appendChild($domtree->createElement('name', $paramKey));
-                    $paramRoot->appendChild($domtree->createElement('value', $paramVal));
-                }
-            }
+        $jobNamesRoot = $parentElement->appendChild($domtree->createElement('job_names'));
+        foreach ( $this->classnames as $classname ) {
+            $nameRoot = $jobNamesRoot->appendChild($domtree->createElement('name'));
+            $nameRoot->appendChild($domtree->createElement('value', $classname));
+            $nameRoot->appendChild($domtree->createElement('label',
+                str_replace(self::JOB_CLASS_PREFIX, '', $classname)));
+        }
 
-            // only include logfile if it exists
-            $jobLogFilename = "job-" . $record->job_id . ".log";
-            $jobLogFilenameCompressed = "job-" . $record->job_id . ".gz";
-            if( file_exists( $logDirectory . "/" . $jobLogFilename )
-                    || file_exists( $logDirectory . "/" . $jobLogFilenameCompressed ) ) {
-                $recordRoot->appendChild($domtree->createElement('log_file', $logDirectoryUrl . $record->job_id ));
-            }
+        $statusesRoot = $parentElement->appendChild($domtree->createElement('statuses'));
+        foreach ( $this->statuses as $status ) {
+            $statusesRoot->appendChild($domtree->createElement('status', $status));
         }
     }
-    
-    /** 
+
+    /**
       Generates the following xml:
         <view>
-            <record>
-                <job_id>123</job_id>
-                <job_name>com.macbackpackers.jobs.BedCountJob</job_name>
+            <homeurl>...</homeurl>
+            <pluginurl>...</pluginurl>
+            <log_directory_url>...</log_directory_url>
+            <wpnonce>...</wpnonce>
+            <job_names>
+                <name>
+                    <value>com.macbackpackers.jobs.BedCountJob</value>
+                    <label>BedCountJob</label>
+                </name>
+            </job_names>
+            <statuses>
                 <status>completed</status>
-                <start_date>2016-02-03 02:48:03</start_date>
-                <end_date>2016-02-03 02:48:35</end_date>
-                <job_param>
-                    <name>allocation_scraper_job_id</name>
-                    <value>13</value>
-                </job_param>
-            </record>
-            ...
+            </statuses>
         </view>
      */
     function toXml() {
@@ -106,7 +169,7 @@ class LHJobHistory extends XslTransform {
         $xml = $domtree->saveXML();
         return $xml;
     }
-    
+
     /**
      * Returns the filename for the stylesheet to use during transform.
      */

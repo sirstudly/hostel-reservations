@@ -59,6 +59,13 @@ class WP_HostelBackoffice {
                     return is_user_logged_in();
                 }
             ) );
+            register_rest_route( 'hbo-reports/v1', '/job-history', array(
+                'methods' => 'GET',
+                'callback' => array( new LHJobHistory(), 'fetch_job_history' ),
+                'permission_callback' => function () {
+                    return is_user_logged_in();
+                }
+            ) );
             register_rest_route( 'hbo-reports/v1', '/blacklist', array(
                 'methods' => 'POST',
                 'callback' => array(new Blacklist(), 'getBlacklist'),

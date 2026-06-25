@@ -21,76 +21,163 @@
 
     <div class="card text-center">
         <div class="card-body">
-            <xsl:choose>
-                <xsl:when test="record">
-                    <xsl:call-template name="report_data"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <div class="ml-5 mb-2 mt-2 font-italic">
-                        <h6>No jobs found.</h6>
-                    </div>
-                </xsl:otherwise>
-            </xsl:choose>
+            <style type="text/css">
+                #job_history_table .job-history-filters th {
+                    background-color: #f8f9fa;
+                    border-top: none;
+                    font-weight: normal;
+                }
+            </style>
+            <table id="job_history_table" class="table table-striped">
+                <thead>
+                    <tr class="thead-dark">
+                        <th scope="col">Job ID</th>
+                        <th scope="col">Job Name</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">End Date</th>
+                        <th scope="col">Log File</th>
+                    </tr>
+                    <tr class="job-history-filters">
+                        <th/>
+                        <th>
+                            <select id="filter_job_name" class="form-control form-control-sm">
+                                <option value="">All job types</option>
+                                <xsl:for-each select="job_names/name">
+                                    <option>
+                                        <xsl:attribute name="value"><xsl:value-of select="value"/></xsl:attribute>
+                                        <xsl:value-of select="label"/>
+                                    </option>
+                                </xsl:for-each>
+                            </select>
+                        </th>
+                        <th>
+                            <select id="filter_status" class="form-control form-control-sm">
+                                <option value="">All statuses</option>
+                                <xsl:for-each select="statuses/status">
+                                    <option>
+                                        <xsl:attribute name="value"><xsl:value-of select="."/></xsl:attribute>
+                                        <xsl:value-of select="."/>
+                                    </option>
+                                </xsl:for-each>
+                            </select>
+                        </th>
+                        <th/>
+                        <th/>
+                        <th/>
+                    </tr>
+                </thead>
+                <tbody/>
+            </table>
         </div>
     </div>
+
+    <script type="text/javascript">
+    jQuery(document).ready(function() {
+        var homeurl = '<xsl:value-of select="homeurl"/>';
+        var wpnonce = '<xsl:value-of select="wpnonce"/>';
+        var pluginurl = '<xsl:value-of select="pluginurl"/>';
+
+        function formatJobParamsTooltip(params) {
+            if (!params || Object.keys(params).length === 0) {
+                return '';
+            }
+            var lines = [];
+            jQuery.each(params, function(key, val) {
+                lines.push(key + ': ' + val);
+            });
+            return lines.join('&lt;br&gt;');
+        }
+
+        job_history_table = new DataTable('#job_history_table', {
+            processing: true,
+            serverSide: true,
+            pageLength: 100,
+            lengthMenu: [[50, 100, 500], [50, 100, 500]],
+            searching: false,
+            order: [[0, 'desc']],
+            ajax: {
+                url: homeurl + '/wp-json/hbo-reports/v1/job-history',
+                data: function(d) {
+                    d.job_name = jQuery('#filter_job_name').val();
+                    d.status = jQuery('#filter_status').val();
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', wpnonce);
+                }
+            },
+            columns: [
+                { data: 'job_id' },
+                {
+                    data: 'job_name',
+                    className: 'text-left',
+                    render: function(data, type, row) {
+                        if (type !== 'display') {
+                            return data;
+                        }
+                        var tooltip = formatJobParamsTooltip(row.job_params);
+                        if (tooltip) {
+                            return jQuery('&lt;a&gt;', {
+                                href: 'javascript:void(0)',
+                                'data-toggle': 'tooltip',
+                                'data-html': true,
+                                'data-trigger': 'hover focus click',
+                                title: tooltip
+                            }).text(data).prop('outerHTML');
+                        }
+                        return data;
+                    }
+                },
+                {
+                    data: 'status',
+                    render: function(data, type, row) {
+                        if (type !== 'display') {
+                            return data;
+                        }
+                        if (row.can_resubmit) {
+                            var link = jQuery('&lt;a&gt;', {
+                                href: 'javascript:void(0)',
+                                css: { marginLeft: '10px' },
+                                onclick: 'resubmit_incomplete_job(' + row.job_id + '); return false;'
+                            }).append(jQuery('&lt;img&gt;', {
+                                src: pluginurl + '/img/refresh.svg',
+                                width: 16
+                            }));
+                            return data + link.prop('outerHTML');
+                        }
+                        return data;
+                    }
+                },
+                { data: 'start_date' },
+                { data: 'end_date' },
+                {
+                    data: 'log_file',
+                    orderable: false,
+                    render: function(data, type, row) {
+                        if (type !== 'display' || !data) {
+                            return '';
+                        }
+                        return jQuery('&lt;a&gt;', {
+                            href: data,
+                            text: 'job-' + row.job_id + '.log'
+                        }).prop('outerHTML');
+                    }
+                }
+            ],
+            drawCallback: function() {
+                jQuery('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+
+        jQuery('#filter_job_name, #filter_status').on('change', function() {
+            job_history_table.ajax.reload();
+        });
+    });
+    </script>
 
     <xsl:call-template name="write_inline_js"/>
     <xsl:call-template name="write_inline_css"/>
 
-</xsl:template>
-
-<xsl:template name="report_data">
-    <table id="job_history_table" class="table table-striped">
-        <thead class="thead-dark">
-            <th scope="col">Job ID</th>
-            <th scope="col">Job Name</th>
-            <th scope="col">Status</th>
-            <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col">Log File</th>
-        </thead>
-        <tbody>
-            <xsl:apply-templates select="record"/>
-        </tbody>
-    </table>
-
-</xsl:template>
-
-
-<xsl:template match="record">
-    <tr>
-        <td><xsl:value-of select="job_id"/></td>
-        <td class="text-left">
-            <xsl:choose>
-                <xsl:when test="job_param">
-                    <a href="javascript:void(0)" data-toggle="tooltip" data-html="true" data-trigger="hover focus click">
-                        <xsl:attribute name="title"><xsl:apply-templates select="job_param"/></xsl:attribute>
-                        <xsl:value-of select="job_name"/>
-                    </a>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="job_name"/>
-                </xsl:otherwise>
-            </xsl:choose>
-        </td>
-        <td><xsl:value-of select="status"/><xsl:if test="status = 'failed' or status = 'aborted'">
-            <a href="javascript:void(0)" style="margin-left: 10px;">
-                <xsl:attribute name="onclick">
-                    resubmit_incomplete_job(<xsl:value-of select="job_id"/>);
-                </xsl:attribute>
-                <img width="16px">
-                    <xsl:attribute name="src"><xsl:value-of select="/view/pluginurl"/>/img/refresh.svg</xsl:attribute>
-                </img>
-            </a>
-        </xsl:if></td>
-        <td><xsl:value-of select="start_date"/></td>
-        <td><xsl:value-of select="end_date"/></td>
-        <td><xsl:if test="log_file"><a><xsl:attribute name="href"><xsl:value-of select="log_file"/></xsl:attribute>job-<xsl:value-of select="job_id"/>.log</a></xsl:if></td>
-    </tr>
-</xsl:template>
-
-<xsl:template match="job_param">
-    <xsl:value-of select="name"/>: <xsl:value-of select="value"/>&lt;br&gt;
 </xsl:template>
 
 </xsl:stylesheet>
