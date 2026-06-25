@@ -27,6 +27,17 @@
                     border-top: none;
                     font-weight: normal;
                 }
+                .job-history-page-jump {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    margin-top: 8px;
+                    gap: 6px;
+                    width: 100%;
+                }
+                .job-history-page-input {
+                    width: 4.5em;
+                }
             </style>
             <table id="job_history_table" class="table table-striped">
                 <thead>
@@ -69,6 +80,12 @@
                 </thead>
                 <tbody/>
             </table>
+            <div id="job_history_page_jump" class="job-history-page-jump" style="display: none;">
+                Go to page
+                <input type="number" min="1" class="form-control form-control-sm job-history-page-input"/>
+                <span class="job-history-page-of"/>
+                <button type="button" class="btn btn-sm btn-secondary job-history-page-go">Go</button>
+            </div>
         </div>
     </div>
 
@@ -96,6 +113,12 @@
             lengthMenu: [[50, 100, 500], [50, 100, 500]],
             searching: false,
             order: [[0, 'desc']],
+            layout: {
+                topStart: 'pageLength',
+                topEnd: null,
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
             ajax: {
                 url: homeurl + '/wp-json/hbo-reports/v1/job-history',
                 data: function(d) {
@@ -164,6 +187,34 @@
                     }
                 }
             ],
+            initComplete: function() {
+                var api = this.api();
+                var jump = jQuery('#job_history_page_jump');
+                jump.show();
+
+                function goToPage() {
+                    var page = parseInt(jump.find('.job-history-page-input').val(), 10);
+                    var info = api.page.info();
+                    if ( ! isNaN(page) &amp;&amp; page &gt;= 1 &amp;&amp; page &lt;= info.pages) {
+                        api.page(page - 1).draw('page');
+                    }
+                }
+
+                function updatePageInput() {
+                    var info = api.page.info();
+                    jump.find('.job-history-page-input').attr('max', info.pages).val(info.page + 1);
+                    jump.find('.job-history-page-of').text('of ' + info.pages);
+                }
+
+                jump.find('.job-history-page-go').on('click', goToPage);
+                jump.find('.job-history-page-input').on('keypress', function(e) {
+                    if (e.which === 13) {
+                        goToPage();
+                    }
+                });
+                api.on('draw', updatePageInput);
+                updatePageInput();
+            },
             drawCallback: function() {
                 jQuery('[data-toggle="tooltip"]').tooltip();
             }
