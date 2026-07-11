@@ -90,10 +90,70 @@
     </div>
 
     <script type="text/javascript">
+    var job_history_state_key = 'hbo_job_history_state';
+
+    function loadJobHistoryState() {
+        try {
+            var raw = sessionStorage.getItem(job_history_state_key);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveJobHistoryState() {
+        if (typeof job_history_table === 'undefined') {
+            return;
+        }
+        var info = job_history_table.page.info();
+        sessionStorage.setItem(job_history_state_key, JSON.stringify({
+            job_name: jQuery('#filter_job_name').val() || '',
+            status: jQuery('#filter_status').val() || '',
+            page: info.page,
+            length: info.length,
+            start: info.start
+        }));
+    }
+
+    function applyJobHistoryState(state) {
+        if (!state) {
+            return;
+        }
+        jQuery('#filter_job_name').val(state.job_name || '');
+        jQuery('#filter_status').val(state.status || '');
+    }
+
+    function restoreJobHistoryTable(state) {
+        if (!state || typeof job_history_table === 'undefined') {
+            return;
+        }
+        applyJobHistoryState(state);
+        var api = job_history_table;
+        var current = api.page.info();
+        if (state.length &amp;&amp; state.length !== current.length) {
+            api.page.len(state.length);
+        }
+        api.ajax.reload(function() {
+            var targetPage = state.page || 0;
+            if (api.page.info().page !== targetPage) {
+                api.page(targetPage).draw(false);
+            }
+            saveJobHistoryState();
+        }, false);
+    }
+
+    jQuery(window).on('pageshow', function(e) {
+        if (e.originalEvent &amp;&amp; e.originalEvent.persisted) {
+            restoreJobHistoryTable(loadJobHistoryState());
+        }
+    });
+
     jQuery(document).ready(function() {
         var homeurl = '<xsl:value-of select="homeurl"/>';
         var wpnonce = '<xsl:value-of select="wpnonce"/>';
         var pluginurl = '<xsl:value-of select="pluginurl"/>';
+        var savedState = loadJobHistoryState();
+        applyJobHistoryState(savedState);
 
         function formatJobParamsTooltip(params) {
             if (!params || Object.keys(params).length === 0) {
@@ -109,7 +169,8 @@
         job_history_table = new DataTable('#job_history_table', {
             processing: true,
             serverSide: true,
-            pageLength: 100,
+            pageLength: savedState &amp;&amp; savedState.length ? savedState.length : 100,
+            displayStart: savedState &amp;&amp; savedState.start ? savedState.start : 0,
             lengthMenu: [[50, 100, 500], [50, 100, 500]],
             searching: false,
             order: [[0, 'desc']],
@@ -214,14 +275,21 @@
                 });
                 api.on('draw', updatePageInput);
                 updatePageInput();
+
+                if (savedState &amp;&amp; typeof savedState.page === 'number' &amp;&amp; api.page.info().page !== savedState.page) {
+                    api.page(savedState.page).draw(false);
+                }
             },
             drawCallback: function() {
                 jQuery('[data-toggle="tooltip"]').tooltip();
+                saveJobHistoryState();
             }
         });
 
         jQuery('#filter_job_name, #filter_status').on('change', function() {
-            job_history_table.ajax.reload();
+            job_history_table.ajax.reload(function() {
+                saveJobHistoryState();
+            }, true);
         });
     });
     </script>
