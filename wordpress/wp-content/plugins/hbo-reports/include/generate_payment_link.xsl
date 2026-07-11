@@ -200,6 +200,9 @@ function copyToClipboard(inputElem, infoMsgElem) {
         First Night: £<xsl:value-of select="amount_first_night"/><br/>
         Grand Total: £<xsl:value-of select="grand_total"/><br/>
         Balance Due: £<xsl:value-of select="balance_due"/><br/>
+        <xsl:if test="visitor_levy">
+        Visitor Levy: £<xsl:value-of select="visitor_levy"/> (to be paid on arrival)<br/>
+        </xsl:if>
     </div>
     <div class="row mt-2">
         <div class="offset-md-1 col-10">
@@ -218,7 +221,12 @@ function copyToClipboard(inputElem, infoMsgElem) {
         <div class="row">
             <div class="offset-md-2 col-10">
                 <input id="payment_full" name="payment_type" type="radio" onclick="document.post_option.payment_amount.value='{balance_due}';" value="balance_due"/>
-                <label class="form_label pl-3" for="payment_full">Outstanding Balance (£<xsl:value-of select="balance_due"/>)</label>
+                <label class="form_label pl-3" for="payment_full">
+                    <xsl:choose>
+                        <xsl:when test="visitor_levy">Outstanding Balance less Visitor Levy (£<xsl:value-of select="balance_due"/>)</xsl:when>
+                        <xsl:otherwise>Outstanding Balance (£<xsl:value-of select="balance_due"/>)</xsl:otherwise>
+                    </xsl:choose>
+                </label>
             </div>
         </div>
     </xsl:if>

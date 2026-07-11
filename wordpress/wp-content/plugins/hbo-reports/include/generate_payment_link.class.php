@@ -9,6 +9,9 @@ class GeneratePaymentLinkController extends XslTransform {
     const LOOKUPKEY_CHARSET = "2345678ABCDEFGHJKLMNPQRSTUVWXYZ";
     const LOOKUPKEY_LENGTH = 7;
 
+    // tax name prefix used to identify Edinburgh Visitor Levy in tax_breakdown
+    const EDINBURGH_VISITOR_LEVY_TAX_PREFIX = 'Edinburgh Visitor Levy';
+
     // currently loaded booking
     var $booking;
 
@@ -101,8 +104,37 @@ class GeneratePaymentLinkController extends XslTransform {
 			}
 			$response['amount_first_night'] = $total_deposit;
 		}
+		$this->adjustBookingForVisitorLevy( $response );
 		$this->booking = $response;
 		return $response;
+	}
+
+	/**
+	 * Returns the Edinburgh Visitor Levy amount from the booking tax breakdown, if present.
+	 * @param array $response cloudbeds get_reservation response
+	 * @return float levy amount, or 0 if not found
+	 */
+	function getEdinburghVisitorLevyAmount( $response ) {
+		$tax_breakdown = $response['balance_details']['tax_breakdown'] ?? array();
+		foreach ( $tax_breakdown as $tax ) {
+			if ( isset( $tax['name'] ) && strpos( $tax['name'], self::EDINBURGH_VISITOR_LEVY_TAX_PREFIX ) === 0 ) {
+				return floatval( $tax['amount'] );
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Excludes Edinburgh Visitor Levy from payment link totals; levy is paid on arrival.
+	 * @param array $response cloudbeds get_reservation response (modified in place)
+	 */
+	function adjustBookingForVisitorLevy( &$response ) {
+		$visitor_levy = $this->getEdinburghVisitorLevyAmount( $response );
+		if ( $visitor_levy > 0 ) {
+			$response['visitor_levy'] = $visitor_levy;
+			$response['grand_total'] = max( 0, floatval( $response['grand_total'] ) - $visitor_levy );
+			$response['balance_due'] = max( 0, floatval( $response['balance_due'] ) - $visitor_levy );
+		}
 	}
 
     /**
@@ -197,6 +229,9 @@ class GeneratePaymentLinkController extends XslTransform {
             $bookingRoot->appendChild($domtree->createElement('num_guests', intval($this->booking['adults_number']) + intval($this->booking['kids_number'])));
             $bookingRoot->appendChild($domtree->createElement('grand_total', number_format($this->booking['grand_total'], 2)));
             $bookingRoot->appendChild($domtree->createElement('balance_due', number_format($this->booking['balance_due'], 2)));
+            if ( ! empty( $this->booking['visitor_levy'] ) ) {
+                $bookingRoot->appendChild($domtree->createElement('visitor_levy', number_format($this->booking['visitor_levy'], 2)));
+            }
             $bookingRoot->appendChild($domtree->createElement('amount_first_night', number_format($this->booking['amount_first_night'], 2)));
             $parentElement->appendChild($bookingRoot);
         }
