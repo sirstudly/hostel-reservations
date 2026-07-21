@@ -77,7 +77,10 @@ abstract class ScheduledJob {
         ], [
             'classname'  => 'com.macbackpackers.jobs.CreateCalculateEdinburghVisitorLevyForBookingJob',
             'name'       => 'Recalculate Edinburgh Visitor Levy (EVL)',
-            'parameters' => [ 'booking_date_start' => 'TODAY-3', 'booking_date_end' => 'TODAY' ]
+            'parameters' => [
+                'booking_date_start' => 'TODAY-3', 'booking_date_end'   => 'TODAY',
+                'checkin_date_start' => '', 'checkin_date_end'   => ''
+            ]
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendBulkEmailJob',
 		    'name'       => 'Send Bulk Email Job',
