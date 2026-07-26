@@ -81,6 +81,10 @@ abstract class ScheduledJob {
                 'booking_date_start' => 'TODAY-3', 'booking_date_end'   => 'TODAY',
                 'checkin_date_start' => '', 'checkin_date_end'   => ''
             ]
+        ], [
+            'classname'  => 'com.macbackpackers.jobs.BDCVerifyLoginJob',
+            'name'       => 'Booking.com Session Keep-Alive Job ',
+            'parameters' => []
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendBulkEmailJob',
 		    'name'       => 'Send Bulk Email Job',
