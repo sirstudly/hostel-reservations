@@ -82,7 +82,7 @@ abstract class ScheduledJob {
                 'checkin_date_start' => '', 'checkin_date_end'   => ''
             ]
         ], [
-            'classname'  => 'com.macbackpackers.jobs.BDCVerifyLoginJob',
+            'classname'  => 'com.macbackpackers.jobs.BDCSeleniumVerifyLoginJob',
             'name'       => 'Booking.com Session Keep-Alive Job ',
             'parameters' => []
 	    ], [
