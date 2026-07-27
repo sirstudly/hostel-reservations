@@ -194,10 +194,14 @@ jQuery(document).ready( function(){
             <div class="row">
                 <input type="checkbox" id="bdc_pwcheck" class="offset-sm-4 mr-2 mt-1" /> Show Password
             </div>
+            <div class="row">
+                <label class="col-4" for="bdc_2facode">2FA Code:</label>
+                <input id="bdc_2facode" name="hbo_bdc_2facode" class="regular-text code col-7" type="text" autocomplete="false" value="{hbo_bdc_2facode}"/>
+            </div>
 
             <div class="btn-container mb-2">
                 <div style="float: left;" id="ajax_respond_bdc"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_bdc" class="btn btn-primary" style="float: right;" onclick="save_bdc_settings(document.post_option.bdc_username.value, document.post_option.bdc_password.value); this.disabled=true;">Save</a>
+                <a id="btn_save_bdc" class="btn btn-primary" style="float: right;" onclick="save_bdc_settings(document.post_option.bdc_username.value, document.post_option.bdc_password.value, document.post_option.bdc_2facode.value); this.disabled=true;">Save</a>
             </div>
         </div>
 

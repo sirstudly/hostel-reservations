@@ -186,7 +186,8 @@ function save_hostelworld_settings( username, password ) {
 // saves the login details for bdc
 // username : bdc username
 // password : bdc password
-function save_bdc_settings( username, password ) {
+// facode : bdc 2FA code
+function save_bdc_settings( username, password, facode ) {
 
     jQuery('#ajax_respond_bdc').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
@@ -198,7 +199,8 @@ function save_bdc_settings( username, password ) {
         data:{
             ajax_action : 'SAVE_BDC_SETTINGS',
             username : username,
-            password : password
+            password : password,
+            facode : facode
         }
     });
 }

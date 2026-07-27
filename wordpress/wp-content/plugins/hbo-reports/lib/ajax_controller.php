@@ -385,12 +385,13 @@ class AjaxController {
      * Requires POST variables:
      *   username : bdc username
      *   password : bdc password
+     *   facode : bdc 2FA code
      */
     function saveBdcSettings() {
         try {
             $settingsPage = new LHReportSettings();
             $settingsPage->saveBdcSettings(
-                $_POST['username'], $_POST['password'] );
+                $_POST['username'], $_POST['password'], $_POST['facode'] );
 
             ?> 
             <script type="text/javascript">

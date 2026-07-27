@@ -28,6 +28,7 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_hw_password'] = htmlspecialchars(stripslashes(get_option('hbo_hw_password')));
 	    $this->reportSettings['hbo_bdc_username'] = get_option('hbo_bdc_username');
 	    $this->reportSettings['hbo_bdc_password'] = htmlspecialchars(stripslashes(get_option('hbo_bdc_password')));
+	    $this->reportSettings['hbo_bdc_2facode'] = get_option('hbo_bdc_2facode');
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
         $this->reportSettings['hbo_agoda_password'] = htmlspecialchars(stripslashes(get_option('hbo_agoda_password')));
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
@@ -132,9 +133,10 @@ class LHReportSettings extends XslTransform {
    /**
     * Updates details for BDC.
     */
-   function saveBdcSettings( $username, $password ) {
+   function saveBdcSettings( $username, $password, $facode ) {
        update_option( "hbo_bdc_username", $username );
        update_option( "hbo_bdc_password", $password );
+       update_option( "hbo_bdc_2facode", $facode );
 	   delete_option( "hbo_bdc_lasturl" );
    }
 
