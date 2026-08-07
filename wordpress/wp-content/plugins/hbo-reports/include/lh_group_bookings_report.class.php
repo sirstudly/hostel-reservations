@@ -8,6 +8,7 @@ class LHGroupBookingsReport extends XslTransform {
     const JOB_TYPE = "com.macbackpackers.jobs.AllocationScraperJob";
 
     var $groupBookingsReport;  // the view of the latest report
+    var $mostlyFullDormsReport; // bookings that nearly fill a dorm
     var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
     var $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job
     var $lastJob; // the last job of this type that has run
@@ -24,6 +25,7 @@ class LHGroupBookingsReport extends XslTransform {
      */
     function doView() {
         $this->groupBookingsReport = LilHotelierDBO::getGroupBookingsReport();
+        $this->mostlyFullDormsReport = LilHotelierDBO::getMostlyFullDormsReport();
         $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
         $this->lastCompletedAllocScraperJob = LilHotelierDBO::getLastCompletedAllocationScraperJob();
         $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
@@ -92,6 +94,31 @@ class LHGroupBookingsReport extends XslTransform {
                 $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
             }
         }
+
+        if ( $this->mostlyFullDormsReport ) {
+            foreach( $this->mostlyFullDormsReport as $record ) {
+                $recordRoot = $parentElement->appendChild($domtree->createElement('mostly_full_record'));
+                $recordRoot->appendChild($domtree->createElement('guest_name', htmlspecialchars(html_entity_decode($record->guest_name, ENT_COMPAT, "UTF-8" ))));
+                $recordRoot->appendChild($domtree->createElement('booking_reference', $record->booking_reference));
+                $recordRoot->appendChild($domtree->createElement('booking_source', htmlspecialchars(html_entity_decode($record->booking_source, ENT_COMPAT, "UTF-8" ))));
+                $recordRoot->appendChild($domtree->createElement('checkin_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('D, d M Y')));
+                $recordRoot->appendChild($domtree->createElement('checkin_date_yyyymmdd', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->format('Y-m-d')));
+                $recordRoot->appendChild($domtree->createElement('checkin_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkin_date)->getTimestamp()));
+                $recordRoot->appendChild($domtree->createElement('checkout_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->format('D, d M Y')));
+                $recordRoot->appendChild($domtree->createElement('checkout_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->checkout_date)->getTimestamp()));
+                if( $record->booked_date ) {
+                    $recordRoot->appendChild($domtree->createElement('booked_date', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->format('D, d M Y')));
+                    $recordRoot->appendChild($domtree->createElement('booked_datetime', DateTime::createFromFormat('Y-m-d H:i:s', $record->booked_date)->getTimestamp()));
+                }
+                $recordRoot->appendChild($domtree->createElement('num_guests', $record->num_guests));
+                $recordRoot->appendChild($domtree->createElement('room_capacity', $record->room_capacity));
+                $recordRoot->appendChild($domtree->createElement('data_href', $record->data_href));
+                if ( isset( $record->notes ) ) {
+                    $recordRoot->appendChild($domtree->createElement('notes', str_replace(array("\r\n", "\n", "\r"), "<br/>", htmlspecialchars($record->notes))));
+                }
+                $recordRoot->appendChild($domtree->createElement('viewed_yn', $record->viewed_yn));
+            }
+        }
     }
     
     /** 
@@ -113,9 +140,19 @@ class LHGroupBookingsReport extends XslTransform {
                 <notes>Arriving late</notes>
                 <viewed_yn>Y</viewed_yn>
             </record>
-            <record>
-                ...
-            </record>
+            <mostly_full_record>
+                <guest_name>Joe Bloggs</guest_name>
+                <booking_reference>192121</booking_reference>
+                <booking_source>Extranet</booking_source>
+                <checkin_date>Mon, 18 May 2015</checkin_date>
+                <checkout_date>Wed, 20 May 2015</checkout_date>
+                <booked_date>Fri, 13 Apr 2015</booked_date>
+                <num_guests>5</num_guests>
+                <room_capacity>6</room_capacity>
+                <data_href>/extranet/properties/533/reservations/1046289/edit</data_href>
+                <notes>Arriving late</notes>
+                <viewed_yn>Y</viewed_yn>
+            </mostly_full_record>
             ...
         </view>
      */

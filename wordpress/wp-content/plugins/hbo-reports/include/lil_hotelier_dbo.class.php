@@ -331,6 +331,25 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns report for bookings that nearly fill a dorm (capacity - 1).
+     */
+    static function getMostlyFullDormsReport() {
+        global $wpdb;
+        $resultset = $wpdb->get_results(
+            "SELECT guest_name, booking_reference, booking_source, checkin_date, checkout_date,
+                    booked_date, num_guests, room_capacity, data_href, notes, viewed_yn
+               FROM wp_lh_rpt_mostly_full_dorms
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.MostlyFullDormReportJob' AND status = 'completed'))
+              ORDER BY checkin_date");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return $resultset;
+    }
+
+    /**
      * Returns report of bookings which have unpaid deposits.
      */
     static function getUnpaidDepositReport() {
@@ -658,7 +677,8 @@ class LilHotelierDBO {
                            'com.macbackpackers.jobs.BookingScraperJob', 
                            'com.macbackpackers.jobs.SplitRoomReservationReportJob',
                            'com.macbackpackers.jobs.UnpaidDepositReportJob',
-                           'com.macbackpackers.jobs.GroupBookingsReportJob' )
+                           'com.macbackpackers.jobs.GroupBookingsReportJob',
+                           'com.macbackpackers.jobs.MostlyFullDormReportJob' )
                    AND status IN ( %s, %s )",  
                 self::STATUS_SUBMITTED, self::STATUS_PROCESSING ));
 
