@@ -227,8 +227,7 @@ function save_agoda_settings( username, password ) {
 
 // saves group bookings report settings
 // group_booking_size : group size in report
-// mostly_full_dorm_email_template : Cloudbeds email template name for mostly-full dorm guests
-function save_group_bookings_report_settings( group_booking_size, mostly_full_dorm_email_template ) {
+function save_group_bookings_report_settings( group_booking_size ) {
 
     jQuery('#ajax_respond_group_bookings_rpt').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
@@ -239,8 +238,7 @@ function save_group_bookings_report_settings( group_booking_size, mostly_full_do
         error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
             ajax_action : 'SAVE_GROUP_BOOKINGS_REPORT_SETTINGS',
-            group_booking_size : group_booking_size,
-            mostly_full_dorm_email_template : mostly_full_dorm_email_template
+            group_booking_size : group_booking_size
         }
     });
 }
