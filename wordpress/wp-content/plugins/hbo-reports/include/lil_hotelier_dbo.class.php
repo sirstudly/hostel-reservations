@@ -318,9 +318,7 @@ class LilHotelierDBO {
                     booked_date, payment_outstanding, num_guests, data_href, notes, viewed_yn 
                FROM wp_lh_group_bookings
               WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.GroupBookingsReportJob' AND status = 'completed'))
-                AND ( num_guests >= %d " .
-                       (get_option('hbo_include_5_guests_in_6bed_dorm') == 'true' ? ' OR num_guests = 5' : '' ) . "
-                    )
+                AND num_guests >= %d
               ORDER BY checkin_date", get_option('hbo_group_booking_size')));
 
         if($wpdb->last_error) {

@@ -225,25 +225,21 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-        <div class="shadow settings-container">
+        <div class="shadow settings-container-lg">
             <h4>Group Bookings Report</h4>
             <div class="row mb-1">
-                <label class="col-7" for="group_booking_size">Group Booking Size:</label>
+                <label class="col-4" for="group_booking_size">Group Booking Size:</label>
                 <input id="group_booking_size" name="hbo_group_booking_size" class="regular-text code col-3" type="text" value="{hbo_group_booking_size}"/>
             </div>
 
-            <div class="row">
-                <label class="col-10" for="include_5_guests_in_6bed_dorm">Include Bookings of 5 Guests in a 6 Bed Dorm:</label>
-                <input class="mt-1" type="checkbox" id="include_5_guests_in_6bed_dorm" name="hbo_include_5_guests_in_6bed_dorm">
-                        <xsl:if test="hbo_include_5_guests_in_6bed_dorm = 'true'">
-                            <xsl:attribute name="checked">checked</xsl:attribute>
-                        </xsl:if>
-                </input>
+            <div class="row mb-1">
+                <label class="col-4" for="mostly_full_dorm_email_template">Mostly Full Dorm Email Template:</label>
+                <input id="mostly_full_dorm_email_template" name="hbo_mostly_full_dorm_email_template" class="regular-text code col-7" type="text" value="{hbo_mostly_full_dorm_email_template}"/>
             </div>
 
             <div class="btn-container mb-2">
                 <div style="float: left;" id="ajax_respond_group_bookings_rpt"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_group_rpt_settings" class="btn btn-primary" style="float: right;" onclick="save_group_bookings_report_settings(document.post_option.group_booking_size.value, document.post_option.include_5_guests_in_6bed_dorm.checked); this.disabled=true;">Save</a>
+                <a id="btn_save_group_rpt_settings" class="btn btn-primary" style="float: right;" onclick="save_group_bookings_report_settings(document.post_option.group_booking_size.value, document.post_option.mostly_full_dorm_email_template.value); this.disabled=true;">Save</a>
             </div>
         </div>
 

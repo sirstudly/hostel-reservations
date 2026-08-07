@@ -32,7 +32,7 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_agoda_username'] = get_option('hbo_agoda_username');
         $this->reportSettings['hbo_agoda_password'] = htmlspecialchars(stripslashes(get_option('hbo_agoda_password')));
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
-        $this->reportSettings['hbo_include_5_guests_in_6bed_dorm'] = get_option('hbo_include_5_guests_in_6bed_dorm');
+        $this->reportSettings['hbo_mostly_full_dorm_email_template'] = get_option('hbo_mostly_full_dorm_email_template');
 	    $this->reportSettings['hbo_bedsheets_change_after_days'] = get_option('hbo_bedsheets_change_after_days');
         $this->reportSettings['hbo_api_key'] = get_option('hbo_api_key');
         $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
@@ -159,9 +159,9 @@ class LHReportSettings extends XslTransform {
 	/**
     * Updates details for the Group Bookings report.
     * $groupBookingSize : number of guests for a booking to be considered a "group" (string)
-    * $include5guestsIn6bedDorms : boolean (true to include bookings of 5 guests in 6 bed dorms)
+    * $mostlyFullDormEmailTemplate : Cloudbeds email template name for mostly-full dorm guests
     */
-   function saveGroupBookingsReportSettings( $groupBookingSize, $include5guestsIn6bedDorms ) {
+   function saveGroupBookingsReportSettings( $groupBookingSize, $mostlyFullDormEmailTemplate ) {
 
        if( empty( $groupBookingSize )) {
            throw new ValidationException( "Group booking size cannot be blank" );
@@ -174,7 +174,7 @@ class LHReportSettings extends XslTransform {
        }
 
        update_option( "hbo_group_booking_size", $groupBookingSize );
-       update_option( "hbo_include_5_guests_in_6bed_dorm", $include5guestsIn6bedDorms ? 'true' : 'false' );
+       update_option( "hbo_mostly_full_dorm_email_template", $mostlyFullDormEmailTemplate );
    }
 
 	/**

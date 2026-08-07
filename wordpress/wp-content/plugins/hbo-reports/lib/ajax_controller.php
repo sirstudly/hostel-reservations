@@ -451,13 +451,13 @@ class AjaxController {
      * Updates the settings for the group bookings report.
      * Requires POST variables:
      *   group_booking_size : group size in report
-     *   include_5_guests_in_6bed_dorm : checkbox value to include 5 guests in 6 bed dorm
+     *   mostly_full_dorm_email_template : Cloudbeds email template name for mostly-full dorm guests
      */
     function saveGroupBookingsReportSettings() {
         try {
             $settingsPage = new LHReportSettings();
             $settingsPage->saveGroupBookingsReportSettings( 
-                $_POST['group_booking_size'], $_POST['include_5_guests_in_6bed_dorm'] == 'true' );
+                $_POST['group_booking_size'], $_POST['mostly_full_dorm_email_template'] );
             ?> 
             <script type="text/javascript">
                 jQuery("#ajax_respond_group_bookings_rpt")

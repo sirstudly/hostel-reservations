@@ -118,7 +118,7 @@ class WP_HostelBackoffice {
         add_option('hbo_blacklist_url', 'admin/blacklist');
         add_option('hbo_online_checkin_url', 'online-checkin');
         add_option('hbo_group_booking_size', '6');
-        add_option('hbo_include_5_guests_in_6bed_dorm', 'true');
+        add_option('hbo_mostly_full_dorm_email_template', '');
         self::insert_site_pages();
     }
 
@@ -153,7 +153,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_online_checkin_url');
         delete_option('hbo_run_processor_cmd');
         delete_option('hbo_group_booking_size');
-        delete_option('hbo_include_5_guests_in_6bed_dorm');
+        delete_option('hbo_mostly_full_dorm_email_template');
         self::delete_site_pages();
     }
 
