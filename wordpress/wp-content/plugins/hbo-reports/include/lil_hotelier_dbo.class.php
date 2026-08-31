@@ -367,6 +367,74 @@ class LilHotelierDBO {
     }
 
     /**
+     * Returns true if an active Charge Non-Refundable Bookings job exists in the scheduler.
+     */
+    static function isChargeNonRefundableBookingJobActive() {
+        global $wpdb;
+        $jobId = $wpdb->get_var(
+            "SELECT job_id
+               FROM job_scheduler
+              WHERE classname = 'com.macbackpackers.jobs.CreateChargeNonRefundableBookingJob'
+                AND active_yn = 'Y'
+              LIMIT 1");
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return ! empty( $jobId );
+    }
+
+    /**
+     * Returns booking references exempt from automated cancelation.
+     * @return array of booking_reference strings
+     */
+    static function getCancelBookingExemptReferences() {
+        global $wpdb;
+        $resultset = $wpdb->get_col(
+            "SELECT booking_reference FROM wp_hwl_cancel_booking_exempt");
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $resultset ? $resultset : array();
+    }
+
+    /**
+     * Marks a booking as exempt from automated cancelation.
+     * $bookingReference : booking reference key
+     */
+    static function setCancelBookingExempt( $bookingReference ) {
+        global $wpdb;
+        $returnval = $wpdb->query( $wpdb->prepare(
+            "INSERT IGNORE INTO wp_hwl_cancel_booking_exempt (booking_reference) VALUES (%s)",
+            $bookingReference ) );
+
+        if ( false === $returnval ) {
+            error_log( $wpdb->last_error . " executing sql: " . $wpdb->last_query );
+            throw new DatabaseException( $wpdb->last_error );
+        }
+    }
+
+    /**
+     * Removes a booking from the cancel-exempt list.
+     * $bookingReference : booking reference key
+     */
+    static function unsetCancelBookingExempt( $bookingReference ) {
+        global $wpdb;
+        $returnval = $wpdb->delete(
+            "wp_hwl_cancel_booking_exempt",
+            array( 'booking_reference' => $bookingReference ),
+            array( '%s' ) );
+
+        if ( false === $returnval ) {
+            error_log( $wpdb->last_error . " executing sql: " . $wpdb->last_query );
+            throw new DatabaseException( $wpdb->last_error );
+        }
+    }
+
+    /**
      * Returns report with all guest comments.
      */
     static function getGuestCommentsReport() {

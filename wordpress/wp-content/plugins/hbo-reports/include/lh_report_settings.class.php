@@ -26,6 +26,7 @@ class LHReportSettings extends XslTransform {
 	    $this->reportSettings['hbo_cloudbeds_password'] = htmlspecialchars(stripslashes(get_option('hbo_cloudbeds_password')));
         $this->reportSettings['hbo_hw_username'] = get_option('hbo_hw_username');
         $this->reportSettings['hbo_hw_password'] = htmlspecialchars(stripslashes(get_option('hbo_hw_password')));
+        $this->reportSettings['hbo_hw_hostelnumber'] = get_option('hbo_hw_hostelnumber');
 	    $this->reportSettings['hbo_bdc_username'] = get_option('hbo_bdc_username');
 	    $this->reportSettings['hbo_bdc_password'] = htmlspecialchars(stripslashes(get_option('hbo_bdc_password')));
 	    $this->reportSettings['hbo_bdc_2facode'] = get_option('hbo_bdc_2facode');
@@ -123,10 +124,21 @@ class LHReportSettings extends XslTransform {
 
    /**
     * Updates details for hostelworld.
+    * $username : HW username
+    * $password : HW password
+    * $hostelNumber : HW hostel number (required non-blank integer)
     */
-   function saveHostelworldSettings( $username, $password ) {
+   function saveHostelworldSettings( $username, $password, $hostelNumber ) {
+       if ( empty( $hostelNumber ) ) {
+           throw new ValidationException( "Hostel Number cannot be blank" );
+       }
+       if ( ctype_digit( $hostelNumber ) === false ) {
+           throw new ValidationException( "Hostel Number must be an integer" );
+       }
+
        update_option( "hbo_hw_username", $username );
        update_option( "hbo_hw_password", $password );
+       update_option( "hbo_hw_hostelnumber", $hostelNumber );
    }
 
    /**

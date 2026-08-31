@@ -166,7 +166,8 @@ function update_cloudbeds_2facode( cb_2facode ) {
 // saves the login details for hostelworld
 // username : HW username
 // password : HW password
-function save_hostelworld_settings( username, password ) {
+// hostelnumber : HW hostel number (required integer)
+function save_hostelworld_settings( username, password, hostelnumber ) {
 
     jQuery('#ajax_respond_hw').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
@@ -178,7 +179,8 @@ function save_hostelworld_settings( username, password ) {
         data:{
             ajax_action : 'SAVE_HOSTELWORLD_SETTINGS',
             username : username,
-            password : password
+            password : password,
+            hostelnumber : hostelnumber
         }
     });
 }
@@ -274,6 +276,74 @@ function save_api_key_settings( api_key ) {
         data:{
             ajax_action : 'SAVE_API_KEY_SETTINGS',
             api_key : api_key
+        }
+    });
+}
+
+// saves cancel-booking settings on the unpaid deposit report
+// hours : hours after final payment reminder (blank to disable)
+// min_days : minimum days prior to checkin (required positive integer)
+function save_cancel_booking_settings( hours, min_days ) {
+
+    hours = jQuery.trim( hours );
+    min_days = jQuery.trim( min_days );
+
+    if ( hours !== '' && ( ! /^\d+$/.test( hours ) || parseInt( hours, 10 ) < 1 ) ) {
+        jQuery('#ajax_respond_cancel_booking_settings')
+            .html('Cancel booking hours must be a positive integer (or blank to disable).')
+            .css({ 'color': 'red' });
+        jQuery('#btn_save_cancel_booking_settings').prop( 'disabled', false );
+        return;
+    }
+    if ( min_days === '' || ! /^\d+$/.test( min_days ) || parseInt( min_days, 10 ) < 1 ) {
+        jQuery('#ajax_respond_cancel_booking_settings')
+            .html('Minimum days prior to checkin must be a positive integer (at least 1).')
+            .css({ 'color': 'red' });
+        jQuery('#btn_save_cancel_booking_settings').prop( 'disabled', false );
+        return;
+    }
+
+    jQuery('#ajax_respond_cancel_booking_settings').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){if( textStatus == 'success') jQuery('#ajax_respond_cancel_booking_settings').html( data ); },
+        error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');} jQuery('#btn_save_cancel_booking_settings').prop( 'disabled', false );},
+        data:{
+            ajax_action : 'SAVE_CANCEL_BOOKING_SETTINGS',
+            cancel_booking_hours : hours,
+            cancel_booking_min_days : min_days
+        }
+    });
+}
+
+// marks a booking as exempt from automated cancelation
+function set_cancel_booking_exempt( booking_reference ) {
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){ /* no update to page */ },
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'SET_CANCEL_BOOKING_EXEMPT',
+            booking_reference : booking_reference
+        }
+    });
+}
+
+// removes a booking from the cancel-exempt list
+function unset_cancel_booking_exempt( booking_reference ) {
+
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url+ '/' + wpdev_bk_plugin_filename,
+        type:'POST',
+        success: function (data, textStatus){ /* no update to page */ },
+        error:function (XMLHttpRequest, textStatus, errorThrown){window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
+        data:{
+            ajax_action : 'UNSET_CANCEL_BOOKING_EXEMPT',
+            booking_reference : booking_reference
         }
     });
 }

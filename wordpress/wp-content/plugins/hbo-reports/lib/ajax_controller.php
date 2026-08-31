@@ -81,6 +81,18 @@ class AjaxController {
 		        $this->saveApiKeySettings();
 		        break;
 
+	        case 'SAVE_CANCEL_BOOKING_SETTINGS':
+		        $this->saveCancelBookingSettings();
+		        break;
+
+	        case 'SET_CANCEL_BOOKING_EXEMPT':
+		        $this->setCancelBookingExempt();
+		        break;
+
+	        case 'UNSET_CANCEL_BOOKING_EXEMPT':
+		        $this->unsetCancelBookingExempt();
+		        break;
+
 	        case 'SAVE_CHECKOUT_EMAIL_TEMPLATE':
                 $this->saveCheckoutEmailTemplate();
                 break;
@@ -352,12 +364,14 @@ class AjaxController {
      * Requires POST variables:
      *   username : HW username
      *   password : HW password
+     *   hostelnumber : HW hostel number
      */
     function saveHostelworldSettings() {
         try {
             $settingsPage = new LHReportSettings();
             $settingsPage->saveHostelworldSettings( 
-                $_POST['username'], $_POST['password'] );
+                $_POST['username'], $_POST['password'],
+                isset( $_POST['hostelnumber'] ) ? $_POST['hostelnumber'] : '' );
 
             ?> 
             <script type="text/javascript">
@@ -535,6 +549,54 @@ class AjaxController {
             </script>
 			<?php
 		}
+	}
+
+	/**
+	 * Saves cancel-booking settings for the unpaid deposit report.
+	 * Requires POST variables:
+	 *   cancel_booking_hours : hours after final payment reminder (blank to disable)
+	 *   cancel_booking_min_days : minimum days prior to checkin
+	 */
+	function saveCancelBookingSettings() {
+		try {
+			$report = new LHUnpaidDepositReport();
+			$report->saveCancelBookingSettings(
+				isset( $_POST['cancel_booking_hours'] ) ? $_POST['cancel_booking_hours'] : '',
+				isset( $_POST['cancel_booking_min_days'] ) ? $_POST['cancel_booking_min_days'] : '' );
+			?>
+            <script type="text/javascript">
+                window.location.reload(true);
+            </script>
+			<?php
+		}
+		catch( Exception $e ) {
+			?>
+            <script type="text/javascript">
+                jQuery("#ajax_respond_cancel_booking_settings")
+                    .html('<?php echo $e->getMessage(); ?>')
+                    .css({ 'color': 'red' });
+                jQuery("#btn_save_cancel_booking_settings").prop( "disabled", false );
+            </script>
+			<?php
+		}
+	}
+
+	/**
+	 * Marks a booking as exempt from automated cancelation.
+	 * Requires POST variable: booking_reference
+	 */
+	function setCancelBookingExempt() {
+		$report = new LHUnpaidDepositReport();
+		$report->setCancelExempt( $_POST['booking_reference'] );
+	}
+
+	/**
+	 * Removes a booking from the cancel-exempt list.
+	 * Requires POST variable: booking_reference
+	 */
+	function unsetCancelBookingExempt() {
+		$report = new LHUnpaidDepositReport();
+		$report->unsetCancelExempt( $_POST['booking_reference'] );
 	}
 
 	/**

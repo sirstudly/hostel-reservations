@@ -42,6 +42,42 @@
 
 <xsl:template name="report_header">
 
+    <xsl:if test="hw_password_configured = 'true'">
+    <div class="container mt-1 mb-3">
+        <div class="row">
+            <div class="col-12 text-left">
+                <xsl:if test="charge_non_refundable_job_active != 'true'">
+                    <div class="text-left mb-2" style="color: red;">
+                        An active 'Charge Non-Refundable Bookings' job must be enabled in the Job Scheduler to perform automated cancellations.
+                    </div>
+                </xsl:if>
+                <p class="help-block text-left mb-1" style="font-style: normal; color: #000;">
+                    Cancel booking
+                    <input type="text" id="cancel_booking_hours" name="cancel_booking_hours" class="form-control d-inline-block mx-1" style="width: 60px;" size="4">
+                        <xsl:attribute name="value"><xsl:value-of select="cancel_booking_hours"/></xsl:attribute>
+                    </input>
+                    hours after Final Payment Reminder Email unless exempted below (leave blank to disable)
+                </p>
+                <ul class="help-block text-left mb-2" style="font-style: normal; color: #000; list-style-type: disc; padding-left: 1.5rem;">
+                    <li>
+                        Do not cancel if less than
+                        <input type="text" id="cancel_booking_min_days" name="cancel_booking_min_days" class="form-control d-inline-block mx-1" style="width: 60px;" size="4">
+                            <xsl:attribute name="value"><xsl:value-of select="cancel_booking_min_days"/></xsl:attribute>
+                        </input>
+                        days prior to checkin (eg. Setting to 2 days means if the guest is due to check-in on April 17, then we don't cancel this booking from midnight of April 15 onwards)
+                    </li>
+                    <li>Minimum value is 1. We don't cancel any bookings on the day, or even the day before. We're not that cruel.</li>
+                </ul>
+                <div class="d-flex align-items-center mb-2">
+                    <div id="ajax_respond_cancel_booking_settings"><xsl:comment/><!-- ajax response here--></div>
+                    <a id="btn_save_cancel_booking_settings" class="btn btn-primary ml-2" href="javascript:void(0)"
+                       onclick="save_cancel_booking_settings(document.getElementById('cancel_booking_hours').value, document.getElementById('cancel_booking_min_days').value); this.disabled=true;">Save</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </xsl:if>
+
     <form name="report_form" action="" method="post" id="report_form" class="form-inline">
     <div class="container mt-1">
         <div class="row">
@@ -101,6 +137,9 @@
                 <th scope="col">Checkin Date</th>
                 <th scope="col">Checkout Date</th>
                 <th scope="col">Booked Date</th>
+                <xsl:if test="hw_password_configured = 'true' and string(cancel_booking_hours) != ''">
+                    <th scope="col" class="text-center">Cancel Exempt</th>
+                </xsl:if>
             </tr>
         </thead>
         <tbody>
@@ -142,6 +181,14 @@
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkin_datetime"/></xsl:attribute><xsl:value-of select="checkin_date"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
+        <xsl:if test="../hw_password_configured = 'true' and string(../cancel_booking_hours) != ''">
+            <td class="text-center">
+                <input type="checkbox" name="cancel_exempt_checkbox">
+                    <xsl:if test="cancel_exempt = 'Y'"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+                    <xsl:attribute name="onClick">if(this.checked) { set_cancel_booking_exempt('<xsl:value-of select="booking_reference"/>'); } else { unset_cancel_booking_exempt('<xsl:value-of select="booking_reference"/>'); }</xsl:attribute>
+                </input>
+            </td>
+        </xsl:if>
     </tr>
 </xsl:template>
 

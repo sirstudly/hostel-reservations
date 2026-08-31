@@ -164,6 +164,10 @@ jQuery(document).ready( function(){
         <div class="shadow settings-container">
             <h4>Hostelworld</h4>
             <div class="row">
+                <label class="col-4" for="hw_hostelnumber">Property ID:</label>
+                <input id="hw_hostelnumber" name="hbo_hw_hostelnumber" class="regular-text code col-7" type="text" autocomplete="false" value="{hbo_hw_hostelnumber}"/>
+            </div>
+            <div class="row">
                 <label class="col-4" for="hw_username">Username:</label>
                 <input id="hw_username" name="hbo_hw_username" class="regular-text code col-7" type="text" autocomplete="false" value="{hbo_hw_username}"/>
             </div>
@@ -177,7 +181,7 @@ jQuery(document).ready( function(){
 
             <div class="btn-container mb-2">
                 <div style="float: left;" id="ajax_respond_hw"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value); this.disabled=true;">Save</a>
+                <a id="btn_save_hw" class="btn btn-primary" style="float: right;" onclick="save_hostelworld_settings(document.post_option.hw_username.value, document.post_option.hw_password.value, document.post_option.hw_hostelnumber.value); this.disabled=true;">Save</a>
             </div>
         </div>
 
