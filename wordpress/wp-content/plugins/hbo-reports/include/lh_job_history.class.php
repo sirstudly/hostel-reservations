@@ -50,7 +50,15 @@ class LHJobHistory extends XslTransform {
             $filters['status'] = $status;
         }
 
-        list( $orderCol, $orderDir ) = $this->resolveJobHistoryOrder( $request );
+        $orderColumns = array( 'job_id', 'classname', 'status', 'start_date', 'end_date', 'job_id' );
+        $orderColIndex = 0;
+        $orderDir = 'desc';
+        if ( is_array( $request->get_param( 'order' ) ) && count( $request->get_param( 'order' ) ) > 0 ) {
+            $order = $request->get_param( 'order' )[0];
+            $orderColIndex = isset( $order['column'] ) ? (int) $order['column'] : 0;
+            $orderDir = isset( $order['dir'] ) ? $order['dir'] : 'desc';
+        }
+        $orderCol = isset( $orderColumns[ $orderColIndex ] ) ? $orderColumns[ $orderColIndex ] : 'job_id';
 
         $recordsTotal = LilHotelierDBO::getJobHistoryCount( array() );
         $recordsFiltered = LilHotelierDBO::getJobHistoryCount( $filters );
@@ -92,51 +100,6 @@ class LHJobHistory extends XslTransform {
         ), 200 );
         $response->header( 'Content-type', 'application/json' );
         return $response;
-    }
-
-    /**
-     * Resolves sort column and direction from a DataTables server-side request.
-     * Defaults to job_id descending when no valid order is supplied.
-     * @param WP_REST_Request $request
-     * @return array [ orderCol, orderDir ]
-     */
-    private function resolveJobHistoryOrder( $request ) {
-        $orderCol = 'job_id';
-        $orderDir = 'desc';
-
-        $orderableColumns = array(
-            'job_id' => 'job_id',
-            'job_name' => 'classname',
-            'status' => 'status',
-            'start_date' => 'start_date',
-            'end_date' => 'end_date',
-        );
-        $orderColumns = array( 'job_id', 'classname', 'status', 'start_date', 'end_date' );
-
-        $queryParams = $request->get_query_params();
-        $orderParam = isset( $queryParams['order'] ) ? $queryParams['order'] : $request->get_param( 'order' );
-        $columnsParam = isset( $queryParams['columns'] ) ? $queryParams['columns'] : $request->get_param( 'columns' );
-
-        if ( ! is_array( $orderParam ) || count( $orderParam ) === 0 || ! isset( $orderParam[0] ) || ! is_array( $orderParam[0] ) ) {
-            return array( $orderCol, $orderDir );
-        }
-
-        $order = $orderParam[0];
-        $orderColIndex = isset( $order['column'] ) ? (int) $order['column'] : 0;
-        $orderDir = ( isset( $order['dir'] ) && strtolower( $order['dir'] ) === 'asc' ) ? 'asc' : 'desc';
-
-        if ( is_array( $columnsParam ) && isset( $columnsParam[ $orderColIndex ] ) && is_array( $columnsParam[ $orderColIndex ] ) ) {
-            $column = $columnsParam[ $orderColIndex ];
-            $isOrderable = ! ( isset( $column['orderable'] ) && ( $column['orderable'] === false || $column['orderable'] === 'false' ) );
-            $dataField = isset( $column['data'] ) ? $column['data'] : '';
-            if ( $isOrderable && isset( $orderableColumns[ $dataField ] ) ) {
-                $orderCol = $orderableColumns[ $dataField ];
-            }
-        } elseif ( isset( $orderColumns[ $orderColIndex ] ) ) {
-            $orderCol = $orderColumns[ $orderColIndex ];
-        }
-
-        return array( $orderCol, $orderDir );
     }
 
     /**
