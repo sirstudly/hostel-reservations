@@ -287,7 +287,7 @@
         });
 
         jQuery('#filter_job_name, #filter_status').on('change', function() {
-            job_history_table.ajax.reload(function() {
+            job_history_table.order([[0, 'desc']]).ajax.reload(function() {
                 saveJobHistoryState();
             }, true);
         });
