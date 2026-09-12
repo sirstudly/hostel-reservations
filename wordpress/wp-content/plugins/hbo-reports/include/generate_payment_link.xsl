@@ -230,6 +230,14 @@ function copyToClipboard(inputElem, infoMsgElem) {
             </div>
         </div>
     </xsl:if>
+    <xsl:if test="visitor_levy and balance_due_with_levy">
+        <div class="row">
+            <div class="offset-md-2 col-10">
+                <input id="payment_full_with_levy" name="payment_type" type="radio" onclick="document.post_option.payment_amount.value='{balance_due_with_levy}';" value="balance_due_with_levy"/>
+                <label class="form_label pl-3" for="payment_full_with_levy">Outstanding Balance with Visitor Levy (£<xsl:value-of select="balance_due_with_levy"/>)</label>
+            </div>
+        </div>
+    </xsl:if>
     <div class="row">
         <div class="offset-md-2 col-10">
             <input id="payment_custom_amount" name="payment_type" type="radio" value="custom_amount" checked="true"/>

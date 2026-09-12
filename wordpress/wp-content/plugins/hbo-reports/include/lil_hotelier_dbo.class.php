@@ -548,12 +548,17 @@ class LilHotelierDBO {
      * $reservationId : ID of reservation
      * $lookupKey : unique key for this reservation
      * $payment_requested : (optional) amount to pre-populate payment form
+     * $include_levy_yn : (optional) 'Y' to include visitor levy; leave unset/null otherwise
      */
-    static function insertLookupKeyForBooking( $reservationId, $lookupKey, $payment_requested ) {
+    static function insertLookupKeyForBooking( $reservationId, $lookupKey, $payment_requested, $include_levy_yn = null ) {
         global $wpdb;
-        if (false === $wpdb->insert("wp_booking_lookup_key",
-            array( 'reservation_id' => $reservationId, 'lookup_key' => $lookupKey, 'payment_requested' => $payment_requested ),
-                array( '%s', '%s', '%f' ))) {
+        $data = array( 'reservation_id' => $reservationId, 'lookup_key' => $lookupKey, 'payment_requested' => $payment_requested );
+        $formats = array( '%s', '%s', '%f' );
+        if ( $include_levy_yn === 'Y' ) {
+            $data['include_levy_yn'] = 'Y';
+            $formats[] = '%s';
+        }
+        if (false === $wpdb->insert("wp_booking_lookup_key", $data, $formats)) {
             error_log($wpdb->last_error . " executing sql: " . $wpdb->last_query);
             throw new DatabaseException($wpdb->last_error);
         }

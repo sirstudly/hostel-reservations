@@ -42,8 +42,9 @@ class GeneratePaymentLinkController extends XslTransform {
      *
      * @param $booking_ref string cloudbeds identifier
      * @param $deposit_only boolean true to request deposit amount only, false for total outstanding
+     * @param $include_levy boolean true to include visitor levy in payment link (include_levy_yn = Y)
      */
-    function generatePaymentLink($booking_ref, $deposit_only) {
+    function generatePaymentLink($booking_ref, $deposit_only, $include_levy = false) {
 
 	    $response = $this->loadBooking( $booking_ref );
 	    $amount   = $deposit_only;
@@ -53,7 +54,8 @@ class GeneratePaymentLinkController extends XslTransform {
 	    // this is used for generating a short URL
 	    $lookup_key = $this->generateRandomLookupKey( self::LOOKUPKEY_LENGTH );
 	    LilHotelierDBO::insertLookupKeyForBooking( $response['reservation_id'], $lookup_key,
-		    $amount > 0 ? $amount : null );
+		    $amount > 0 ? $amount : null,
+		    $include_levy ? 'Y' : null );
 	    return get_option( "hbo_booking_payments_url" ) . $lookup_key;
     }
 
@@ -231,6 +233,8 @@ class GeneratePaymentLinkController extends XslTransform {
             $bookingRoot->appendChild($domtree->createElement('balance_due', number_format($this->booking['balance_due'], 2)));
             if ( ! empty( $this->booking['visitor_levy'] ) ) {
                 $bookingRoot->appendChild($domtree->createElement('visitor_levy', number_format($this->booking['visitor_levy'], 2)));
+                $balance_due_with_levy = floatval( $this->booking['balance_due'] ) + floatval( $this->booking['visitor_levy'] );
+                $bookingRoot->appendChild($domtree->createElement('balance_due_with_levy', number_format($balance_due_with_levy, 2)));
             }
             $bookingRoot->appendChild($domtree->createElement('amount_first_night', number_format($this->booking['amount_first_night'], 2)));
             $parentElement->appendChild($bookingRoot);

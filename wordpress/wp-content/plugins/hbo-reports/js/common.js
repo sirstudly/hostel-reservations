@@ -433,15 +433,20 @@ function submit_manual_charge( bookingRef, amount, note, override_card_details )
 
 //Looks up a booking and generates a new payment link
 //booking_ref : the cloudbeds booking reference ("identifier" in get_reservation request)
-//payment_type : one of first_night, balance_due, custom_amount
+//payment_type : one of first_night, balance_due, balance_due_with_levy, custom_amount
 //amount : boolean/number (true to pre-populate just the amount of first night, false for total outstanding, or specific custom amount)
 function generate_payment_link( booking_ref, payment_type, amount ) {
 
+    var include_levy = false;
     if(payment_type == 'first_night') {
         amount = true;
     }
     else if(payment_type == 'balance_due') {
         amount = false;
+    }
+    else if(payment_type == 'balance_due_with_levy') {
+        amount = false;
+        include_levy = true;
     }
     else if (amount != '' && isNaN(parseFloat(amount))) {
         jQuery('#payment_amount').addClass('form-control is-invalid')
@@ -479,7 +484,8 @@ function generate_payment_link( booking_ref, payment_type, amount ) {
         data: {
             ajax_action: 'GENERATE_PAYMENT_LINK',
             booking_ref: booking_ref,
-            amount: amount
+            amount: amount,
+            include_levy: include_levy
         }
     });
 }

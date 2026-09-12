@@ -756,13 +756,15 @@ class AjaxController {
      * Requires POST variables:
      *   booking_ref : cloudbeds "identifier"
      *   amount : true to prepopulate deposit amount, false for total outstanding, or numeric amount
+     *   include_levy : (optional) true to set include_levy_yn = Y on the lookup key
      */
     function generatePaymentLink() {
 	    header('Content-Type: application/json; charset=utf-8');
         try {
             $paymentLinkPage = new GeneratePaymentLinkController();
             $paymentUrl = $paymentLinkPage->generatePaymentLink($_POST['booking_ref'],
-                $_POST['amount'] == 'true' ? true : ($_POST['amount'] == 'false' ? false : $_POST['amount']));
+                $_POST['amount'] == 'true' ? true : ($_POST['amount'] == 'false' ? false : $_POST['amount']),
+                isset( $_POST['include_levy'] ) && $_POST['include_levy'] == 'true' );
 	        echo json_encode( [ 'paymentUrl' => $paymentUrl ] );
         }
         catch( Exception $e ) {
