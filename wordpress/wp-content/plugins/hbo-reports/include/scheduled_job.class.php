@@ -109,9 +109,10 @@ abstract class ScheduledJob {
 	    ], [
 		    'classname'  => 'com.macbackpackers.jobs.CreateSendGuestRegistrationJob',
 		    'name'       => 'Send Guest Registration Email Job',
-		    'parameters' => [ 'booking_date' => 'TODAY-1',
-							  'min_guests' => '2',
-							  'max_guests' => '4' ]
+		    'parameters' => [
+                'booking_date_start' => 'TODAY-1', 'booking_date_end' => 'TODAY-1',
+                'checkin_date_start' => '', 'checkin_date_end' => ''
+            ]
 	    ] );
 
 	    if ( strpos( get_option( 'siteurl' ), 'castlerock' ) !== false
