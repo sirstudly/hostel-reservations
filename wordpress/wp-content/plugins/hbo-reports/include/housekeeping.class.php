@@ -48,9 +48,8 @@ class HouseKeeping extends XslTransform {
         // find the last completed job
         $this->jobInfo = LilHotelierDBO::getLatestJobOfType( self::JOB_TYPE );
 
-        if( $this->jobInfo ) {
-            $this->bedsheetView = LilHotelierDBO::fetchBedSheetsFrom( $selectionDate, $this->jobInfo->job_id);
-        }
+        $jobId = $this->jobInfo ? $this->jobInfo->job_id : 0;
+        $this->bedsheetView = LilHotelierDBO::fetchBedSheetsFrom( $selectionDate, $jobId );
 
         $this->isRefreshJobInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::JOB_TYPE );
         $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
@@ -122,7 +121,8 @@ class HouseKeeping extends XslTransform {
             if( !isset( $bedcounts[$arrayKey] )) {
                 $bedcounts[$arrayKey] = 0;
             }
-            if( $bed->bedsheet == 'CHANGE' || $bed->bedsheet == 'N DAY CHANGE' ) {
+            if( $bed->bedsheet == 'CHANGE' || $bed->bedsheet == 'N DAY CHANGE'
+                    || strpos( $bed->bedsheet, 'CHANGE' ) === 0 ) {
                 if( $bed->room_type == 'TWIN' || $bed->room_type == 'DBL'
                         || $bed->room_type == 'TRIPLE' || $bed->room_type == 'QUAD' ) {
                     $bedcounts[$arrayKey] += $bed->capacity; // increment by capacity of private room
@@ -142,6 +142,19 @@ class HouseKeeping extends XslTransform {
     function addSelfToDocument($domtree, $parentElement) {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         $parentElement->appendChild($domtree->createElement('selectiondate', $this->selectionDate->format('l jS F Y')));
+
+        // Mercure live updates (optional)
+        $mercureHub = get_option( 'hbo_mercure_hub_url' );
+        $mercureJwt = get_option( 'hbo_mercure_subscriber_jwt' );
+        $propertyId = get_option( 'hbo_cloudbeds_property_id' );
+        if ( false === empty( $mercureHub ) && false === empty( $mercureJwt ) && false === empty( $propertyId ) ) {
+            $topic = 'housekeeping/' . $propertyId;
+            $sep = ( strpos( $mercureHub, '?' ) === false ) ? '?' : '&';
+            $subscribeUrl = $mercureHub . $sep . 'topic=' . rawurlencode( $topic )
+                . '&authorization=' . rawurlencode( $mercureJwt );
+            $parentElement->appendChild($domtree->createElement('mercure_url', $subscribeUrl));
+            $parentElement->appendChild($domtree->createElement('mercure_topic', $topic));
+        }
 
         if( $this->jobInfo ) {
             // job_id, name, status, created_date, last_updated_date
@@ -179,7 +192,14 @@ class HouseKeeping extends XslTransform {
                 $bedRoot->appendChild($domtree->createElement('checkin_date', $bed->checkin_date ?? ""));
                 $bedRoot->appendChild($domtree->createElement('checkout_date', $bed->checkout_date ?? ""));
                 $bedRoot->appendChild($domtree->createElement('data_href', $bed->data_href ?? ""));
-                $bedRoot->appendChild($domtree->createElement('bedsheet', $bed->bedsheet == 'N DAY CHANGE' && false === empty($n_day_change) ? "$n_day_change DAY CHANGE": $bed->bedsheet));
+                $displayBedsheet = $bed->bedsheet;
+                if ( $bed->bedsheet == 'N DAY CHANGE' && false === empty($n_day_change) ) {
+                    $displayBedsheet = "$n_day_change DAY CHANGE";
+                }
+                $bedRoot->appendChild($domtree->createElement('bedsheet', $displayBedsheet));
+                if ( !empty( $bed->room_id ) ) {
+                    $bedRoot->appendChild($domtree->createElement('room_id', $bed->room_id));
+                }
             }
         }
 

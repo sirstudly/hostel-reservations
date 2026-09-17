@@ -30,13 +30,31 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns all bedsheet data for the given date.
+     * Returns all bedsheet data for the given date from the realtime housekeeping projection.
+     * Falls back to the legacy job-scoped calendar query if the projection table is empty.
      * $selectedDate : DateTime object
      * Returns raw resultset
      */
     static function fetchBedSheetsFrom($selectedDate, $jobId) {
         global $wpdb;
 
+        // Prefer live projection written by Java (HousekeepingStatusService)
+        $projected = $wpdb->get_results($wpdb->prepare(
+            "SELECT room_id, room, bed_name, room_type, capacity, guest_name, checkin_date, checkout_date,
+                    data_href, bedsheet
+               FROM wp_lh_housekeeping_bed
+              WHERE selected_date = %s
+              ORDER BY IF(room = 'TMNT', 'T3MNT', room), bed_name",
+            $selectedDate->format('Y-m-d')));
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+        if ( $projected && count( $projected ) > 0 ) {
+            return $projected;
+        }
+
+        // Legacy fallback while projection is being populated
 	    $n_day_change = get_option('hbo_bedsheets_change_after_days');
 	    $n_day_change = empty( $n_day_change ) ? 1000 : $n_day_change; // set to an arbitrarily large value if not defined so it doesn't kick in
 

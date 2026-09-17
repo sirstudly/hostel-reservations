@@ -253,9 +253,25 @@ jQuery(document).ready( function(){
                 <div class="col-11 mr-1">(blank to disable)</div>
             </div>
 
+            <div class="row mb-1">
+                <label class="col-3" for="mercure_hub_url">Mercure Hub URL:</label>
+                <input id="mercure_hub_url" name="hbo_mercure_hub_url" class="regular-text code col-8 mr-1" type="text" value="{hbo_mercure_hub_url}"/>
+            </div>
+            <div class="row mb-1">
+                <label class="col-3" for="mercure_publisher_jwt">Mercure Publisher JWT:</label>
+                <input id="mercure_publisher_jwt" name="hbo_mercure_publisher_jwt" class="regular-text code col-8 mr-1" type="password" autocomplete="off" value="{hbo_mercure_publisher_jwt}"/>
+            </div>
+            <div class="row mb-1">
+                <label class="col-3" for="mercure_subscriber_jwt">Mercure Subscriber JWT:</label>
+                <input id="mercure_subscriber_jwt" name="hbo_mercure_subscriber_jwt" class="regular-text code col-8 mr-1" type="password" autocomplete="off" value="{hbo_mercure_subscriber_jwt}"/>
+            </div>
+            <div class="row mb-1">
+                <div class="col-11 mr-1">Reuse the existing Mercure hub. Topic is housekeeping/&#123;propertyId&#125;. Leave blank to disable live updates.</div>
+            </div>
+
             <div class="btn-container mb-2 mr-4">
                 <div style="float: left;" id="ajax_respond_bedsheets_change_after_days"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_bedsheets_change_after_days" class="btn btn-primary" style="float: right;" onclick="save_housekeeping_report_settings(document.post_option.bedsheets_change_after_days.value); this.disabled=true;">Save</a>
+                <a id="btn_save_bedsheets_change_after_days" class="btn btn-primary" style="float: right;" onclick="save_housekeeping_report_settings(document.post_option.bedsheets_change_after_days.value, document.post_option.mercure_hub_url.value, document.post_option.mercure_publisher_jwt.value, document.post_option.mercure_subscriber_jwt.value); this.disabled=true;">Save</a>
             </div>
         </div>
 
