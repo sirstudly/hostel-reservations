@@ -119,8 +119,7 @@ class WP_HostelBackoffice {
         add_option('hbo_online_checkin_url', 'online-checkin');
         add_option('hbo_group_booking_size', '6');
         add_option('hbo_mercure_hub_url', '');
-        add_option('hbo_mercure_publisher_jwt', '');
-        add_option('hbo_mercure_subscriber_jwt', '');
+        add_option('hbo_mercure_jwt_secret', '');
         self::insert_site_pages();
     }
 
@@ -156,8 +155,7 @@ class WP_HostelBackoffice {
         delete_option('hbo_run_processor_cmd');
         delete_option('hbo_group_booking_size');
         delete_option('hbo_mercure_hub_url');
-        delete_option('hbo_mercure_publisher_jwt');
-        delete_option('hbo_mercure_subscriber_jwt');
+        delete_option('hbo_mercure_jwt_secret');
         self::delete_site_pages();
     }
 

@@ -143,17 +143,20 @@ class HouseKeeping extends XslTransform {
         $parentElement->appendChild($domtree->createElement('homeurl', home_url()));
         $parentElement->appendChild($domtree->createElement('selectiondate', $this->selectionDate->format('l jS F Y')));
 
-        // Mercure live updates (optional)
+        // Mercure live updates (optional): mint short-lived subscribe JWT from shared secret
         $mercureHub = get_option( 'hbo_mercure_hub_url' );
-        $mercureJwt = get_option( 'hbo_mercure_subscriber_jwt' );
+        $mercureSecret = get_option( 'hbo_mercure_jwt_secret' );
         $propertyId = get_option( 'hbo_cloudbeds_property_id' );
-        if ( false === empty( $mercureHub ) && false === empty( $mercureJwt ) && false === empty( $propertyId ) ) {
+        if ( false === empty( $mercureHub ) && false === empty( $mercureSecret ) && false === empty( $propertyId ) ) {
             $topic = 'housekeeping/' . $propertyId;
-            $sep = ( strpos( $mercureHub, '?' ) === false ) ? '?' : '&';
-            $subscribeUrl = $mercureHub . $sep . 'topic=' . rawurlencode( $topic )
-                . '&authorization=' . rawurlencode( $mercureJwt );
-            $parentElement->appendChild($domtree->createElement('mercure_url', $subscribeUrl));
-            $parentElement->appendChild($domtree->createElement('mercure_topic', $topic));
+            $mercureJwt = $this->mintMercureSubscriberJwt( $mercureSecret, $topic );
+            if ( $mercureJwt ) {
+                $sep = ( strpos( $mercureHub, '?' ) === false ) ? '?' : '&';
+                $subscribeUrl = $mercureHub . $sep . 'topic=' . rawurlencode( $topic )
+                    . '&authorization=' . rawurlencode( $mercureJwt );
+                $parentElement->appendChild($domtree->createElement('mercure_url', $subscribeUrl));
+                $parentElement->appendChild($domtree->createElement('mercure_topic', $topic));
+            }
         }
 
         if( $this->jobInfo ) {
@@ -263,6 +266,34 @@ class HouseKeeping extends XslTransform {
      */
     function getXslFilename() {
         return HBO_PLUGIN_DIR. '/include/housekeeping.xsl';
+    }
+
+    /**
+     * Mints a short-lived Mercure subscriber JWT (HS256) for the given topic.
+     * Uses the same shared secret as the Mercure hub / Java publisher.
+     */
+    private function mintMercureSubscriberJwt( $secret, $topic, $ttlSeconds = 21600 ) {
+        $header = array( 'alg' => 'HS256', 'typ' => 'JWT' );
+        $now = time();
+        $payload = array(
+            'iat' => $now,
+            'exp' => $now + intval( $ttlSeconds ),
+            'mercure' => array(
+                'subscribe' => array( $topic ),
+            ),
+        );
+        $segments = array(
+            $this->base64UrlEncode( json_encode( $header ) ),
+            $this->base64UrlEncode( json_encode( $payload ) ),
+        );
+        $signingInput = implode( '.', $segments );
+        $signature = hash_hmac( 'sha256', $signingInput, $secret, true );
+        $segments[] = $this->base64UrlEncode( $signature );
+        return implode( '.', $segments );
+    }
+
+    private function base64UrlEncode( $data ) {
+        return rtrim( strtr( base64_encode( $data ), '+/', '-_' ), '=' );
     }
 
 }

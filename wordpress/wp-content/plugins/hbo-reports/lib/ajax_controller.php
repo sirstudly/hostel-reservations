@@ -503,8 +503,7 @@ class AjaxController {
 			$settingsPage->saveHousekeepingReportSettings(
 				$_POST['bedsheet_change_days'] ?? '',
 				$_POST['mercure_hub_url'] ?? '',
-				$_POST['mercure_publisher_jwt'] ?? '',
-				$_POST['mercure_subscriber_jwt'] ?? ''
+				$_POST['mercure_jwt_secret'] ?? ''
 			);
 			?>
             <script type="text/javascript">

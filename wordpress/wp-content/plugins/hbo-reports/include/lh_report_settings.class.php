@@ -35,8 +35,7 @@ class LHReportSettings extends XslTransform {
         $this->reportSettings['hbo_group_booking_size'] = get_option('hbo_group_booking_size');
 	    $this->reportSettings['hbo_bedsheets_change_after_days'] = get_option('hbo_bedsheets_change_after_days');
 	    $this->reportSettings['hbo_mercure_hub_url'] = get_option('hbo_mercure_hub_url');
-	    $this->reportSettings['hbo_mercure_publisher_jwt'] = get_option('hbo_mercure_publisher_jwt');
-	    $this->reportSettings['hbo_mercure_subscriber_jwt'] = get_option('hbo_mercure_subscriber_jwt');
+	    $this->reportSettings['hbo_mercure_jwt_secret'] = get_option('hbo_mercure_jwt_secret');
         $this->reportSettings['hbo_api_key'] = get_option('hbo_api_key');
         $this->reportSettings['hbo_guest_email_subject'] = htmlspecialchars(stripslashes(get_option('hbo_guest_email_subject')));
         $this->reportSettings['hbo_guest_email_template'] = esc_textarea(stripslashes(get_option('hbo_guest_email_template')));
@@ -192,10 +191,10 @@ class LHReportSettings extends XslTransform {
 	/**
 	 * Updates details for the Housekeeping report.
 	 * $bedsheet_change_days : number of days to change bedsheets on a continuous stay (null/blank to disable)
-	 * $mercure_hub_url / publisher / subscriber JWTs : optional Mercure live-update config
+	 * $mercure_hub_url / $mercure_jwt_secret : optional Mercure live-update config (shared HMAC secret)
 	 */
 	function saveHousekeepingReportSettings( $bedsheet_change_days, $mercure_hub_url = null,
-			$mercure_publisher_jwt = null, $mercure_subscriber_jwt = null ) {
+			$mercure_jwt_secret = null ) {
 
 		if ( false === empty( $bedsheet_change_days )) {
 			if ( ctype_digit( $bedsheet_change_days ) === false ) {
@@ -210,11 +209,11 @@ class LHReportSettings extends XslTransform {
 		if ( $mercure_hub_url !== null ) {
 			update_option( 'hbo_mercure_hub_url', $mercure_hub_url );
 		}
-		if ( $mercure_publisher_jwt !== null ) {
-			update_option( 'hbo_mercure_publisher_jwt', $mercure_publisher_jwt );
-		}
-		if ( $mercure_subscriber_jwt !== null ) {
-			update_option( 'hbo_mercure_subscriber_jwt', $mercure_subscriber_jwt );
+		if ( $mercure_jwt_secret !== null ) {
+			update_option( 'hbo_mercure_jwt_secret', $mercure_jwt_secret );
+			// Clear legacy pre-minted JWT options if present
+			delete_option( 'hbo_mercure_publisher_jwt' );
+			delete_option( 'hbo_mercure_subscriber_jwt' );
 		}
 	}
 
