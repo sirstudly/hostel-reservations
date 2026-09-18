@@ -242,7 +242,7 @@ jQuery(document).ready( function(){
             </div>
         </div>
 
-        <div class="shadow settings-container-lg">
+        <div class="shadow settings-container">
             <h4>Housekeeping</h4>
             <div class="row">
                 <label class="col-7" for="bedsheets_change_after_days">Change Bedsheets After:</label>
@@ -253,21 +253,9 @@ jQuery(document).ready( function(){
                 <div class="col-11 mr-1">(blank to disable)</div>
             </div>
 
-            <div class="row mb-1">
-                <label class="col-3" for="mercure_hub_url">Mercure Hub URL:</label>
-                <input id="mercure_hub_url" name="hbo_mercure_hub_url" class="regular-text code col-8 mr-1" type="text" value="{hbo_mercure_hub_url}"/>
-            </div>
-            <div class="row mb-1">
-                <label class="col-3" for="mercure_jwt_secret">Mercure JWT Secret:</label>
-                <input id="mercure_jwt_secret" name="hbo_mercure_jwt_secret" class="regular-text code col-8 mr-1" type="password" autocomplete="off" value="{hbo_mercure_jwt_secret}"/>
-            </div>
-            <div class="row mb-1">
-                <div class="col-11 mr-1">Same HMAC secret as the Mercure hub. Publisher/subscriber JWTs are minted at runtime. Topic is housekeeping/&#123;propertyId&#125;. Leave blank to disable live updates.</div>
-            </div>
-
             <div class="btn-container mb-2 mr-4">
                 <div style="float: left;" id="ajax_respond_bedsheets_change_after_days"><xsl:comment/><!-- ajax response here--></div>
-                <a id="btn_save_bedsheets_change_after_days" class="btn btn-primary" style="float: right;" onclick="save_housekeeping_report_settings(document.post_option.bedsheets_change_after_days.value, document.post_option.mercure_hub_url.value, document.post_option.mercure_jwt_secret.value); this.disabled=true;">Save</a>
+                <a id="btn_save_bedsheets_change_after_days" class="btn btn-primary" style="float: right;" onclick="save_housekeeping_report_settings(document.post_option.bedsheets_change_after_days.value); this.disabled=true;">Save</a>
             </div>
         </div>
 

@@ -247,7 +247,7 @@ function save_group_bookings_report_settings( group_booking_size ) {
 
 // saves housekeeping report settings
 // bedsheet_change_days : number of days to change bedsheets on a continuous stay (null/blank to disable)
-function save_housekeeping_report_settings( bedsheet_change_days, mercure_hub_url, mercure_jwt_secret ) {
+function save_housekeeping_report_settings( bedsheet_change_days ) {
 
     jQuery('#ajax_respond_bedsheets_change_after_days').html('<div style="margin-left:80px;"><img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif"></div>');
 
@@ -258,9 +258,7 @@ function save_housekeeping_report_settings( bedsheet_change_days, mercure_hub_ur
         error:function (XMLHttpRequest, textStatus, errorThrown){ window.status = 'Ajax sending Error status:'+ textStatus;alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);if (XMLHttpRequest.status == 500) {alert('Oops sorry.. we messed up somewhere...');}},
         data:{
             ajax_action : 'SAVE_HOUSEKEEPING_REPORT_SETTINGS',
-            bedsheet_change_days : bedsheet_change_days,
-            mercure_hub_url : mercure_hub_url || '',
-            mercure_jwt_secret : mercure_jwt_secret || ''
+            bedsheet_change_days : bedsheet_change_days
         }
     });
 }

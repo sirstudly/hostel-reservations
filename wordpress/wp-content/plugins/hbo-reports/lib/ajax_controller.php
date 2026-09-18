@@ -500,11 +500,7 @@ class AjaxController {
 	function saveHousekeepingReportSettings() {
 		try {
 			$settingsPage = new LHReportSettings();
-			$settingsPage->saveHousekeepingReportSettings(
-				$_POST['bedsheet_change_days'] ?? '',
-				$_POST['mercure_hub_url'] ?? '',
-				$_POST['mercure_jwt_secret'] ?? ''
-			);
+			$settingsPage->saveHousekeepingReportSettings( $_POST['bedsheet_change_days'] ?? '' );
 			?>
             <script type="text/javascript">
                 jQuery("#ajax_respond_bedsheets_change_after_days")

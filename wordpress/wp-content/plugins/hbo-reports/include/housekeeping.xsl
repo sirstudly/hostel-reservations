@@ -103,10 +103,10 @@
     <xsl:call-template name="write_inline_js"/>
     <xsl:call-template name="write_inline_css"/>
 
-    <xsl:if test="mercure_url">
+    <xsl:if test="string-length(mercure_url) &gt; 0">
     <script type="text/javascript">
         (function() {
-            const mercureUrl = '<xsl:value-of select="mercure_url"/>';
+            const mercureUrl = <xsl:value-of select="mercure_url"/>;
             const statusEl = document.getElementById('hk_live_status');
             const updatedEl = document.getElementById('hk_last_updated');
 

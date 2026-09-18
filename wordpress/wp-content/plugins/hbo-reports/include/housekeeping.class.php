@@ -154,7 +154,10 @@ class HouseKeeping extends XslTransform {
                 $sep = ( strpos( $mercureHub, '?' ) === false ) ? '?' : '&';
                 $subscribeUrl = $mercureHub . $sep . 'topic=' . rawurlencode( $topic )
                     . '&authorization=' . rawurlencode( $mercureJwt );
-                $parentElement->appendChild($domtree->createElement('mercure_url', $subscribeUrl));
+                // createElement($name, $value) truncates on '&'; text node + JSON for safe JS embed
+                $mercureUrlEl = $domtree->createElement('mercure_url');
+                $mercureUrlEl->appendChild( $domtree->createTextNode( json_encode( $subscribeUrl ) ) );
+                $parentElement->appendChild( $mercureUrlEl );
                 $parentElement->appendChild($domtree->createElement('mercure_topic', $topic));
             }
         }
