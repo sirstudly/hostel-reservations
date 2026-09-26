@@ -139,6 +139,7 @@
                         const el = document.getElementById(id);
                         if (el &amp;&amp; val !== undefined &amp;&amp; val !== null) el.textContent = val;
                     }
+                    setTotal('hk_total_level1', t.level1);
                     setTotal('hk_total_level2', t.level2);
                     setTotal('hk_total_level4', t.level4);
                     setTotal('hk_total_level5', t.level5);
@@ -235,6 +236,9 @@
     <div class="container-fluid font-weight-bold">
         <xsl:if test="totals/level2">
             <div class="row">
+                <div class="col">
+                    10s : <span id="hk_total_level1"><xsl:value-of select="totals/level1"/></span>
+                </div>
                 <div class="col">
                     20s : <span id="hk_total_level2"><xsl:value-of select="totals/level2"/></span>
                 </div>

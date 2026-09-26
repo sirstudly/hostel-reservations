@@ -67,17 +67,19 @@ class HouseKeeping extends XslTransform {
     /**
      * Calculates the number of beds to be changed grouped by
      * the following:
+     * 'level1' => 'W beds'
      * 'level2' => 'X beds'
      * 'level4' => 'Y beds'
      * 'level5' => 'Z beds'
      * 'level6_7' => 'A beds'
      * 'upstairs' => 'Y+Z+A beds'
-     * 'total' => 'X+Y+Z+A beds'
+     * 'total' => 'W+X+Y+Z+A beds'
      */
     function calculateBedChangeCountsByRoomsCastleRock() {
         $bedcounts = array();
         if($this->bedsheetView) {
             foreach( $this->bedsheetView as $bed ) {
+                $this->update_bedsheets_to_change( $bedcounts, $bed, '/^1.*/', 'level1' );
                 $this->update_bedsheets_to_change( $bedcounts, $bed, '/^2.*/', 'level2' );
                 $this->update_bedsheets_to_change( $bedcounts, $bed, '/^4.*/', 'level4' );
                 $this->update_bedsheets_to_change( $bedcounts, $bed, '/^5.*/', 'level5' );
@@ -88,6 +90,7 @@ class HouseKeeping extends XslTransform {
                 ( isset( $bedcounts['level5'] ) ? + $bedcounts['level5'] : 0 ) +
                 ( isset( $bedcounts['level6_7'] ) ? + $bedcounts['level6_7'] : 0 );
             $bedcounts['total'] = $bedcounts['upstairs'] +
+                ( isset( $bedcounts['level1'] ) ? $bedcounts['level1'] : 0 ) +
                 ( isset( $bedcounts['level2'] ) ? $bedcounts['level2'] : 0 );
         }
         return $bedcounts;
