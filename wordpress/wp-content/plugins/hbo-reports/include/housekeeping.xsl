@@ -54,7 +54,7 @@
     font-size: 100%;
 }
 
-.badge-change-closure {
+.badge-closure {
     color: #fff;
     background-color: #6A1B9A;
     font-size: 100%;
@@ -115,7 +115,7 @@
                 if (bedsheet.indexOf('DAY CHANGE') !== -1) return 'badge badge-ndaychange';
                 if (bedsheet === 'CHANGE (CHECKED OUT)') return 'badge badge-change-out';
                 if (bedsheet === 'CHANGE (IN-HOUSE)') return 'badge badge-change-inhouse';
-                if (bedsheet === 'CHANGE (ROOM CLOSURE)') return 'badge badge-change-closure';
+                if (bedsheet === 'ROOM CLOSURE') return 'badge badge-closure';
                 if (bedsheet.indexOf('CHANGE') === 0) return 'badge badge-change';
                 if (bedsheet === 'NO CHANGE') return 'badge badge-nochange';
                 if (bedsheet === 'EMPTY') return 'badge badge-empty';
@@ -305,7 +305,7 @@
                     <xsl:choose>
                         <xsl:when test="bedsheet = 'CHANGE (CHECKED OUT)'">badge-change-out</xsl:when>
                         <xsl:when test="bedsheet = 'CHANGE (IN-HOUSE)'">badge-change-inhouse</xsl:when>
-                        <xsl:when test="bedsheet = 'CHANGE (ROOM CLOSURE)'">badge-change-closure</xsl:when>
+                        <xsl:when test="bedsheet = 'ROOM CLOSURE'">badge-closure</xsl:when>
                         <xsl:when test="contains(bedsheet, 'DAY CHANGE')">badge-ndaychange</xsl:when>
                         <xsl:when test="starts-with(bedsheet, 'CHANGE')">badge-change</xsl:when>
                         <xsl:when test="bedsheet = 'NO CHANGE'">badge-nochange</xsl:when>
