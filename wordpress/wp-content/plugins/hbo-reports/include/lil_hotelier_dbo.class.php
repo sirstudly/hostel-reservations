@@ -413,16 +413,17 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns report with all guest comments.
+     * Returns report with all bookings where the guest asked for something staff need to action
+     * (guest_request is extracted from the raw OTA comments by ExtractGuestRequestsJob).
      */
     static function getGuestCommentsReport() {
         global $wpdb;
         $resultset = $wpdb->get_results(
-            "SELECT reservation_id, GROUP_CONCAT(DISTINCT guest_name SEPARATOR ', ') `guest_name`, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, COUNT(num_guests) `num_guests`, notes, viewed_yn, comments, acknowledged_date
+            "SELECT reservation_id, GROUP_CONCAT(DISTINCT guest_name SEPARATOR ', ') `guest_name`, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, COUNT(num_guests) `num_guests`, notes, viewed_yn, comments, guest_request, acknowledged_date
                FROM ( -- some duplicates may occur; remove them first
                    SELECT c.room, c.bed_name, c.reservation_id, c.guest_name, c.booking_reference, c.booking_source,
                           CAST(c.checkin_date AS DATETIME) AS checkin_date, CAST(c.checkout_date AS DATETIME) AS checkout_date,
-                          c.booked_date, c.payment_outstanding, c.data_href, c.num_guests, c.notes, c.viewed_yn, g.comments, g.acknowledged_date
+                          c.booked_date, c.payment_outstanding, c.data_href, c.num_guests, c.notes, c.viewed_yn, g.comments, g.guest_request, g.acknowledged_date
                      FROM wp_lh_booking_assignment c
 			         JOIN wp_lh_rpt_guest_comments g
                        ON c.reservation_id = g.reservation_id
@@ -430,8 +431,8 @@ class LilHotelierDBO {
                       AND c.source = 'guest'
                       AND c.bed_status <> 'pending_payment'
                       AND c.checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-                      AND g.comments IS NOT NULL ) x
-              GROUP BY reservation_id, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, notes, viewed_yn, comments, acknowledged_date 
+                      AND g.guest_request IS NOT NULL ) x
+              GROUP BY reservation_id, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, notes, viewed_yn, comments, guest_request, acknowledged_date 
               ORDER BY checkin_date, booking_reference");
 
         if($wpdb->last_error) {
@@ -439,6 +440,31 @@ class LilHotelierDBO {
         }
 
         return $resultset;
+    }
+
+    /**
+     * Returns the number of bookings in the guest comments report window whose comments
+     * have not yet been through guest request extraction.
+     */
+    static function getUnclassifiedGuestCommentsCount() {
+        global $wpdb;
+        $count = $wpdb->get_var(
+            "SELECT COUNT(*)
+               FROM wp_lh_rpt_guest_comments g
+              WHERE g.classified_date IS NULL
+                AND g.comments IS NOT NULL
+                AND EXISTS ( SELECT 1 FROM wp_lh_booking_assignment c
+                              WHERE c.reservation_id = g.reservation_id
+                                AND c.valid_to IS NULL
+                                AND c.source = 'guest'
+                                AND c.bed_status <> 'pending_payment'
+                                AND c.checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) )");
+
+        if($wpdb->last_error) {
+            throw new DatabaseException($wpdb->last_error);
+        }
+
+        return intval( $count );
     }
 
     /**

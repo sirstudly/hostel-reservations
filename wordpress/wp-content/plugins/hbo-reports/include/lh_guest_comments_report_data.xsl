@@ -67,8 +67,14 @@
     <tr>
         <!-- grey out if acknowledged -->
         <xsl:if test="acknowledged_date"><xsl:attribute name="style">color: #aaa;</xsl:attribute></xsl:if>
-        <td class="text-left" colspan="7"><div class="comment_header">Comments: </div>
-            <div class="comment_text"><xsl:value-of select="comments"/></div>
+        <td class="text-left" colspan="7"><div class="comment_header">Request: </div>
+            <div class="comment_text"><xsl:value-of select="guest_request"/></div>
+            <xsl:if test="comments">
+                <details style="clear: left;" class="comment_text">
+                    <summary class="small">Original booking comments</summary>
+                    <div class="small"><xsl:value-of select="comments"/></div>
+                </details>
+            </xsl:if>
             <xsl:if test="notes">
                 <div style="clear: left;" class="comment_header">Notes: </div>
                 <div class="comment_text"><xsl:value-of select="notes"/></div>

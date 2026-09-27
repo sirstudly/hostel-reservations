@@ -88,6 +88,11 @@ jQuery(document).ready(function(){
                             </xsl:choose>
                         </div>
                     </xsl:if>
+                    <xsl:if test="unclassified_count &gt; 0">
+                        <div class="text-left" style="color: #b36b00;">
+                            <xsl:value-of select="unclassified_count"/> booking(s) are still awaiting guest request extraction and are not shown yet.
+                        </div>
+                    </xsl:if>
                 </p>
                 <p class="help-block text-left" style="font-style: normal">Acknowledge each request once it's been handled (if applicable) by clicking on the checkbox next to the associated booking.<br/>
                      Showing <xsl:value-of select="count(record)"/> unacknowledged records.
