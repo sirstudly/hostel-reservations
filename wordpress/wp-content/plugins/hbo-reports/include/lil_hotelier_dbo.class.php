@@ -30,15 +30,14 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns all bedsheet data for the given date from the realtime housekeeping projection.
-     * Falls back to the legacy job-scoped calendar query if the projection table is empty.
+     * Returns all bedsheet data for the given date from the realtime housekeeping projection
+     * written by Java (HousekeepingStatusService).
      * $selectedDate : DateTime object
      * Returns raw resultset
      */
-    static function fetchBedSheetsFrom($selectedDate, $jobId) {
+    static function fetchBedSheetsFrom($selectedDate) {
         global $wpdb;
 
-        // Prefer live projection written by Java (HousekeepingStatusService)
         $projected = $wpdb->get_results($wpdb->prepare(
             "SELECT room_id, room, bed_name, room_type, capacity, guest_name, checkin_date, checkout_date,
                     data_href, bedsheet
@@ -50,51 +49,7 @@ class LilHotelierDBO {
         if ( $wpdb->last_error ) {
             throw new DatabaseException($wpdb->last_error);
         }
-        if ( $projected && count( $projected ) > 0 ) {
-            return $projected;
-        }
-
-        // Legacy fallback while projection is being populated
-	    $n_day_change = get_option('hbo_bedsheets_change_after_days');
-	    $n_day_change = empty( $n_day_change ) ? 1000 : $n_day_change; // set to an arbitrarily large value if not defined so it doesn't kick in
-
-	    // query all our resources (in order)
-		$resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, 
-                    IFNULL( c2.checkout_date, c.checkout_date ) AS `checkout_date`,
-                    MAX(c.data_href) as data_href, -- room closures can sometimes have more than one
-                    CASE WHEN c.lh_status = 'confirmed' THEN 'EMPTY' -- not checked-in
-                         WHEN IFNULL( c2.checkout_date, c.checkout_date ) = constants.selected_date THEN 'CHANGE'
-                         WHEN MOD(DATEDIFF(constants.selected_date, c.checkin_date), %d) = 0
-                           -- don't do a N-day change if they're checking out the following day
-                          AND DATEDIFF(IFNULL( c2.checkout_date, c.checkout_date ), constants.selected_date) > 1 THEN 'N DAY CHANGE'
-                         WHEN IFNULL( c2.checkout_date, c.checkout_date ) > constants.selected_date THEN 'NO CHANGE'
-                         ELSE 'EMPTY' END AS bedsheet
-               FROM ( SELECT STR_TO_DATE( '%s', '%%Y-%%m-%%d' ) AS `selected_date` ) `constants`
-               JOIN wp_lh_rooms r ON 1 = 1
-               LEFT OUTER JOIN wp_lh_calendar c
-                 ON r.id = c.room_id
-                AND c.checkout_date >= constants.selected_date
-                AND c.checkin_date < constants.selected_date
-                AND c.job_id = %d
-                    -- check if the following reservation is also the same guest
-               LEFT OUTER JOIN wp_lh_calendar c2
-                 ON c2.room_id = c.room_id
-                AND c2.checkin_date = c.checkout_date
-                AND c2.job_id = c.job_id
-                AND c2.guest_name = c.guest_name
-              WHERE r.room_type NOT IN ('LT_MALE', 'LT_FEMALE', 'LT_MIXED', 'OVERFLOW')
-                AND r.active_yn = 'Y'
-              GROUP BY r.room, r.bed_name, r.room_type, r.capacity, c.job_id, c.guest_name, c.checkin_date, c.checkout_date, c.lh_status,
-                       constants.selected_date, c2.room, c2.bed_name, c2.checkin_date, c2.checkout_date, c2.job_id, c2.guest_name
-              ORDER BY IF(r.room = 'TMNT', 'T3MNT', r.room), r.bed_name",
-		      $n_day_change, $selectedDate->format('Y-m-d'), $jobId));
-
-        if($wpdb->last_error) {
-            throw new DatabaseException($wpdb->last_error);
-        }
-
-        return $resultset;
+        return $projected;
     }
 
     /**
@@ -205,7 +160,9 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns all bookings for the given allocation scraper job ID.
+     * Returns all guest bookings as they were when the given allocation scraper job finished
+     * (point-in-time over the SCD2 booking assignments). Stays before the booking assignment
+     * go-live come from the backfill: final bed/status only and no guest names.
      * @param $allocScraperJobId
      * @param $startDate
      * @param $endDate
@@ -216,14 +173,19 @@ class LilHotelierDBO {
     static function getAllBookings( $allocScraperJobId, $startDate, $endDate ) {
         global $wpdb;
         $resultset = $wpdb->get_results( $wpdb->prepare(
-            "SELECT DISTINCT reservation_id, room_id, guest_name, email, checkin_date, checkout_date, num_guests, payment_total, 
-                             payment_outstanding, lh_status, booking_reference, booking_source
-               FROM wp_lh_calendar
-              WHERE job_id = %d
-                AND checkin_date <= %s
-                AND checkout_date >= %s
-                AND data_href <> 'room_closures'
-              ORDER BY checkin_date",
+            "SELECT DISTINCT a.reservation_id, a.room_id, a.guest_name, a.email,
+                             CAST(a.checkin_date AS DATETIME) AS checkin_date, CAST(a.checkout_date AS DATETIME) AS checkout_date,
+                             a.num_guests, a.payment_total, a.payment_outstanding, a.bed_status AS lh_status,
+                             a.booking_reference, a.booking_source
+               FROM wp_lh_booking_assignment a
+               JOIN wp_lh_jobs j ON j.job_id = %d
+              WHERE a.source = 'guest'
+                AND a.bed_status <> 'pending_payment'
+                AND a.valid_from <= j.end_date
+                AND ( a.valid_to IS NULL OR a.valid_to > j.end_date )
+                AND a.checkin_date <= %s
+                AND a.checkout_date >= %s
+              ORDER BY a.checkin_date",
             $allocScraperJobId, $endDate, $startDate ) );
 
         if ( $wpdb->last_error ) {
@@ -280,22 +242,18 @@ class LilHotelierDBO {
     static function getSplitRoomMultipleReservationsReport() {
         global $wpdb;
 
-        $alloc_scraper_job = self::getLatestJobOfType( "com.macbackpackers.jobs.AllocationScraperJob" );
-
-        if ( ! $alloc_scraper_job ) {
-            return array();
-        }
-        $job_id = $alloc_scraper_job->job_id;
+        // current guest assignments still in house or arriving
+        $current = "valid_to IS NULL AND source = 'guest' AND reservation_id > 0 AND bed_status <> 'pending_payment' AND checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
 
         $resultset = $wpdb->get_results(
-            "SELECT c1.guest_name, c1.booking_reference AS booking_ref_left, c1.data_href AS data_href_left, c1.checkin_date AS checkin_date_left,
-                 c1.checkout_date AS checkout_date_left, c1.booked_date AS booked_date_left,
+            "SELECT c1.guest_name, c1.booking_reference AS booking_ref_left, c1.data_href AS data_href_left, CAST(c1.checkin_date AS DATETIME) AS checkin_date_left,
+                 CAST(c1.checkout_date AS DATETIME) AS checkout_date_left, c1.booked_date AS booked_date_left,
                  GROUP_CONCAT(DISTINCT CONCAT(rm1.room, ' ', rm1.bed_name) ORDER BY rm1.room, rm1.bed_name SEPARATOR ', ') AS room_beds_left,
-                 c2.booking_reference AS booking_ref_right, c2.data_href AS data_href_right, c2.checkin_date AS checkin_date_right,
-                 c2.checkout_date AS checkout_date_right, c2.booked_date AS booked_date_right,
+                 c2.booking_reference AS booking_ref_right, c2.data_href AS data_href_right, CAST(c2.checkin_date AS DATETIME) AS checkin_date_right,
+                 CAST(c2.checkout_date AS DATETIME) AS checkout_date_right, c2.booked_date AS booked_date_right,
                  GROUP_CONCAT(DISTINCT CONCAT(rm2.room, ' ', rm2.bed_name) ORDER BY rm2.room, rm2.bed_name SEPARATOR ', ') AS room_beds_right
-            FROM (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_calendar WHERE job_id = $job_id AND reservation_id > 0) c1
-            JOIN (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_calendar WHERE job_id = $job_id AND reservation_id > 0) c2
+            FROM (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_booking_assignment WHERE $current) c1
+            JOIN (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_booking_assignment WHERE $current) c2
               ON c1.guest_name = c2.guest_name AND c1.checkout_date = c2.checkin_date
             JOIN wp_lh_rooms rm1 ON c1.room_id = rm1.id 
             JOIN wp_lh_rooms rm2 ON c2.room_id = rm2.id 
@@ -304,15 +262,17 @@ class LilHotelierDBO {
              AND rm1.room_type_id = rm2.room_type_id AND rm1.id <> rm2.id -- different bookings, different room, same room type
              -- unless the subsequent booking is already booked by that guest (eg 2 beds -> 1 bed)
              AND NOT EXISTS(
-                 SELECT 1 FROM wp_lh_calendar c1a
-                  WHERE c1a.job_id = $job_id 
+                 SELECT 1 FROM wp_lh_booking_assignment c1a
+                  WHERE c1a.valid_to IS NULL
+                    AND c1a.source = 'guest'
                     AND c1a.guest_name = c1.guest_name
                     AND c1a.checkout_date = c1.checkout_date 
                     AND c1a.room_id = c2.room_id)
              -- unless the former booking is already booked by that guest (eg 1 bed -> 2 beds)
              AND NOT EXISTS(
-                 SELECT 1 FROM wp_lh_calendar c1b
-                  WHERE c1b.job_id = $job_id     
+                 SELECT 1 FROM wp_lh_booking_assignment c1b
+                  WHERE c1b.valid_to IS NULL
+                    AND c1b.source = 'guest'
                     AND c1b.guest_name = c2.guest_name
                     AND c1b.checkin_date = c2.checkin_date 
                     AND c1b.room_id = c1.room_id)
@@ -458,18 +418,18 @@ class LilHotelierDBO {
     static function getGuestCommentsReport() {
         global $wpdb;
         $resultset = $wpdb->get_results(
-            "SELECT job_id, reservation_id, GROUP_CONCAT(DISTINCT guest_name SEPARATOR ', ') `guest_name`, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, COUNT(num_guests) `num_guests`, notes, viewed_yn, comments, acknowledged_date
+            "SELECT reservation_id, GROUP_CONCAT(DISTINCT guest_name SEPARATOR ', ') `guest_name`, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, COUNT(num_guests) `num_guests`, notes, viewed_yn, comments, acknowledged_date
                FROM ( -- some duplicates may occur; remove them first
-                   SELECT c.job_id, c.room, c.bed_name, c.reservation_id, c.guest_name, c.booking_reference, c.booking_source, c.checkin_date, c.checkout_date, c.booked_date, c.payment_outstanding, c.data_href, c.num_guests, c.notes, c.viewed_yn, g.comments, g.acknowledged_date
-                     FROM wp_lh_calendar c
+                   SELECT c.room, c.bed_name, c.reservation_id, c.guest_name, c.booking_reference, c.booking_source,
+                          CAST(c.checkin_date AS DATETIME) AS checkin_date, CAST(c.checkout_date AS DATETIME) AS checkout_date,
+                          c.booked_date, c.payment_outstanding, c.data_href, c.num_guests, c.notes, c.viewed_yn, g.comments, g.acknowledged_date
+                     FROM wp_lh_booking_assignment c
 			         JOIN wp_lh_rpt_guest_comments g
                        ON c.reservation_id = g.reservation_id
-                    WHERE c.job_id IN (
-					      -- retrieve the last run allocation scraper job id
-					      SELECT MAX(j.job_id) 
-                            FROM wp_lh_jobs j 
-					   	   WHERE j.status = 'completed' 
-						     AND j.classname = 'com.macbackpackers.jobs.AllocationScraperJob' )
+                    WHERE c.valid_to IS NULL
+                      AND c.source = 'guest'
+                      AND c.bed_status <> 'pending_payment'
+                      AND c.checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
                       AND g.comments IS NOT NULL ) x
               GROUP BY reservation_id, booking_reference, booking_source, checkin_date, checkout_date, booked_date, payment_outstanding, data_href, notes, viewed_yn, comments, acknowledged_date 
               ORDER BY checkin_date, booking_reference");
@@ -487,25 +447,27 @@ class LilHotelierDBO {
      */
     static function getBottomBunksReport() {
         global $wpdb;
-        $allocScraperJobId = LilHotelierDBO::getLastCompletedAllocationScraperJobId();
-        if ( $allocScraperJobId == null ) {
-            return array();
-        }
-        $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT DISTINCT reservation_id, room, bed_name, guest_name, checkin_date, checkout_date, data_href, lh_status, 
-                             booking_reference, booking_source, booked_date, eta, viewed_yn, notes, comments
-               FROM wp_lh_calendar
-              WHERE job_id = %d
+        $resultset = $wpdb->get_results(
+            "SELECT DISTINCT reservation_id, room, bed_name, guest_name,
+                             CAST(checkin_date AS DATETIME) AS checkin_date, CAST(checkout_date AS DATETIME) AS checkout_date,
+                             data_href, bed_status AS lh_status, booking_reference, booking_source, booked_date,
+                             NULL AS eta, viewed_yn, notes, comments
+               FROM wp_lh_booking_assignment
+              WHERE valid_to IS NULL
+                AND source = 'guest'
+                AND bed_status <> 'pending_payment'
+                AND checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
                 AND reservation_id IN 
-                    ( SELECT DISTINCT c.reservation_id FROM wp_lh_calendar c
-                       WHERE c.job_id = %d
+                    ( SELECT DISTINCT c.reservation_id FROM wp_lh_booking_assignment c
+                       WHERE c.valid_to IS NULL
+                         AND c.source = 'guest'
+                         AND c.checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
                          AND (LOWER(c.notes) LIKE '%bottom bunk%' OR LOWER(c.notes) LIKE '%lower bunk%'
                                 OR LOWER(c.notes) LIKE '%bottom bed%' OR LOWER(c.notes) LIKE '%lower bed%'
                                 OR LOWER(c.comments) LIKE '%bottom bunk%' OR LOWER(c.comments) LIKE '%lower bunk%'
                                 OR LOWER(c.comments) LIKE '%bottom bed%' OR LOWER(c.comments) LIKE '%lower bed%')
                          AND MOD(CAST(SUBSTR(c.bed_name, 1, 2) AS UNSIGNED), 2) > 0) -- odd numbers are top bunks
-              ORDER BY checkin_date",
-            $allocScraperJobId, $allocScraperJobId));
+              ORDER BY checkin_date" );
 
         if ( $wpdb->last_error ) {
             throw new DatabaseException( $wpdb->last_error );
@@ -1157,58 +1119,6 @@ class LilHotelierDBO {
     }
 
     /**
-     * Returns booking engine diff report.
-     * $selectedDate : DateTime for selection date
-     * $jobId : completed jobId to use for querying data
-     */
-    static function getBookingDiffsReport( $selectedDate, $jobId ) {
-        global $wpdb;
-
-        $resultset = $wpdb->get_results($wpdb->prepare(
-            "SELECT y.guest_name, 
-                    IF( y.room_type IN ('DBL','TRIPLE','QUAD','TWIN'), y.room_type, IF(y.room_type_id IS NULL, y.room_type, CONVERT(CONCAT(y.capacity, y.room_type) USING utf8))) `hw_room_type`,
-                    y.checkin_date `hw_checkin_date`, y.checkout_date `hw_checkout_date`, y.hw_persons, y.payment_outstanding `hw_payment_outstanding`, y.booked_date, y.booking_source,
-                    y.booking_reference, 
-	                IF( z.room_type IN ('DBL','TRIPLE','QUAD','TWIN'), z.room_type, CONVERT(CONCAT(z.capacity, z.room_type) USING utf8)) `lh_room_type`, z.lh_status,
-                    z.checkin_date `lh_checkin_date`, z.checkout_date `lh_checkout_date`, z.lh_persons, z.payment_outstanding `lh_payment_outstanding`, z.data_href, z.notes,
-                    IF( IFNULL(y.hw_person_count,0) = IFNULL(z.lh_persons,0), 'Y', 'N' ) `matched_persons`,
-	                IF( IFNULL(y.room_type_id,-1) = IFNULL(z.room_type_id,0), 'Y', 'N' ) `matched_room_type`, -- if room type id not matched, this will always be N
-                    IF( IFNULL(y.checkin_date,0) = IFNULL(z.checkin_date,0), 'Y', 'N') `matched_checkin_date`,
-                    IF( IFNULL(y.checkout_date,0) = IFNULL(z.checkout_date,0), 'Y', 'N') `matched_checkout_date`,
-                    IF( IFNULL(z.lh_status, 'null') IN ('checked-in', 'checked-out') OR IFNULL(y.payment_outstanding,'null') = IFNULL(z.payment_outstanding,'null') OR z.payment_outstanding = 0, 'Y', 'N') `matched_payment_outstanding`
-             FROM (
-               -- all unique HW records for the given job_id
-               SELECT b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons `hw_persons`, b.payment_outstanding, d.persons `hw_person_count`, d.room_type_id, IF(d.room_type_id IS NULL, d.room_type, r.room_type) `room_type`, r.capacity,
-                      (SELECT COUNT(DISTINCT e.room_type_id) FROM wp_hw_booking_dates e WHERE e.hw_booking_id = b.id ) `num_room_types`, -- keep track of bookings that contain more than one room type
-		              MIN(d.booked_date) `checkin_date`, DATE_ADD(MAX(d.booked_date), INTERVAL 1 DAY) `checkout_date`
-                 FROM wp_hw_booking b
-                 JOIN wp_hw_booking_dates d ON b.id = d.hw_booking_id
-                 LEFT OUTER JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM wp_lh_rooms) r ON r.room_type_id = d.room_type_id
-                GROUP BY b.booking_reference, b.booking_source, b.guest_name, b.booked_date, b.persons, b.payment_outstanding, d.persons, d.room_type_id, d.room_type, r.room_type, r.capacity
-               HAVING MIN(d.booked_date) = %s -- checkin date
-             ) y
-             LEFT OUTER JOIN (
-               -- all unique LH records for the given job_id
-               SELECT c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity,
-                      IF(c.lh_status = 'cancelled', c.num_guests, SUM(IFNULL((SELECT MAX(r.capacity) FROM wp_lh_rooms r WHERE r.room_type IN ('DBL', 'TWIN', 'TRIPLE', 'QUAD') AND r.room_type_id = c.room_type_id), 1 ))) `lh_persons`
-                 FROM wp_lh_calendar c 
-                 JOIN (SELECT DISTINCT room_type_id, room_type, capacity FROM wp_lh_rooms) r ON r.room_type_id = c.room_type_id
-                WHERE c.job_id = %d
-                  AND ( c.booking_source = 'Hostelbookers' OR c.booking_source LIKE 'Hostelworld%%' )
-                GROUP BY c.booking_reference, c.guest_name, c.booked_date, c.lh_status, c.room_type_id, c.checkin_date, c.checkout_date, c.data_href, c.payment_outstanding, c.notes, r.room_type, r.capacity
-             ) z ON CONCAT(IF(y.booking_source = 'Hostelbookers', 'HBK-', 'HWL-551-'), y.booking_reference) = z.booking_reference 
-                -- if there is only 1 room type, then match by booking ref only
-                AND IFNULL(y.room_type_id, 0) = IF(y.num_room_types > 1, z.room_type_id, IFNULL(y.room_type_id, 0))", 
-         $selectedDate->format('Y-m-d'), $jobId ));
-
-        if($wpdb->last_error) {
-            throw new DatabaseException($wpdb->last_error);
-        }
-
-        return $resultset;
-    }
-
-    /**
      * Returns array of all ManualChargeJobs.
      */
     static function fetchLastManualTransactions() {
@@ -1224,8 +1134,8 @@ class LilHotelierDBO {
                     SELECT j.job_id, jp1.value AS booking_reference, p.post_date, p.masked_card_number, 
                            COALESCE(p.payment_amount, CAST(jp2.value AS DECIMAL(10,2))) AS payment_amount, 
 		                   p.successful, p.help_text, j.status, 
-                           (SELECT MAX(c.data_href) FROM wp_lh_calendar c WHERE c.booking_reference = jp1.value) AS data_href,
-                           (SELECT MAX(c.checkin_date) FROM wp_lh_calendar c WHERE c.booking_reference = jp1.value) AS checkin_date,
+                           (SELECT MAX(c.data_href) FROM wp_lh_booking_assignment c WHERE c.booking_reference = jp1.value) AS data_href,
+                           (SELECT CAST(MAX(c.checkin_date) AS DATETIME) FROM wp_lh_booking_assignment c WHERE c.booking_reference = jp1.value) AS checkin_date,
                            COALESCE(j.last_updated_date, j.created_date) AS last_updated_date
                       FROM wp_lh_jobs j
                       JOIN wp_lh_job_param jp1 ON j.job_id = jp1.job_id AND jp1.name = 'booking_ref'
