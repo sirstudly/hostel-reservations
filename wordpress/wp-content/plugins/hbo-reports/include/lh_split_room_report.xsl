@@ -45,7 +45,7 @@
     <form name="report_form" action="" method="post" id="report_form" class="form-inline">
     <div class="container mt-1">
         <div class="row">
-            <div class="col-9">
+            <div class="col-8">
                 <p class="help-block font-italic text-left">
                     <xsl:if test="last_completed_job">
                         This report was last run on <xsl:value-of select="last_completed_job"/>.
@@ -64,7 +64,7 @@
                     </xsl:if>
                 </p>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="d-flex justify-content-end">
                     <xsl:if test="split_room_report/record/hint_eligible or multiple_booking_report/record/hint_eligible">
                         <xsl:choose>
