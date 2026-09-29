@@ -104,6 +104,7 @@
                         <th scope="col">Checkout Date</th>
                         <th scope="col">Booked Date</th>
                         <th scope="col">Notes</th>
+                        <th scope="col">Hint</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -190,7 +191,34 @@
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
         <td class="text-left" style="max-width: 300px;"><xsl:value-of select="notes"/></td>
+        <td class="text-left"><xsl:call-template name="shuffle_hint"/></td>
     </tr>
+</xsl:template>
+
+<xsl:template name="shuffle_hint">
+    <xsl:choose>
+        <xsl:when test="shuffle_status and not(shuffle_hint)">
+            <span class="font-italic">Nothing to do</span>
+        </xsl:when>
+        <xsl:when test="shuffle_status">
+            <details>
+                <summary>
+                    <xsl:choose>
+                        <xsl:when test="shuffle_status = 'FOUND' and shuffle_move_count = 1">1 move</xsl:when>
+                        <xsl:when test="shuffle_status = 'FOUND'"><xsl:value-of select="shuffle_move_count"/> moves</xsl:when>
+                        <xsl:when test="shuffle_status = 'INFEASIBLE' or shuffle_status = 'OVERBOOKED'">No single-bed fit, see options</xsl:when>
+                        <xsl:when test="shuffle_status = 'ALREADY_ASSIGNED'">Nothing to do</xsl:when>
+                        <xsl:when test="shuffle_status = 'UNKNOWN'">Timed out</xsl:when>
+                        <xsl:otherwise><xsl:value-of select="shuffle_status"/></xsl:otherwise>
+                    </xsl:choose>
+                </summary>
+                <div style="white-space: pre-line; max-width: 420px;"><xsl:value-of select="shuffle_hint"/></div>
+            </details>
+        </xsl:when>
+        <xsl:when test="hint_eligible = 'true'">
+            <span class="font-italic">Pending...</span>
+        </xsl:when>
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template match="multiple_booking_report/record">

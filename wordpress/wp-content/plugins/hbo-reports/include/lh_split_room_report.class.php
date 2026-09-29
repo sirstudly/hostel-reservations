@@ -90,6 +90,20 @@ class LHSplitRoomReport extends XslTransform {
                 if ( isset( $record->notes ) ) {
                     $recordRoot->appendChild( $domtree->createElement( 'notes', htmlspecialchars( $record->notes ) ) );
                 }
+                // a bed shuffle hint job is queued for every row checking in today or later
+                if ( $record->reservation_id > 0 && substr( $record->checkin_date, 0, 10 ) >= current_time( 'Y-m-d' ) ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'hint_eligible', 'true' ) );
+                }
+                if ( isset( $record->shuffle_status ) ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'shuffle_status', $record->shuffle_status ) );
+                    if ( $record->shuffle_status == 'FOUND' && isset( $record->shuffle_hint ) ) {
+                        $recordRoot->appendChild( $domtree->createElement( 'shuffle_move_count',
+                            preg_match_all( '/^\s*\d+\.\s/m', $record->shuffle_hint ) ) );
+                    }
+                }
+                if ( isset( $record->shuffle_hint ) ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'shuffle_hint', htmlspecialchars( $record->shuffle_hint ) ) );
+                }
             }
         }
 
@@ -134,6 +148,10 @@ class LHSplitRoomReport extends XslTransform {
                     <checkout_date>Wed, 20 May 2015</checkout_date>
                     <data_href>/extranet/properties/533/reservations/1046289/edit</data_href>
                     <notes>Arriving late</notes>
+                    <hint_eligible>true</hint_eligible>
+                    <shuffle_status>FOUND</shuffle_status>
+                    <shuffle_move_count>2</shuffle_move_count>
+                    <shuffle_hint>  1. Move ...</shuffle_hint>
                     <created_date>Sun, 17 May 2015 03:57:19</created_date>
                 </record>
                 <record>

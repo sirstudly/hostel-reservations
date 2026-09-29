@@ -224,7 +224,8 @@ class LilHotelierDBO {
         global $wpdb;
         $resultset = $wpdb->get_results(
             "SELECT reservation_id, guest_name, checkin_date, checkout_date, data_href, lh_status, 
-                    booking_reference, booking_source, booked_date, eta, viewed_yn, notes, created_date
+                    booking_reference, booking_source, booked_date, eta, viewed_yn, notes, created_date,
+                    shuffle_status, shuffle_hint
                FROM wp_lh_rpt_split_rooms
               WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.SplitRoomReservationReportJob' AND status = 'completed'))
               ORDER BY checkin_date");
