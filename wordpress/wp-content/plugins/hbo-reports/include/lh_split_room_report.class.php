@@ -6,12 +6,15 @@
 class LHSplitRoomReport extends XslTransform {
 
     const JOB_TYPE = "com.macbackpackers.jobs.AllocationScraperJob";
+    const REPORT_JOB_TYPE = "com.macbackpackers.jobs.SplitRoomReservationReportJob";
+    const HINT_JOB_TYPE = "com.macbackpackers.jobs.BedShuffleHintJob";
 
     var $splitRoomReport;  // the view of the latest split room report
     var $multipleBookingReport; // the view of multiple contiguous bookings report
     var $lastSubmittedAllocScraperJob; // date/time of last submitted allocation scraper job that hasn't run yet
     var $lastCompletedAllocScraperJob; // date/time of last completed allocation scraper job
     var $lastJob; // the last job of this type that has run
+    var $hintsInProgress; // true if shuffle hints are still being (re)calculated
 
     /**
      * Default constructor.
@@ -29,6 +32,8 @@ class LHSplitRoomReport extends XslTransform {
         $this->lastSubmittedAllocScraperJob = LilHotelierDBO::getOutstandingAllocationScraperJob();
         $this->lastCompletedAllocScraperJob = LilHotelierDBO::getLastCompletedAllocationScraperJob();
         $this->lastJob = LilHotelierDBO::getDetailsOfLastJob( self::JOB_TYPE );
+        $this->hintsInProgress = LilHotelierDBO::isExistsIncompleteJobOfType( self::REPORT_JOB_TYPE )
+            || LilHotelierDBO::isExistsIncompleteJobOfType( self::HINT_JOB_TYPE );
     }
 
     /**
@@ -37,6 +42,43 @@ class LHSplitRoomReport extends XslTransform {
     function submitAllocationScraperJob() {
         LilHotelierDBO::insertAllocationScraperJob();
         LilHotelierDBO::runProcessor();
+    }
+
+    /**
+     * Re-runs the latest split room report from the current booking assignments (without re-scraping),
+     * which recreates both tables and queues a fresh bed shuffle hint for every row.
+     */
+    function submitRecalculateHintsJob() {
+        $allocationScraperJobId = LilHotelierDBO::getLatestSplitRoomReportAllocationScraperJobId();
+        if ( $allocationScraperJobId ) {
+            LilHotelierDBO::insertJobOfType( self::REPORT_JOB_TYPE,
+                array( 'allocation_scraper_job_id' => $allocationScraperJobId ) );
+            LilHotelierDBO::runProcessor();
+        }
+    }
+
+    /**
+     * Adds the bed shuffle hint elements for one report row.
+     * $recordRoot : DOM element of the row
+     * $reservationId : reservation (of the pair, the one checking in) the hint is for
+     * $checkinDate : its checkin date (Y-m-d H:i:s)
+     * $record : row with shuffle_status / shuffle_hint
+     */
+    private function addShuffleHint( $domtree, $recordRoot, $reservationId, $checkinDate, $record ) {
+        // a bed shuffle hint job is queued for every row checking in today or later
+        if ( $reservationId > 0 && substr( $checkinDate, 0, 10 ) >= current_time( 'Y-m-d' ) ) {
+            $recordRoot->appendChild( $domtree->createElement( 'hint_eligible', 'true' ) );
+        }
+        if ( isset( $record->shuffle_status ) ) {
+            $recordRoot->appendChild( $domtree->createElement( 'shuffle_status', $record->shuffle_status ) );
+            if ( $record->shuffle_status == 'FOUND' && isset( $record->shuffle_hint ) ) {
+                $recordRoot->appendChild( $domtree->createElement( 'shuffle_move_count',
+                    preg_match_all( '/^\s*\d+\.\s/m', $record->shuffle_hint ) ) );
+            }
+        }
+        if ( isset( $record->shuffle_hint ) ) {
+            $recordRoot->appendChild( $domtree->createElement( 'shuffle_hint', htmlspecialchars( $record->shuffle_hint ) ) );
+        }
     }
     
     /**
@@ -58,6 +100,10 @@ class LHSplitRoomReport extends XslTransform {
         }
 
         $parentElement->appendChild($domtree->createElement('property_manager', get_option('hbo_property_manager')));
+
+        if ( $this->hintsInProgress ) {
+            $parentElement->appendChild( $domtree->createElement( 'hints_in_progress', 'true' ) );
+        }
 
         // did the last job fail to run?
         if( $this->lastJob ) {
@@ -90,20 +136,7 @@ class LHSplitRoomReport extends XslTransform {
                 if ( isset( $record->notes ) ) {
                     $recordRoot->appendChild( $domtree->createElement( 'notes', htmlspecialchars( $record->notes ) ) );
                 }
-                // a bed shuffle hint job is queued for every row checking in today or later
-                if ( $record->reservation_id > 0 && substr( $record->checkin_date, 0, 10 ) >= current_time( 'Y-m-d' ) ) {
-                    $recordRoot->appendChild( $domtree->createElement( 'hint_eligible', 'true' ) );
-                }
-                if ( isset( $record->shuffle_status ) ) {
-                    $recordRoot->appendChild( $domtree->createElement( 'shuffle_status', $record->shuffle_status ) );
-                    if ( $record->shuffle_status == 'FOUND' && isset( $record->shuffle_hint ) ) {
-                        $recordRoot->appendChild( $domtree->createElement( 'shuffle_move_count',
-                            preg_match_all( '/^\s*\d+\.\s/m', $record->shuffle_hint ) ) );
-                    }
-                }
-                if ( isset( $record->shuffle_hint ) ) {
-                    $recordRoot->appendChild( $domtree->createElement( 'shuffle_hint', htmlspecialchars( $record->shuffle_hint ) ) );
-                }
+                $this->addShuffleHint( $domtree, $recordRoot, $record->reservation_id, $record->checkin_date, $record );
             }
         }
 
@@ -119,8 +152,10 @@ class LHSplitRoomReport extends XslTransform {
                 $recordRoot->appendChild( $domtree->createElement( 'checkout_date_left', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->checkout_date_left )->format( 'd M Y' ) ) );
                 $recordRoot->appendChild( $domtree->createElement( 'checkout_datetime_left', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->checkout_date_left )->getTimestamp() ) );
                 $recordRoot->appendChild( $domtree->createElement( 'data_href_left', $record->data_href_left ) );
-                $recordRoot->appendChild( $domtree->createElement( 'booked_date_left', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_left )->format( 'd M Y' ) ) );
-                $recordRoot->appendChild( $domtree->createElement( 'booked_datetime_left', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_left )->getTimestamp() ) );
+                if ( $record->booked_date_left ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'booked_date_left', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_left )->format( 'd M Y' ) ) );
+                    $recordRoot->appendChild( $domtree->createElement( 'booked_datetime_left', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_left )->getTimestamp() ) );
+                }
                 $recordRoot->appendChild( $domtree->createElement( 'room_beds_left', htmlspecialchars( html_entity_decode( $record->room_beds_left, ENT_COMPAT, "UTF-8" ) ) ) );
 
                 $recordRoot->appendChild( $domtree->createElement( 'booking_ref_right', $record->booking_ref_right ) );
@@ -129,9 +164,12 @@ class LHSplitRoomReport extends XslTransform {
                 $recordRoot->appendChild( $domtree->createElement( 'checkout_date_right', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->checkout_date_right )->format( 'd M Y' ) ) );
                 $recordRoot->appendChild( $domtree->createElement( 'checkout_datetime_right', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->checkout_date_right )->getTimestamp() ) );
                 $recordRoot->appendChild( $domtree->createElement( 'data_href_right', $record->data_href_right ) );
-                $recordRoot->appendChild( $domtree->createElement( 'booked_date_right', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_right )->format( 'd M Y' ) ) );
-                $recordRoot->appendChild( $domtree->createElement( 'booked_datetime_right', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_right )->getTimestamp() ) );
+                if ( $record->booked_date_right ) {
+                    $recordRoot->appendChild( $domtree->createElement( 'booked_date_right', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_right )->format( 'd M Y' ) ) );
+                    $recordRoot->appendChild( $domtree->createElement( 'booked_datetime_right', DateTime::createFromFormat( 'Y-m-d H:i:s', $record->booked_date_right )->getTimestamp() ) );
+                }
                 $recordRoot->appendChild( $domtree->createElement( 'room_beds_right', htmlspecialchars( html_entity_decode( $record->room_beds_right, ENT_COMPAT, "UTF-8" ) ) ) );
+                $this->addShuffleHint( $domtree, $recordRoot, $record->reservation_id_right, $record->checkin_date_right, $record );
             }
         }
     }
@@ -140,6 +178,7 @@ class LHSplitRoomReport extends XslTransform {
       Generates the following xml:
         <view>
             <last_submitted_job>2015-05-24 13:22:58</last_submitted_job>
+            <hints_in_progress>true</hints_in_progress>
             <split_room_report>
                 <record>
                     <reservation_id>123456</reservation_id>
@@ -166,6 +205,10 @@ class LHSplitRoomReport extends XslTransform {
                     <checkout_date_left>Wed, 20 May 2015</checkout_date_left>
                     <data_href_left>/extranet/properties/533/reservations/1046289/edit</data_href/left>
                     ...
+                    <hint_eligible>true</hint_eligible>
+                    <shuffle_status>FOUND</shuffle_status>
+                    <shuffle_move_count>2</shuffle_move_count>
+                    <shuffle_hint>  1. Move ...</shuffle_hint>
                 </record>
                 <record>
                     ...

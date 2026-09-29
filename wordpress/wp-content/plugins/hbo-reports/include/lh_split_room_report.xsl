@@ -66,6 +66,19 @@
             </div>
             <div class="col-3">
                 <div class="d-flex justify-content-end">
+                    <xsl:if test="split_room_report/record/hint_eligible or multiple_booking_report/record/hint_eligible">
+                        <xsl:choose>
+                            <xsl:when test="hints_in_progress">
+                                <a class="btn btn-primary disabled mr-2" href="javascript:void(0)">Recalculating Hints <span class="bi-arrow-repeat-white ml-1"/></a>
+                            </xsl:when>
+                            <xsl:when test="last_submitted_job">
+                                <a class="btn btn-primary disabled mr-2" href="javascript:void(0)">Recalculate Hints</a>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <a class="btn btn-primary mr-2" href="javascript:void(0)" onclick="document.getElementById('reload_data').name = 'recalc_hints'; report_form.submit();">Recalculate Hints</a>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:if>
                     <xsl:choose>
                         <xsl:when test="last_submitted_job">
                             <a class="btn btn-primary disabled" href="javascript:void(0)">Update in Progress <span class="bi-arrow-repeat-white ml-1"/></a>
@@ -154,6 +167,7 @@
                         <th scope="col">Checkout Date</th>
                         <th scope="col">Booked Date</th>
                         <th scope="col">Room/Bed(s)</th>
+                        <th scope="col">Hint</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -168,13 +182,20 @@
         </xsl:otherwise>
     </xsl:choose>
 
-    <script type="text/javascript">
-        jQuery('#multiple_booking_rpt').DataTable({
-        "paging": false,
-        "searching": false,
-        "order": [[2, 'asc']]
-        });
-    </script>
+<script type="text/javascript">
+  var multipleBookingTable = jQuery('#multiple_booking_rpt').DataTable({
+    "paging": false,
+    "searching": false,
+    "order": [[2, 'asc']],
+    "columnDefs": [{ "targets": 11, "visible": false, "orderable": false }]
+  });
+  multipleBookingTable.rows().every(function() {
+    var hint = this.data()[11];
+    if (jQuery.trim(hint)) {
+      this.child(hint).show();
+    }
+  });
+</script>
 </xsl:template>
 
 
@@ -255,6 +276,14 @@
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime_right"/></xsl:attribute><xsl:value-of select="checkout_date_right"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime_right"/></xsl:attribute><xsl:value-of select="booked_date_right"/></td>
         <td class="text-left"><xsl:value-of select="room_beds_right"/></td>
+        <td>
+            <xsl:if test="shuffle_status or hint_eligible = 'true'">
+                <div class="d-flex text-left">
+                    <span class="font-weight-bold mr-2">Hint:</span>
+                    <div><xsl:call-template name="shuffle_hint"/></div>
+                </div>
+            </xsl:if>
+        </td>
     </tr>
 </xsl:template>
 

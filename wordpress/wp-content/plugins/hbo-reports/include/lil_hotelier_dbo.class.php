@@ -239,52 +239,38 @@ class LilHotelierDBO {
 
     /**
      * Returns report where a consecutive bookings for the same guest are in different rooms (for the same room type).
+     * Populated by SplitRoomReservationReportJob alongside the split room report.
      */
     static function getSplitRoomMultipleReservationsReport() {
         global $wpdb;
-
-        // current guest assignments still in house or arriving
-        $current = "valid_to IS NULL AND source = 'guest' AND reservation_id > 0 AND bed_status <> 'pending_payment' AND checkout_date >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
-
         $resultset = $wpdb->get_results(
-            "SELECT c1.guest_name, c1.booking_reference AS booking_ref_left, c1.data_href AS data_href_left, CAST(c1.checkin_date AS DATETIME) AS checkin_date_left,
-                 CAST(c1.checkout_date AS DATETIME) AS checkout_date_left, c1.booked_date AS booked_date_left,
-                 GROUP_CONCAT(DISTINCT CONCAT(rm1.room, ' ', rm1.bed_name) ORDER BY rm1.room, rm1.bed_name SEPARATOR ', ') AS room_beds_left,
-                 c2.booking_reference AS booking_ref_right, c2.data_href AS data_href_right, CAST(c2.checkin_date AS DATETIME) AS checkin_date_right,
-                 CAST(c2.checkout_date AS DATETIME) AS checkout_date_right, c2.booked_date AS booked_date_right,
-                 GROUP_CONCAT(DISTINCT CONCAT(rm2.room, ' ', rm2.bed_name) ORDER BY rm2.room, rm2.bed_name SEPARATOR ', ') AS room_beds_right
-            FROM (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_booking_assignment WHERE $current) c1
-            JOIN (SELECT DISTINCT booking_reference, room_id, guest_name, data_href, checkin_date, checkout_date, booked_date FROM wp_lh_booking_assignment WHERE $current) c2
-              ON c1.guest_name = c2.guest_name AND c1.checkout_date = c2.checkin_date
-            JOIN wp_lh_rooms rm1 ON c1.room_id = rm1.id 
-            JOIN wp_lh_rooms rm2 ON c2.room_id = rm2.id 
-           WHERE rm1.room_type NOT IN ('LT_MALE', 'LT_FEMALE')
-             AND rm2.room_type NOT IN ('LT_MALE', 'LT_FEMALE')
-             AND rm1.room_type_id = rm2.room_type_id AND rm1.id <> rm2.id -- different bookings, different room, same room type
-             -- unless the subsequent booking is already booked by that guest (eg 2 beds -> 1 bed)
-             AND NOT EXISTS(
-                 SELECT 1 FROM wp_lh_booking_assignment c1a
-                  WHERE c1a.valid_to IS NULL
-                    AND c1a.source = 'guest'
-                    AND c1a.guest_name = c1.guest_name
-                    AND c1a.checkout_date = c1.checkout_date 
-                    AND c1a.room_id = c2.room_id)
-             -- unless the former booking is already booked by that guest (eg 1 bed -> 2 beds)
-             AND NOT EXISTS(
-                 SELECT 1 FROM wp_lh_booking_assignment c1b
-                  WHERE c1b.valid_to IS NULL
-                    AND c1b.source = 'guest'
-                    AND c1b.guest_name = c2.guest_name
-                    AND c1b.checkin_date = c2.checkin_date 
-                    AND c1b.room_id = c1.room_id)
-           GROUP BY c1.guest_name, c1.booking_reference, c1.data_href, c1.checkin_date, c1.checkout_date, c1.booked_date,
-                    c2.booking_reference, c2.data_href, c2.checkin_date, c2.checkout_date, c2.booked_date");
+            "SELECT guest_name, reservation_id_left, booking_ref_left, data_href_left, checkin_date_left, checkout_date_left,
+                    booked_date_left, room_beds_left, reservation_id_right, booking_ref_right, data_href_right,
+                    checkin_date_right, checkout_date_right, booked_date_right, room_beds_right, shuffle_status, shuffle_hint
+               FROM wp_lh_rpt_consecutive_bookings
+              WHERE job_id IN (SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.SplitRoomReservationReportJob' AND status = 'completed'))
+              ORDER BY checkin_date_left");
 
         if ( $wpdb->last_error ) {
             throw new DatabaseException( $wpdb->last_error );
         }
 
         return $resultset;
+    }
+
+    /**
+     * Returns the allocation scraper job id the latest completed split room report was run for; null if none.
+     */
+    static function getLatestSplitRoomReportAllocationScraperJobId() {
+        global $wpdb;
+        $jobId = $wpdb->get_var(
+            "SELECT CAST(value AS UNSIGNED) FROM wp_lh_job_param WHERE name = 'allocation_scraper_job_id' AND job_id = (SELECT MAX(job_id) FROM wp_lh_jobs WHERE classname = 'com.macbackpackers.jobs.SplitRoomReservationReportJob' AND status = 'completed')");
+
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+
+        return $jobId === null ? null : (int) $jobId;
     }
 
     /**

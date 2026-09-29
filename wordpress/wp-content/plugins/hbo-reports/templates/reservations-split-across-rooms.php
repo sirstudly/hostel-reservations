@@ -10,6 +10,11 @@
             wp_redirect( get_permalink() ); // redirect after POST to avoid resubmissions
             exit;
         }
+        else if( isset( $_POST['recalc_hints'] ) ) {
+            $rep->submitRecalculateHintsJob();
+            wp_redirect( get_permalink() ); // redirect after POST to avoid resubmissions
+            exit;
+        }
         else {
             get_header();
             $rep->doView(); // update the view
