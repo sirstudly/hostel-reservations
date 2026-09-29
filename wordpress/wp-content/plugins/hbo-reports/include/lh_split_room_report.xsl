@@ -120,10 +120,17 @@
     </xsl:choose>
 
 <script type="text/javascript">
-  jQuery('#split_room_rpt').DataTable({
+  var splitRoomTable = jQuery('#split_room_rpt').DataTable({
     "paging": false,
     "searching": false,
-    "order": [[3, 'asc']]
+    "order": [[3, 'asc']],
+    "columnDefs": [{ "targets": 7, "visible": false, "orderable": false }]
+  });
+  splitRoomTable.rows().every(function() {
+    var hint = this.data()[7];
+    if (jQuery.trim(hint)) {
+      this.child(hint).show();
+    }
   });
 </script>
 </xsl:template>
@@ -191,7 +198,14 @@
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="checkout_datetime"/></xsl:attribute><xsl:value-of select="checkout_date"/></td>
         <td class="text-left"><xsl:attribute name="data-order"><xsl:value-of select="booked_datetime"/></xsl:attribute><xsl:value-of select="booked_date"/></td>
         <td class="text-left" style="max-width: 300px;"><xsl:value-of select="notes"/></td>
-        <td class="text-left"><xsl:call-template name="shuffle_hint"/></td>
+        <td>
+            <xsl:if test="shuffle_status or hint_eligible = 'true'">
+                <div class="d-flex text-left">
+                    <span class="font-weight-bold mr-2">Hint:</span>
+                    <div><xsl:call-template name="shuffle_hint"/></div>
+                </div>
+            </xsl:if>
+        </td>
     </tr>
 </xsl:template>
 
@@ -212,7 +226,7 @@
                         <xsl:otherwise><xsl:value-of select="shuffle_status"/></xsl:otherwise>
                     </xsl:choose>
                 </summary>
-                <div style="white-space: pre-line; max-width: 420px;"><xsl:value-of select="shuffle_hint"/></div>
+                <div style="white-space: pre-line;"><xsl:value-of select="shuffle_hint"/></div>
             </details>
         </xsl:when>
         <xsl:when test="hint_eligible = 'true'">
