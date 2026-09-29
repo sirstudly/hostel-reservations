@@ -153,6 +153,9 @@ Tested WordPress Versions: 4.6
     if (file_exists(HBO_PLUGIN_DIR. '/include/blacklist.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/blacklist.class.php' ); }
 
+    if (file_exists(HBO_PLUGIN_DIR. '/include/bed_locks.class.php'))
+        { require_once(HBO_PLUGIN_DIR. '/include/bed_locks.class.php' ); }
+
     if (file_exists(HBO_PLUGIN_DIR. '/include/payment_history.class.php'))
         { require_once(HBO_PLUGIN_DIR. '/include/payment_history.class.php' ); }
 

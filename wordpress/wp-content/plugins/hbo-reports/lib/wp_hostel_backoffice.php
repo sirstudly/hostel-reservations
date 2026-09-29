@@ -69,24 +69,43 @@ class WP_HostelBackoffice {
             register_rest_route( 'hbo-reports/v1', '/blacklist', array(
                 'methods' => 'POST',
                 'callback' => array(new Blacklist(), 'getBlacklist'),
-                'permission_callback' => function ($request) {
-                    // Get the Authorization header
-                    $auth_header = $request->get_header('Authorization');
+                'permission_callback' => array( 'WP_HostelBackoffice', 'is_valid_api_key' )
+            ) );
 
-                    // Check if it's a Bearer token
-                    if (empty($auth_header) || strpos($auth_header, 'Bearer ') !== 0) {
-                        return false;
-                    }
-
-                    // Extract the token (remove 'Bearer ' prefix)
-                    // Validate against the stored API key
-                    $token = substr($auth_header, 7);
-                    $valid_api_key = get_option('hbo_api_key');
-                    return $token === $valid_api_key;
-                }
+            // bed locks set from the Cloudbeds calendar (CloudbedsBedLock.js userscript)
+            register_rest_route( 'hbo-reports/v1', '/bed-locks', array(
+                array(
+                    'methods' => 'GET',
+                    'callback' => array( new BedLocks(), 'list_locks' ),
+                    'permission_callback' => array( 'WP_HostelBackoffice', 'is_valid_api_key' )
+                ),
+                array(
+                    'methods' => 'POST',
+                    'callback' => array( new BedLocks(), 'lock' ),
+                    'permission_callback' => array( 'WP_HostelBackoffice', 'is_valid_api_key' )
+                )
+            ) );
+            register_rest_route( 'hbo-reports/v1', '/bed-locks/(?P<id>\d+)/unlock', array(
+                'methods' => 'POST',
+                'callback' => array( new BedLocks(), 'unlock' ),
+                'permission_callback' => array( 'WP_HostelBackoffice', 'is_valid_api_key' )
             ) );
         } );
 
+    }
+
+    /**
+     * REST permission callback: request must carry "Authorization: Bearer <hbo_api_key>".
+     * @param WP_REST_Request $request
+     * @return bool
+     */
+    static function is_valid_api_key( $request ) {
+        $auth_header = $request->get_header('Authorization');
+        if (empty($auth_header) || strpos($auth_header, 'Bearer ') !== 0) {
+            return false;
+        }
+        $valid_api_key = get_option('hbo_api_key');
+        return false === empty($valid_api_key) && substr($auth_header, 7) === $valid_api_key;
     }
 
     /**
