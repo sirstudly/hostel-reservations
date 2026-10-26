@@ -90,6 +90,10 @@ abstract class ScheduledJob {
             'name'       => 'Record Hostelworld Pay Now Payments',
             'parameters' => [ 'days_back' => '3' ]
         ], [
+            'classname'  => 'com.macbackpackers.jobs.CreateAirbnbPrepaidPaymentJob',
+            'name'       => 'Record Airbnb Prepaid Payments',
+            'parameters' => [ 'days_back' => '3' ]
+        ], [
             'classname'  => 'com.macbackpackers.jobs.BDCSeleniumVerifyLoginJob',
             'name'       => 'Booking.com Session Keep-Alive Job ',
             'parameters' => []
