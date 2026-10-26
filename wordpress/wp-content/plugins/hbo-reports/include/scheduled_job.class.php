@@ -86,6 +86,10 @@ abstract class ScheduledJob {
                 'checkin_date_start' => '', 'checkin_date_end'   => ''
             ]
         ], [
+            'classname'  => 'com.macbackpackers.jobs.CreateHostelworldPayNowPaymentJob',
+            'name'       => 'Record Hostelworld Pay Now Payments',
+            'parameters' => [ 'days_back' => '3' ]
+        ], [
             'classname'  => 'com.macbackpackers.jobs.BDCSeleniumVerifyLoginJob',
             'name'       => 'Booking.com Session Keep-Alive Job ',
             'parameters' => []
