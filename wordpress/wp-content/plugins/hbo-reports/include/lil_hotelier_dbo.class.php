@@ -2032,7 +2032,7 @@ class LilHotelierDBO {
         $row = $wpdb->get_row( $wpdb->prepare(
             "SELECT id FROM wp_lh_airbnb_payment WHERE confirmation_code = %s", $confirmationCode ) );
         if ( ! $row ) {
-            throw new DatabaseException( "Unknown confirmation code: $confirmationCode" );
+            throw new DatabaseException( "Confirmation code $confirmationCode not found in any imports" );
         }
         $jobId = self::insertJobOfType(
             'com.macbackpackers.jobs.AirbnbImportTransactionJob',

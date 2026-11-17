@@ -2,69 +2,73 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 <xsl:template match="view">
-    <h3>Airbnb Payments</h3>
+    <div class="container-fluid px-4 py-3">
+        <div class="row">
+            <div class="col-12 col-xl-11">
+                <h3 class="mb-2">Airbnb Payments</h3>
+                <p class="text-muted mb-4">Records with a start / check-in date before 2026-01-01 are ignored (not shown and not imported).</p>
 
-    <xsl:if test="message">
-        <div class="alert alert-success"><xsl:value-of select="message"/></div>
-    </xsl:if>
-    <xsl:if test="error">
-        <div class="alert alert-danger"><xsl:value-of select="error"/></div>
-    </xsl:if>
+                <xsl:if test="message">
+                    <div class="alert alert-success"><xsl:value-of select="message"/></div>
+                </xsl:if>
+                <xsl:if test="error">
+                    <div class="alert alert-danger"><xsl:value-of select="error"/></div>
+                </xsl:if>
 
-    <div class="card mb-3" style="max-width: 720px;">
-        <div class="card-body">
-            <h5 class="card-title">Import Airbnb transactions CSV</h5>
-            <form id="airbnb_import_form" enctype="multipart/form-data" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="airbnb_csv_file">File</label>
-                    <input type="file" class="form-control-file" id="airbnb_csv_file" name="airbnb_csv_file" accept=".csv,text/csv"/>
+                <div class="card mb-4" style="max-width: 720px;">
+                    <div class="card-body">
+                        <h5 class="card-title">Import Airbnb transactions CSV</h5>
+                        <form id="airbnb_import_form" enctype="multipart/form-data" onsubmit="return false;">
+                            <div class="form-group">
+                                <label for="airbnb_csv_file">File</label>
+                                <input type="file" class="form-control-file" id="airbnb_csv_file" name="airbnb_csv_file" accept=".csv,text/csv"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Post payment amount from (property default):
+                                    <strong><xsl:value-of select="post_payment_field"/></strong>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="upload_airbnb_csv()">Import</button>
+                            <span id="airbnb_import_status" class="ml-2"></span>
+                        </form>
+                        <hr/>
+                        <form method="post">
+                            <div class="form-group">
+                                <label for="hbo_airbnb_post_payment_field">Property post field</label>
+                                <select class="form-control" id="hbo_airbnb_post_payment_field" name="hbo_airbnb_post_payment_field" style="max-width:240px;">
+                                    <option value="amount">
+                                        <xsl:if test="post_payment_field = 'amount'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+                                        Amount
+                                    </option>
+                                    <option value="gross_earnings">
+                                        <xsl:if test="post_payment_field = 'gross_earnings'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+                                        Gross earnings
+                                    </option>
+                                </select>
+                            </div>
+                            <button type="submit" name="save_airbnb_post_field" value="1" class="btn btn-secondary btn-sm">Save setting</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Post payment amount from (property default):
-                        <strong><xsl:value-of select="post_payment_field"/></strong>
-                    </label>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="upload_airbnb_csv()">Import</button>
-                <span id="airbnb_import_status" class="ml-2"></span>
-            </form>
-            <hr/>
-            <form method="post">
-                <div class="form-group">
-                    <label for="hbo_airbnb_post_payment_field">Property post field</label>
-                    <select class="form-control" id="hbo_airbnb_post_payment_field" name="hbo_airbnb_post_payment_field" style="max-width:240px;">
-                        <option value="amount">
-                            <xsl:if test="post_payment_field = 'amount'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-                            Amount
-                        </option>
-                        <option value="gross_earnings">
-                            <xsl:if test="post_payment_field = 'gross_earnings'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-                            Gross earnings
-                        </option>
+
+                <div class="mb-3">
+                    <label class="mr-2">Filter status:</label>
+                    <select id="airbnb_status_filter" class="form-control d-inline-block" style="width:auto; min-width:160px;" onchange="filter_airbnb_status(this.value)">
+                        <option value="">All</option>
+                        <option value="imported"><xsl:if test="/view/filter_status='imported'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>imported</option>
+                        <option value="processing"><xsl:if test="/view/filter_status='processing'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>processing</option>
+                        <option value="processed"><xsl:if test="/view/filter_status='processed'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>processed</option>
+                        <option value="needs_review"><xsl:if test="/view/filter_status='needs_review'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>needs_review</option>
+                        <option value="errored"><xsl:if test="/view/filter_status='errored'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>errored</option>
+                        <option value="ignored"><xsl:if test="/view/filter_status='ignored'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>ignored</option>
+                        <option value="unmatched"><xsl:if test="/view/filter_status='unmatched'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>unmatched</option>
                     </select>
                 </div>
-                <button type="submit" name="save_airbnb_post_field" value="1" class="btn btn-secondary btn-sm">Save setting</button>
-            </form>
+
+                <xsl:apply-templates select="rows"/>
+            </div>
         </div>
     </div>
-
-    <div class="mb-2">
-        <label>Filter status:
-            <select id="airbnb_status_filter" onchange="filter_airbnb_status(this.value)">
-                <option value="">All</option>
-                <xsl:for-each select="document('')">
-                </xsl:for-each>
-                <option value="imported"><xsl:if test="/view/filter_status='imported'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>imported</option>
-                <option value="processing"><xsl:if test="/view/filter_status='processing'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>processing</option>
-                <option value="processed"><xsl:if test="/view/filter_status='processed'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>processed</option>
-                <option value="needs_review"><xsl:if test="/view/filter_status='needs_review'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>needs_review</option>
-                <option value="errored"><xsl:if test="/view/filter_status='errored'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>errored</option>
-                <option value="ignored"><xsl:if test="/view/filter_status='ignored'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>ignored</option>
-                <option value="unmatched"><xsl:if test="/view/filter_status='unmatched'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>unmatched</option>
-            </select>
-        </label>
-    </div>
-
-    <xsl:apply-templates select="rows"/>
 
     <div id="airbnb_process_dialog" title="Process Airbnb payment" style="display:none;">
         <form id="airbnb_process_form">
@@ -118,7 +122,7 @@ jQuery('#airbnb-payments-table').DataTable({
 </script>
         </xsl:when>
         <xsl:otherwise>
-            <div style="margin: 20px 0 20px 50px; font-style: italic;"><h4>No data available.</h4></div>
+            <div class="text-muted font-italic my-3"><h4>No data available.</h4></div>
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
