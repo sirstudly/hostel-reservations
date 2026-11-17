@@ -915,3 +915,81 @@ function resubmit_incomplete_job(job_id) {
         }
     });
 }
+
+function upload_airbnb_csv() {
+    var files = document.getElementById('airbnb_csv_file').files;
+    if (!files || files.length === 0) {
+        alert('Please select a CSV file.');
+        return;
+    }
+    jQuery('#airbnb_import_status').html('<img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif">');
+    var fd = new FormData();
+    fd.append('file', files[0]);
+    fd.append('ajax_action', 'UPLOAD_AIRBNB_CSV');
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        data: fd,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (data, textStatus) {
+            if (textStatus === 'success') {
+                jQuery('#airbnb_import_status').html(data);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+        }
+    });
+}
+
+function filter_airbnb_status(status) {
+    var url = window.location.pathname;
+    if (status) {
+        url += (url.indexOf('?') >= 0 ? '&' : '?') + 'status=' + encodeURIComponent(status);
+    }
+    window.location = url;
+}
+
+function show_airbnb_process_dialog(btn) {
+    var confirmation = jQuery(btn).data('confirmation');
+    var guest = jQuery(btn).data('guest');
+    var status = jQuery(btn).data('status');
+    jQuery('#airbnb_process_confirmation').val(confirmation);
+    jQuery('#airbnb_process_summary').text(guest + ' — ' + confirmation + ' (' + status + ')');
+    jQuery('#airbnb_process_response').html('');
+    jQuery('#airbnb_process_dialog').dialog({
+        modal: true,
+        width: 480,
+        buttons: {
+            Submit: function () {
+                submit_airbnb_process();
+            },
+            Cancel: function () {
+                jQuery(this).dialog('close');
+            }
+        }
+    });
+}
+
+function submit_airbnb_process() {
+    jQuery('#airbnb_process_response').html('<img src="'+wpdev_bk_plugin_url+'/img/ajax-loader.gif">');
+    jQuery.ajax({
+        url: wpdev_bk_plugin_url + '/' + wpdev_bk_plugin_filename,
+        type: 'POST',
+        data: {
+            ajax_action: 'PROCESS_AIRBNB_PAYMENT',
+            confirmation_code: jQuery('#airbnb_process_confirmation').val(),
+            action: jQuery('#airbnb_process_action').val()
+        },
+        success: function (data, textStatus) {
+            if (textStatus === 'success') {
+                jQuery('#airbnb_process_response').html(data);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+        }
+    });
+}

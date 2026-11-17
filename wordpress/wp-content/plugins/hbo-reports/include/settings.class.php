@@ -35,6 +35,7 @@ class Settings extends XslTransform {
         $xmlRoot->appendChild($domtree->createElement('payment_history_inv_url', get_option('hbo_payment_history_inv_url')));
         $xmlRoot->appendChild($domtree->createElement('process_refunds_url', get_option('hbo_process_refunds_url')));
         $xmlRoot->appendChild($domtree->createElement('refund_history_url', get_option('hbo_refund_history_url')));
+        $xmlRoot->appendChild($domtree->createElement('airbnb_payments_url', get_option('hbo_airbnb_payments_url')));
         $xmlRoot->appendChild($domtree->createElement('report_settings_url', get_option('hbo_report_settings_url')));
         $xmlRoot->appendChild($domtree->createElement('view_log_url', get_option('hbo_view_log_url')));
         $xmlRoot->appendChild($domtree->createElement('job_history_url', get_option('hbo_job_history_url')));
@@ -68,6 +69,7 @@ class Settings extends XslTransform {
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_payment_history_inv_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_process_refunds_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_refund_history_url');
+        $this->setOptionIfNotEmpty($optionsArray, 'hbo_airbnb_payments_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_report_settings_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_job_history_url');
         $this->setOptionIfNotEmpty($optionsArray, 'hbo_job_scheduler_url');

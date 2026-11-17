@@ -185,11 +185,73 @@ class AjaxController {
                 $this->uploadBlacklistImage();
                 break;
 
+            case 'UPLOAD_AIRBNB_CSV':
+                $this->uploadAirbnbCsv();
+                break;
+
+            case 'PROCESS_AIRBNB_PAYMENT':
+                $this->processAirbnbPayment();
+                break;
+
             default:
                 error_log("ERROR: Undefined AJAX action  $action");
 
         endswitch;
         die();
+    }
+
+    /**
+     * Uploads Airbnb transactions CSV into wp_lh_airbnb_import_batch and enqueues parse job.
+     */
+    function uploadAirbnbCsv() {
+        if ( ! isset( $_FILES['file'] ) || $_FILES['file']['error'] !== UPLOAD_ERR_OK ) {
+            echo '<div class="alert alert-danger">Upload failed.</div>';
+            return;
+        }
+        $tmp = $_FILES['file']['tmp_name'];
+        $name = basename( $_FILES['file']['name'] );
+        $content = file_get_contents( $tmp );
+        if ( $content === false || strlen( $content ) === 0 ) {
+            echo '<div class="alert alert-danger">Empty file.</div>';
+            return;
+        }
+        try {
+            $user = wp_get_current_user();
+            $jobId = LilHotelierDBO::createAirbnbImportBatch(
+                $name, $content, $user ? $user->user_login : null );
+            echo '<div class="alert alert-success">Import job ' . intval( $jobId )
+                . ' submitted. Refresh shortly to see rows.</div>';
+        }
+        catch ( Exception $e ) {
+            echo '<div class="alert alert-danger">' . htmlspecialchars( $e->getMessage() ) . '</div>';
+        }
+    }
+
+    /**
+     * Manual process action for one Airbnb confirmation code.
+     * POST: confirmation_code, action
+     */
+    function processAirbnbPayment() {
+        $code = isset( $_POST['confirmation_code'] ) ? sanitize_text_field( $_POST['confirmation_code'] ) : '';
+        $action = isset( $_POST['action'] ) ? sanitize_text_field( $_POST['action'] ) : 'auto';
+        if ( $code === '' ) {
+            echo '<div class="alert alert-danger">Missing confirmation code.</div>';
+            return;
+        }
+        try {
+            if ( $action === 'mark_processed' || $action === 'mark_ignored' ) {
+                $status = $action === 'mark_processed' ? 'processed' : 'ignored';
+                LilHotelierDBO::markAirbnbPaymentStatus( $code, $status, 'Marked via UI' );
+                echo '<div class="alert alert-success">Updated to ' . htmlspecialchars( $status ) . '.</div>';
+                return;
+            }
+            $jobId = LilHotelierDBO::enqueueAirbnbImportTransactionJob( $code, $action );
+            echo '<div class="alert alert-success">Job ' . intval( $jobId )
+                . ' submitted for ' . htmlspecialchars( $code ) . '.</div>';
+        }
+        catch ( Exception $e ) {
+            echo '<div class="alert alert-danger">' . htmlspecialchars( $e->getMessage() ) . '</div>';
+        }
     }
 
     /**

@@ -1921,4 +1921,148 @@ class LilHotelierDBO {
             throw new DatabaseException( "Unable to find blacklist id $id" );
         }
     }
+
+    /**
+     * Cloudbeds Airbnb bookings (checkin >= 2026-01-01) left-joined to import rows,
+     * plus unmatched import rows. Optional processing_status filter; use 'unmatched'
+     * for import rows with no Cloudbeds reservation.
+     */
+    static function getAirbnbPayments( $filterStatus = '' ) {
+        global $wpdb;
+        $sql = "
+            SELECT * FROM (
+            SELECT COALESCE(p.reservation_id, v.reservation_id) AS reservation_id,
+                   COALESCE(p.confirmation_code, v.booking_reference) AS confirmation_code,
+                   COALESCE(p.guest_name, v.guest_name) AS guest_name,
+                   COALESCE(p.start_date, v.checkin_date) AS checkin_date,
+                   COALESCE(p.end_date, v.checkout_date) AS checkout_date,
+                   COALESCE(p.booked_date, DATE(v.booked_date)) AS booked_date,
+                   COALESCE(p.amount, p.net_amount) AS amount,
+                   COALESCE(p.service_fee, p.net_service_fee) AS service_fee,
+                   COALESCE(p.gross_earnings, p.net_gross_earnings) AS gross_earnings,
+                   COALESCE(v.bed_statuses, '') AS booking_status,
+                   COALESCE(p.processing_status, '') AS processing_status,
+                   p.status_reason,
+                   COALESCE(p.matched_yn, 'Y') AS matched_yn,
+                   v.data_href
+              FROM v_wp_lh_booking_reservation v
+              LEFT JOIN wp_lh_airbnb_payment p
+                ON p.confirmation_code = v.booking_reference
+             WHERE v.booking_source LIKE 'Airbnb%'
+               AND v.checkin_date >= '2026-01-01'
+            UNION
+            SELECT p.reservation_id,
+                   p.confirmation_code,
+                   p.guest_name,
+                   p.start_date AS checkin_date,
+                   p.end_date AS checkout_date,
+                   p.booked_date,
+                   COALESCE(p.amount, p.net_amount) AS amount,
+                   COALESCE(p.service_fee, p.net_service_fee) AS service_fee,
+                   COALESCE(p.gross_earnings, p.net_gross_earnings) AS gross_earnings,
+                   '' AS booking_status,
+                   p.processing_status,
+                   p.status_reason,
+                   p.matched_yn,
+                   NULL AS data_href
+              FROM wp_lh_airbnb_payment p
+             WHERE (p.start_date IS NULL OR p.start_date >= '2026-01-01')
+               AND NOT EXISTS (
+                     SELECT 1 FROM v_wp_lh_booking_reservation v2
+                      WHERE v2.booking_reference = p.confirmation_code
+                        AND v2.booking_source LIKE 'Airbnb%'
+                        AND v2.checkin_date >= '2026-01-01'
+                   )
+            ) x
+             ORDER BY checkin_date DESC";
+        $rows = $wpdb->get_results( $sql );
+        if ( $wpdb->last_error ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        if ( $filterStatus === 'unmatched' ) {
+            return array_values( array_filter( $rows, function( $r ) {
+                return empty( $r->reservation_id ) || $r->matched_yn === 'N';
+            } ) );
+        }
+        if ( $filterStatus !== '' ) {
+            return array_values( array_filter( $rows, function( $r ) use ( $filterStatus ) {
+                return $r->processing_status === $filterStatus;
+            } ) );
+        }
+        return $rows;
+    }
+
+    /**
+     * Inserts an Airbnb CSV import batch and enqueues AirbnbImportTransactionsJob.
+     * Returns parent job id.
+     */
+    static function createAirbnbImportBatch( $filename, $csvContent, $createdBy = null ) {
+        global $wpdb;
+        $postField = get_option( 'hbo_airbnb_post_payment_field', 'amount' );
+        if ( $postField !== 'gross_earnings' ) {
+            $postField = 'amount';
+        }
+        $ok = $wpdb->insert( 'wp_lh_airbnb_import_batch', array(
+            'created_by' => $createdBy,
+            'filename' => $filename,
+            'post_payment_field' => $postField,
+            'csv_content' => $csvContent,
+            'status' => 'submitted',
+        ), array( '%s', '%s', '%s', '%s', '%s' ) );
+        if ( false === $ok ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+        $batchId = $wpdb->insert_id;
+        $jobId = self::insertJobOfType(
+            'com.macbackpackers.jobs.AirbnbImportTransactionsJob',
+            array( 'batch_id' => (string) $batchId ) );
+        $wpdb->update( 'wp_lh_airbnb_import_batch',
+            array( 'parent_job_id' => $jobId ),
+            array( 'id' => $batchId ),
+            array( '%d' ), array( '%d' ) );
+        self::runProcessor();
+        return $jobId;
+    }
+
+    /**
+     * Enqueues AirbnbImportTransactionJob for a confirmation code with optional action override.
+     */
+    static function enqueueAirbnbImportTransactionJob( $confirmationCode, $action = 'auto' ) {
+        global $wpdb;
+        $row = $wpdb->get_row( $wpdb->prepare(
+            "SELECT id FROM wp_lh_airbnb_payment WHERE confirmation_code = %s", $confirmationCode ) );
+        if ( ! $row ) {
+            throw new DatabaseException( "Unknown confirmation code: $confirmationCode" );
+        }
+        $jobId = self::insertJobOfType(
+            'com.macbackpackers.jobs.AirbnbImportTransactionJob',
+            array(
+                'confirmation_code' => $confirmationCode,
+                'action' => $action,
+            ) );
+        $wpdb->update( 'wp_lh_airbnb_payment',
+            array(
+                'processing_status' => 'processing',
+                'last_job_id' => $jobId,
+                'status_reason' => null,
+            ),
+            array( 'confirmation_code' => $confirmationCode ),
+            array( '%s', '%d', '%s' ), array( '%s' ) );
+        self::runProcessor();
+        return $jobId;
+    }
+
+    static function markAirbnbPaymentStatus( $confirmationCode, $status, $reason = null ) {
+        global $wpdb;
+        $ok = $wpdb->update( 'wp_lh_airbnb_payment',
+            array(
+                'processing_status' => $status,
+                'status_reason' => $reason,
+            ),
+            array( 'confirmation_code' => $confirmationCode ),
+            array( '%s', '%s' ), array( '%s' ) );
+        if ( false === $ok ) {
+            throw new DatabaseException( $wpdb->last_error );
+        }
+    }
 }

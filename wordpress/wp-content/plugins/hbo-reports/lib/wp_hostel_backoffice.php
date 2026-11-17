@@ -126,6 +126,8 @@ class WP_HostelBackoffice {
         add_option('hbo_payment_history_inv_url', 'payments/invoice-payment-history');
         add_option('hbo_process_refunds_url', 'payments/process-refunds');
         add_option('hbo_refund_history_url', 'payments/refund-history');
+        add_option('hbo_airbnb_payments_url', 'payments/airbnb-payments');
+        add_option('hbo_airbnb_post_payment_field', 'amount');
         add_option('hbo_report_settings_url', 'admin/report-settings');
         add_option('hbo_reports_help_url', 'reports');
         add_option('hbo_redirect_to_url', 'redirect-to');
@@ -337,6 +339,7 @@ class WP_HostelBackoffice {
         $this->do_redirect_for_page(get_option('hbo_payment_history_inv_url'), 'payment-history-inv.php');
         $this->do_redirect_for_page(get_option('hbo_process_refunds_url'), 'process-refunds.php');
         $this->do_redirect_for_page(get_option('hbo_refund_history_url'), 'refund-history.php');
+        $this->do_redirect_for_page(get_option('hbo_airbnb_payments_url'), 'airbnb-payments.php');
         $this->do_redirect_for_page(get_option('hbo_online_checkin_url'), 'online-checkin.php');
         $this->do_redirect_for_page(get_option('hbo_view_log_url'), 'view-log.php');
         $this->do_redirect_for_page(get_option('hbo_reports_help_url'), 'reports-help.php');

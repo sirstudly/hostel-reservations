@@ -93,6 +93,10 @@
                                         <td><input id="refund_history_url"  name="hbo_refund_history_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{refund_history_url}" /></td>
                                     </tr>
                                     <tr valign="top">
+                                        <th scope="row"><label for="airbnb_payments_url">Airbnb Payments</label></th>
+                                        <td><input id="airbnb_payments_url"  name="hbo_airbnb_payments_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{airbnb_payments_url}" /></td>
+                                    </tr>
+                                    <tr valign="top">
                                         <th scope="row"><label for="online_checkin_url">Online Checkin</label></th>
                                         <td><input id="online_checkin_url"  name="hbo_online_checkin_url" class="regular-text code" type="text" style="width:350px;" size="145" value="{online_checkin_url}" /></td>
                                     </tr>
