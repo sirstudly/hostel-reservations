@@ -14,6 +14,9 @@ class AirbnbPaymentsController extends XslTransform {
     }
 
     function doView() {
+        // Controller is session-backed; clear flash so it only shows on the POST that set it.
+        $this->message = '';
+        $this->error = '';
         if ( isset( $_POST['save_airbnb_post_field'] ) && isset( $_POST['hbo_airbnb_post_payment_field'] ) ) {
             $field = $_POST['hbo_airbnb_post_payment_field'] === 'gross_earnings' ? 'gross_earnings' : 'amount';
             update_option( 'hbo_airbnb_post_payment_field', $field );
