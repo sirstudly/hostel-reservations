@@ -3,8 +3,6 @@
 
 <xsl:template match="view">
     <div class="container-fluid px-4 py-3">
-        <div class="row">
-            <div class="col-12 col-xl-11">
                 <h3 class="mb-2">Airbnb Payments</h3>
                 <p class="text-muted mb-4">Records with a start / check-in date before 2026-01-01 are ignored (not shown and not imported).</p>
 
@@ -66,8 +64,6 @@
                 </div>
 
                 <xsl:apply-templates select="rows"/>
-            </div>
-        </div>
     </div>
 
     <div id="airbnb_process_dialog" title="Process Airbnb payment" style="display:none;">
@@ -93,7 +89,7 @@
 <xsl:template match="rows">
     <xsl:choose>
         <xsl:when test="row">
-            <table id="airbnb-payments-table" class="table table-striped table-sm">
+            <table id="airbnb-payments-table" class="table table-striped table-sm w-100">
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Guest</th>
